@@ -1,4 +1,4 @@
-const { canTransition } = require('../../src/services/pure/listingStatusTransitions');
+const { canTransition, getAllowedTransitions } = require('../../src/services/pure/listingStatusTransitions');
 
 describe('listingStatusTransitions', () => {
     const validTransitions = [
@@ -27,5 +27,19 @@ describe('listingStatusTransitions', () => {
 
     test.each(invalidTransitions)('from %s to %s should be disallowed', (from, to) => {
         expect(canTransition(from, to)).toBe(false);
+    });
+});
+
+describe('getAllowedTransitions', () => {
+    const expectedAllowedTransitions = [
+        ['draft', ['moderation']],
+        ['moderation', ['published', 'rejected']],
+        ['rejected', ['moderation']],
+        ['published', ['unpublished']],
+        ['unpublished', ['moderation']],
+    ];
+
+    test.each(expectedAllowedTransitions)('should return correct allowed transitions for status "%s"', (status, expectedAllowed) => {
+        expect(getAllowedTransitions(status)).toEqual(expectedAllowed);
     });
 });
