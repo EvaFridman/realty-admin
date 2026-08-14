@@ -1,6 +1,6 @@
 const listingsRepo = require('../repositories/listingsRepository');
 const parseListingFilters = require('./pure/parseListingFilters');
-const { canTransition } = require('./pure/listingStatusTransitions');
+const { canTransition, getAllowedTransitions } = require('./pure/listingStatusTransitions');
 const { NotFoundError, ConflictError } = require('../errors/AppError');
 const config = require('../config');
 const defaultLogger = require('../../logger');
@@ -24,7 +24,9 @@ async function listListings(rawQuery) {
 async function getListingById(id) {
     const listing = await listingsRepo.findListingById(id);
     if (!listing) throw new NotFoundError('Listing not found');
-    return listing;
+    const plainListing = listing.toJSON();
+    plainListing.allowedTransitions = getAllowedTransitions(listing.status);
+    return plainListing;
 }
 
 async function getListingsByIds(ids) {

@@ -1,5 +1,5 @@
 import styles from './ListingListItem.module.css';
-import { listingStatusLabels } from '../../data/adminData';
+import { listingStatusLabels } from "../../../constants/adminData.js";
 
 export default function ListingListItem({ listing, isActive, onSelect }) {
   return (

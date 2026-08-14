@@ -1,5 +1,6 @@
-import { API_BASE_URL } from './config';
 import { ApiError } from './ApiError';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export class Transport {
     constructor(resource = "") { this.resource = resource; }
@@ -23,5 +24,7 @@ export class Transport {
     getById(id, options = {}) { return this.request(`/${id}`, options); }
     create(body) { return this.request("", { method: "POST", body }); }
     update(id, body) { return this.request(`/${id}`, { method: "PUT", body }); }
+    patchSubresource(id, subpath, body) { return this.request(`/${id}${subpath}`, { method: 'PATCH', body }); }
+    getSubresource(id, subpath, options = {}) { return this.request(`/${id}${subpath}`, options); }
     remove(id) { return this.request(`/${id}`, { method: "DELETE" }); }
 }

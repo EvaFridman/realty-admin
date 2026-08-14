@@ -1,6 +1,6 @@
 import styles from './ListingFilterPanel.module.css';
 import { useState, useRef, useEffect } from 'react';
-import { dealTypeLabels, propertyTypeLabels } from '../../data/adminData';
+import { dealTypeLabels, propertyTypeLabels } from '../../../constants/adminData';
 
 const ROOM_OPTIONS = [1, 2, 3, 4, 5];
 const SEARCH_DELAY_MS = 350;

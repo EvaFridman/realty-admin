@@ -1,11 +1,12 @@
 import styles from './ListingsSection.module.css';
 import { useState, useEffect } from 'react';
-import { listingsApi, districtsApi } from '../../api/resources';
-import { emptyListingFilters } from '../../data/adminData';
+import { listingsApi, districtsApi } from "../../../api/resources.js";
+import { emptyListingFilters } from "../../../constants/adminData.js";
 import ListingFilterPanel from './ListingFilterPanel';
 import ListingListItem from './ListingListItem';
-import StatusMessage from '../common/StatusMessage';
-import Pagination from '../common/Pagination';
+import StatusMessage from "../../../components/common/StatusMessage.jsx";
+import Pagination from "../../../components/common/Pagination.jsx";
+import ListingDetailPanel from "../components/ListingDetailPanel.jsx";
 
 export default function ListingsSection({ statusFilter }) {
     const [filters, setFilters] = useState(emptyListingFilters);
@@ -86,7 +87,7 @@ export default function ListingsSection({ statusFilter }) {
 
             <div className={styles.detailColumn}>
                 {selectedId ? (
-                    <StatusMessage>Карточка объявления</StatusMessage>
+                    <ListingDetailPanel listingId={selectedId} />
                 ) : (
                     <StatusMessage>Выберите объявление</StatusMessage>
                 )}

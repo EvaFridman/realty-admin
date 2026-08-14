@@ -1,0 +1,22 @@
+.viewingsContainer {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--spacing-lg);
+}
+
+.title {
+    margin: 0 0 var(--spacing-sm);
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+}
+
+.viewing {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-top: 1px solid var(--color-border);
+    font-size: var(--font-size-md);
+}
+
+.viewingStatus {
+    color: var(--color-text-muted);
+}
