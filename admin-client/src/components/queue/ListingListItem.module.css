@@ -1,0 +1,28 @@
+.item,
+.itemActive {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+}
+
+.itemActive {
+    border-left: 3px solid var(--color-text-secondary);
+}
+
+.title {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+.meta {
+    margin: var(--spacing-xxs) 0 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}

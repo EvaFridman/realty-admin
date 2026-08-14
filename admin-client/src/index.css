@@ -1,0 +1,55 @@
+:root {
+    /* Цвета */
+    --color-bg: #f5f6f8;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f1f2f4;
+    --color-border: #dcdfe4;
+    --color-text: #1f2328;
+    --color-text-secondary: #4b5157;
+    --color-text-muted: #838a92;
+
+    /* Шрифты */
+    --font-family: system-ui, sans-serif;
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-md: 13px;
+    --font-size-lg: 16px;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+
+    /* Отступы */
+    --spacing-xxs: 2px;
+    --spacing-xs: 4px;
+    --spacing-sm: 6px;
+    --spacing-md: 8px;
+    --spacing-lg: 10px;
+    --spacing-xl: 12px;
+    --spacing-2xl: 14px;
+    --spacing-3xl: 16px;
+    --spacing-4xl: 32px;
+
+    /* Радиусы */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    /* Высота контролов */
+    --control-height: 32px;
+    --transition-duration: 0.2s;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-family);
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+button {
+    cursor: pointer;
+}
