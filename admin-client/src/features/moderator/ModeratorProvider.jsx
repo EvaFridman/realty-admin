@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { ModeratorContext } from './ModeratorContext';
-import { usersApi } from '../api/resources';
+import { usersApi } from '../../api/resources';
 
 export function ModeratorProvider({ children }) {
     const [moderators, setModerators] = useState([]);

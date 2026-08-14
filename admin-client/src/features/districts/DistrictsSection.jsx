@@ -1,28 +1,13 @@
 import styles from './DistrictsSection.module.css';
-import { useState, useEffect } from 'react';
+import { useCallback } from 'react';
 import { districtsApi } from '../../api/resources';
-import StatusMessage from '../common/StatusMessage';
+import StatusMessage from '../../components/common/StatusMessage';
+import useFetch from '../../hooks/useFetch';
 
 export default function DistrictsSection() {
-    const [districts, setDistricts] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        async function load() {
-            setIsLoading(true);
-            setError(null);
-            try {
-                const json = await districtsApi.list();
-                setDistricts(json.data ?? []);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        load();
-    }, []);
+    const fetchDistricts = useCallback((signal) => districtsApi.list(undefined, { signal }), []);
+    const { data, isLoading, error } = useFetch(fetchDistricts);
+    const districts = data?.data ?? [];
 
     if (isLoading) return <StatusMessage>Загрузка…</StatusMessage>;
     if (error) return <StatusMessage>Ошибка: {error}</StatusMessage>;
