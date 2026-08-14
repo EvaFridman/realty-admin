@@ -1,5 +1,5 @@
-import { listingStatusLabels } from '../../data/adminData';
-import styles from '../../../constants/adminData.js';
+import styles from './StatusTransitionButtons.module.css';
+import { listingStatusLabels } from '../../../constants/adminData.js';
 
 export default function StatusTransitionButtons({ allowedTransitions, onTransition }) {
   if (!allowedTransitions || allowedTransitions.length === 0) {

@@ -1,6 +1,6 @@
+import styles from './AlertProvider.module.css';
 import { useContext, useState } from 'react';
 import { AlertContext } from './AlertContext';
-import styles from './AlertProvider.module.css';
 
 export function AlertProvider({ children }) {
     const [alerts, setAlerts] = useState([]);

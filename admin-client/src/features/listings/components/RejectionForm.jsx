@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import styles from './RejectionForm.module.css';
+import { useState } from 'react';
 
 export default function RejectionForm({ onSubmit, onCancel }) {
     const [reason, setReason] = useState('');

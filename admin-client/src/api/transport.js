@@ -24,5 +24,7 @@ export class Transport {
     getById(id, options = {}) { return this.request(`/${id}`, options); }
     create(body) { return this.request("", { method: "POST", body }); }
     update(id, body) { return this.request(`/${id}`, { method: "PUT", body }); }
+    patchSubresource(id, subpath, body) { return this.request(`/${id}${subpath}`, { method: 'PATCH', body }); }
+    getSubresource(id, subpath, options = {}) { return this.request(`/${id}${subpath}`, options); }
     remove(id) { return this.request(`/${id}`, { method: "DELETE" }); }
 }
