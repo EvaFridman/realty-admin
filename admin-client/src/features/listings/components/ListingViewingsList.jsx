@@ -34,7 +34,7 @@ export default function ListingViewingsList({ listingId }) {
                 <div className={styles.viewingsList}>
                     {viewings.map((viewing) => (
                         <div key={viewing.id} className={styles.viewing}>
-                            <span>{viewing.visitorName ?? `Заявка №${viewing.id}`}</span>
+                            <span>{viewing.clientName ?? `Заявка №${viewing.id}`}</span>
                             <span className={styles.viewingStatus}>{viewing.status}</span>
                         </div>
                     ))}

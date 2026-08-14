@@ -1,14 +1,37 @@
 const viewingsRepo = require('../repositories/viewingsRepository');
 const listingsRepo = require('../repositories/listingsRepository');
 const mailService = require('./mailService');
-const { canTransition } = require('./pure/viewingStatusTransitions');
+const { canTransition, getAllowedTransitions } = require('./pure/viewingStatusTransitions');
 const { NotFoundError, ConflictError } = require('../errors/AppError');
 const defaultLogger = require('../../logger');
 
 async function listViewings(listingId) {
     const listing = await listingsRepo.findListingById(listingId);
     if (!listing) throw new NotFoundError('Listing not found');
-    return viewingsRepo.findViewingsByListingId(listingId);
+    const viewings = await viewingsRepo.findViewingsByListingId(listingId);
+    return viewings.map((v) => {
+        const plain = v.toJSON ? v.toJSON() : v;
+        plain.allowedTransitions = getAllowedTransitions(plain.status);
+        return plain;
+    });
+}
+
+async function listAllViewings(filters) {
+    const { rows, count } = await viewingsRepo.findAndCountViewings(filters);
+    const data = rows.map((row) => {
+        const plain = row.toJSON();
+        plain.allowedTransitions = getAllowedTransitions(plain.status);
+        return plain;
+    });
+    return {
+        data,
+        meta: {
+            page: filters.page,
+            limit: filters.limit,
+            total: count,
+            totalPages: Math.ceil(count / filters.limit),
+        },
+    };
 }
 
 async function createViewing(listingId, data, log = defaultLogger) {
@@ -58,4 +81,4 @@ async function changeStatus(id, newStatus, log = defaultLogger) {
     return updated;
 }
 
-module.exports = { listViewings, createViewing, changeStatus };
+module.exports = { listViewings, createViewing, changeStatus, listAllViewings };

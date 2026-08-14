@@ -1,5 +1,18 @@
 const { Viewing, Listing, User } = require('../../database/models');
 
+async function findAndCountViewings(filters) {
+    const { page, limit, sortOrder, status } = filters;
+    const where = status ? { status } : {};
+
+    return Viewing.findAndCountAll({
+        where,
+        include: [{ model: Listing, as: 'listing' }],
+        order: [['createdAt', sortOrder]],
+        limit,
+        offset: (page - 1) * limit,
+    });
+}
+
 async function findViewingsByListingId(listingId) {
     return Viewing.findAll({ where: { listingId }, order: [['createdAt', 'DESC']] });
 }
@@ -23,4 +36,4 @@ async function markNotified(id) {
     await Viewing.update({ notifiedAt: new Date() }, { where: { id } });
 }
 
-module.exports = { findViewingsByListingId, findViewingById, createViewing, updateViewingStatus, markNotified };
+module.exports = { findViewingsByListingId, findViewingById, createViewing, updateViewingStatus, markNotified, findAndCountViewings };

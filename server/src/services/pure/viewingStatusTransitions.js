@@ -10,4 +10,8 @@ function canTransition(from, to) {
   return ALLOWED_TRANSITIONS[from]?.includes(to) ?? false;
 }
 
-module.exports = { canTransition, ALLOWED_TRANSITIONS };
+function getAllowedTransitions(currentStatus) {
+  return ALLOWED_TRANSITIONS[currentStatus] ?? [];
+}
+
+module.exports = { canTransition, ALLOWED_TRANSITIONS, getAllowedTransitions };
