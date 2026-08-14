@@ -1,10 +1,10 @@
 import styles from './App.module.css';
 import { useState } from 'react';
-import SectionSwitcher from './components/layout/SectionSwitcher';
-import ModeratorSelect from './components/layout/ModeratorSelect';
-import ListingsSection from './components/queue/ListingsSection';
-import DistrictsSection from './components/districts/DistrictsSection';
-import StatusMessage from './components/common/StatusMessage';
+import SectionSwitcher from "./features/navigation/SectionSwitcher.jsx";
+import ModeratorSelect from "./features/moderator/ModeratorSelect.jsx";
+import ListingsSection from "./features/listings/queue/ListingsSection.jsx";
+import DistrictsSection from "./features/districts/DistrictsSection.jsx";
+import StatusMessage from "./components/common/StatusMessage.jsx";
 
 function App() {
     const [activeSection, setActiveSection] = useState('queue');

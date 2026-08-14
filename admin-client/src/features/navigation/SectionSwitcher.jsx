@@ -1,5 +1,5 @@
 import styles from './SectionSwitcher.module.css';
-import { sections } from '../../data/adminData';
+import { sections } from "../../constants/adminData.js";
 
 export default function SectionSwitcher({activeSection, onSectionChange}) {
     return (
