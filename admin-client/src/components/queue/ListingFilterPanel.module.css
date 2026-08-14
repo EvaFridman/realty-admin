@@ -1,0 +1,48 @@
+.filterPanel {
+    background: var(--color-surface-muted);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.filterPanel select,
+.filterPanel input {
+    width: 100%;
+    height: var(--control-height);
+    padding: 0 var(--spacing-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: var(--font-size-md);
+}
+
+.priceRangeRow {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.priceRangeRow input {
+    width: 100%;
+}
+
+.roomsRow {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    font-size: var(--font-size-sm);
+}
+
+.roomCheckbox {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xxs);
+}
+
+.pending {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    display: block;
+    margin-top: var(--spacing-xxs);
+}
