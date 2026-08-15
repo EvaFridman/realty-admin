@@ -5,7 +5,8 @@ function validate(schema, source = 'body') {
         const data = req[source];
         const result = schema.safeParse(data);
         if(!result.success) {
-            const details = result.error.flatten().fieldErrors;
+            const fieldErrors = result.error.flatten().fieldErrors;
+            const details = Object.values(fieldErrors).flat();
             const error = new ValidationError("Validation failed", details);
             return next(error);
         }

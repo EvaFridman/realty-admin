@@ -1,0 +1,13 @@
+.viewingsFilterPanel {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.viewingsFilterPanel select {
+    height: var(--control-height);
+    padding: 0 var(--spacing-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: var(--font-size-md);
+}

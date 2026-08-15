@@ -1,0 +1,11 @@
+.viewingsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.viewingsList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}

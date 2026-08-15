@@ -4,7 +4,7 @@ import SectionSwitcher from "./features/navigation/SectionSwitcher.jsx";
 import ModeratorSelect from "./features/moderator/ModeratorSelect.jsx";
 import ListingsSection from "./features/listings/queue/ListingsSection.jsx";
 import DistrictsSection from "./features/districts/DistrictsSection.jsx";
-import StatusMessage from "./components/common/StatusMessage.jsx";
+import ViewingsSection from "./features/viewings/ViewingsSection.jsx";
 
 function App() {
     const [activeSection, setActiveSection] = useState('queue');
@@ -20,7 +20,7 @@ function App() {
             <main>
                 {activeSection === 'queue' && <ListingsSection statusFilter="moderation" />}
                 {activeSection === 'listings' && <ListingsSection statusFilter={null} />}
-                {activeSection === 'viewings' && <StatusMessage>Заявки</StatusMessage>}
+                {activeSection === 'viewings' && <ViewingsSection />}
                 {activeSection === 'districts' && <DistrictsSection />}
             </main>
         </>

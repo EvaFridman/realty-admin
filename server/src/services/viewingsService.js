@@ -78,7 +78,9 @@ async function changeStatus(id, newStatus, log = defaultLogger) {
         }
     }
 
-    return updated;
+    const plain = updated.toJSON ? updated.toJSON() : updated;
+    plain.allowedTransitions = getAllowedTransitions(plain.status);
+    return plain;
 }
 
 module.exports = { listViewings, createViewing, changeStatus, listAllViewings };

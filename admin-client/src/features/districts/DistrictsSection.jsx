@@ -1,12 +1,10 @@
 import styles from './DistrictsSection.module.css';
-import { useCallback } from 'react';
 import { districtsApi } from '../../api/resources';
 import StatusMessage from '../../components/common/StatusMessage';
 import useFetch from '../../hooks/useFetch';
 
 export default function DistrictsSection() {
-    const fetchDistricts = useCallback((signal) => districtsApi.list(undefined, { signal }), []);
-    const { data, isLoading, error } = useFetch(fetchDistricts);
+    const { data, isLoading, error } = useFetch((signal) => districtsApi.list(undefined, { signal }), []);
     const districts = data?.data ?? [];
 
     if (isLoading) return <StatusMessage>Загрузка…</StatusMessage>;
