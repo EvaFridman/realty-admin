@@ -10,6 +10,15 @@ async function list(req, res, next) {
     }
 }
 
+async function listAll(req, res, next) {
+    try {
+        const { data, meta } = await viewingsService.listAllViewings(req.validatedQuery);
+        sendResponse(res, 200, data, null, meta);
+    } catch (err) {
+        next(err);
+    }
+}
+
 async function create(req, res, next) {
     try {
         const viewing = await viewingsService.createViewing(req.params.id, req.body, req.log);
@@ -28,4 +37,4 @@ async function changeStatus(req, res, next) {
     }
 }
 
-module.exports = { list, create, changeStatus };
+module.exports = { list, create, changeStatus, listAll };

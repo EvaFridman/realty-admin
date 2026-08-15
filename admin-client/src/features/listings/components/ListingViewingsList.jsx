@@ -1,28 +1,12 @@
 import styles from './ListingViewingsList.module.css';
-import { useState, useEffect } from 'react';
+import { viewingStatusLabels } from '../../../constants/adminData';
 import { listingsApi } from '../../../api/resources.js';
 import StatusMessage from '../../../components/common/StatusMessage.jsx';
+import useFetch from '../../../hooks/useFetch';
 
 export default function ListingViewingsList({ listingId }) {
-    const [viewings, setViewings] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        async function load() {
-            setIsLoading(true);
-            setError(null);
-            try {
-                const json = await listingsApi.getSubresource(listingId, '/viewings');
-                setViewings(json.data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        load();
-    }, [listingId]);
+    const { data, isLoading, error } = useFetch((signal) => listingsApi.getSubresource(listingId, '/viewings', { signal }), [listingId]);
+    const viewings = data?.data ?? [];
 
     return (
         <div className={styles.viewingsContainer}>
@@ -34,8 +18,8 @@ export default function ListingViewingsList({ listingId }) {
                 <div className={styles.viewingsList}>
                     {viewings.map((viewing) => (
                         <div key={viewing.id} className={styles.viewing}>
-                            <span>{viewing.visitorName ?? `Заявка №${viewing.id}`}</span>
-                            <span className={styles.viewingStatus}>{viewing.status}</span>
+                            <span>{viewing.clientName ?? `Заявка №${viewing.id}`}</span>
+                            <span className={styles.viewingStatus}>{viewingStatusLabels[viewing.status]}</span>
                         </div>
                     ))}
                 </div>

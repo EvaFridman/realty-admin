@@ -5,9 +5,9 @@ import { ModeratorProvider } from "./features/moderator/ModeratorProvider.jsx";
 import { AlertProvider } from "./components/common/AlertProvider.jsx";
 
 createRoot(document.getElementById('root')).render(
-    <ModeratorProvider>
-        <AlertProvider>
+    <AlertProvider>
+        <ModeratorProvider>
             <App />
-        </AlertProvider>
-    </ModeratorProvider>
+        </ModeratorProvider>
+    </AlertProvider>
 );

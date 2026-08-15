@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-export default function useFetch(fetchFn) {
+export default function useFetch(request, dependencies = []) {
+    const requestRef = useRef(request);
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    requestRef.current = request;
 
     useEffect(() => {
         const controller = new AbortController();
@@ -11,19 +14,23 @@ export default function useFetch(fetchFn) {
         async function load() {
             setIsLoading(true);
             setError(null);
-
+            setData(null);
             try {
-                const result = await fetchFn(controller.signal);
+                const result = await requestRef.current(controller.signal);
                 setData(result);
             } catch (err) {
-                if (err.name !== 'AbortError') setError(err.message);
+                if (err.name !== 'AbortError') {
+                    setError(err.message);
+                }
             } finally {
-                setIsLoading(false);
+                if (!controller.signal.aborted) {
+                    setIsLoading(false);
+                }
             }
         }
         load();
         return () => controller.abort();
-    }, [fetchFn]);
+    }, dependencies);
 
     return { data, isLoading, error };
 }

@@ -1,5 +1,5 @@
 import styles from './ListingsSection.module.css';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { listingsApi, districtsApi } from "../../../api/resources.js";
 import { emptyListingFilters } from "../../../constants/adminData.js";
 import ListingFilterPanel from './ListingFilterPanel';
@@ -7,51 +7,27 @@ import ListingListItem from './ListingListItem';
 import StatusMessage from "../../../components/common/StatusMessage.jsx";
 import Pagination from "../../../components/common/Pagination.jsx";
 import ListingDetailPanel from "../components/ListingDetailPanel.jsx";
+import useFetch from '../../../hooks/useFetch';
 
 export default function ListingsSection({ statusFilter }) {
     const [filters, setFilters] = useState(emptyListingFilters);
-    const [districts, setDistricts] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
 
-    const [listings, setListings] = useState([]);
-    const [meta, setMeta] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { data: districtsData } = useFetch((signal) => districtsApi.list(undefined, { signal }), []);
+    const districts = districtsData?.data ?? [];
 
-    useEffect(() => {
-        async function loadDistricts() {
-            try {
-                const json = await districtsApi.list();
-                setDistricts(json.data);
-            } catch { }
-        }
-        loadDistricts();
-    }, []);
+    const { data, isLoading, error } = useFetch(
+        (signal) => {
+            const query = { ...Object.fromEntries(Object.entries(filters).filter(([, v]) => Array.isArray(v) ? v.length > 0 : v !== '' && v != null)) };
+            if (filters.rooms?.length) query.rooms = filters.rooms.join(',');
+            if (statusFilter) query.status = statusFilter;
+            return listingsApi.list(query, { signal });
+        },
+        [filters, statusFilter]
+    );
 
-    useEffect(() => {
-        const controller = new AbortController();
-
-        async function loadListings() {
-            setIsLoading(true);
-            setError(null);
-            try {
-                const query = { ...Object.fromEntries(Object.entries(filters).filter(([, v]) => Array.isArray(v) ? v.length > 0 : v !== '' && v != null))};
-                if (filters.rooms?.length) query.rooms = filters.rooms.join(',');
-                if (statusFilter) query.status = statusFilter;
-                const json = await listingsApi.list(query, { signal: controller.signal });
-                setListings(json.data ?? []);
-                setMeta(json.meta ?? null);
-            } catch (err) {
-                if (err.name === 'AbortError') return;
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        loadListings();
-        return () => controller.abort();
-    }, [filters, statusFilter]);
+    const listings = data?.data ?? [];
+    const meta = data?.meta ?? null;
 
     function handleFieldChange(name, value) {
         setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
