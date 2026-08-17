@@ -18,7 +18,7 @@ describe('viewingsService', () => {
                 count: 25,
             });
 
-            const result = await listAllViewings({ page: 1, limit: 20, status: undefined, sortOrder: 'desc' });
+            const result = await viewingsService.listAllViewings({ page: 1, limit: 20, status: undefined, sortOrder: 'desc' });
 
             expect(result.meta.totalPages).toBe(2);
             expect(result.data[0].allowedTransitions).toBeDefined();
@@ -27,7 +27,7 @@ describe('viewingsService', () => {
         test('передаёт фильтр по статусу в репозиторий', async () => {
             viewingsRepo.findAndCountViewings.mockResolvedValue({ rows: [], count: 0 });
 
-            await listAllViewings({ page: 1, limit: 20, status: 'created', sortOrder: 'desc' });
+            await viewingsService.listAllViewings({ page: 1, limit: 20, status: 'created', sortOrder: 'desc' });
 
             expect(viewingsRepo.findAndCountViewings).toHaveBeenCalledWith(
                 expect.objectContaining({ status: 'created' })
