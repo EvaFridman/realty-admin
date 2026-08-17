@@ -9,10 +9,10 @@ export const viewingStatusLabels = {
 };
 
 export const sections = [
-    { id: 'queue', title: 'Очередь модерации' },
-    { id: 'listings', title: 'Все объявления' },
-    { id: 'viewings', title: 'Заявки на просмотр' },
-    { id: 'districts', title: 'Районы' },
+    { id: 'queue', title: 'Очередь модерации', path: '/' },
+    { id: 'listings', title: 'Все объявления', path: '/listings' },
+    { id: 'viewings', title: 'Заявки на просмотр', path: '/viewings' },
+    { id: 'districts', title: 'Районы', path: '/districts' },
 ];
 
 export const emptyListingFilters = {

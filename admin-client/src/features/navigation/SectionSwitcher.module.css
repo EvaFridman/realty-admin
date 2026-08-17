@@ -12,6 +12,7 @@
     cursor: pointer;
     background: transparent;
     color: var(--color-text-secondary);
+    text-decoration: none;
 }
 
 .tabActive {

@@ -1,12 +1,13 @@
 import styles from './SectionSwitcher.module.css';
+import { NavLink } from 'react-router';
 import { sections } from "../../constants/adminData.js";
 
-export default function SectionSwitcher({activeSection, onSectionChange}) {
+export default function SectionSwitcher() {
     return (
-        <div className={styles.sectionsSwitcher}>
+        <nav className={styles.sectionsSwitcher}>
             {sections.map((section) => (
-                <button key={section.id} type="button" className={section.id === activeSection ? styles.tabActive : styles.tab} onClick={() => onSectionChange(section.id)}>{section.title}</button>
+                <NavLink key={section.id} to={section.path} end={section.id === 'queue'} className={({isActive}) => (isActive ? styles.tabActive : styles.tab)}>{section.title}</NavLink>
             ))}
-        </div>
+        </nav>
     )
 }
