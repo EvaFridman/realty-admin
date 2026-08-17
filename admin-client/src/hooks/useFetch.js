@@ -6,7 +6,9 @@ export default function useFetch(request, dependencies = []) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    requestRef.current = request;
+    useEffect(() => {
+        requestRef.current = request;
+    }, [request]);
 
     useEffect(() => {
         const controller = new AbortController();

@@ -11,10 +11,6 @@ export default function ListingFilterPanel({ filters, districts, onFieldChange, 
     const debouncedSearch = useDebouncedValue(searchInput, SEARCH_DELAY_MS);
 
     useEffect(() => {
-        setSearchInput(filters.search);
-    }, [filters.search]);
-
-    useEffect(() => {
         if (debouncedSearch === filters.search) return;
         onSearchChange(debouncedSearch);
     }, [debouncedSearch, filters.search, onSearchChange]);

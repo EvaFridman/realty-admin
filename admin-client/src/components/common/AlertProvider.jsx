@@ -1,5 +1,5 @@
 import styles from './AlertProvider.module.css';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { AlertContext } from './AlertContext';
 
 export function AlertProvider({ children }) {
@@ -19,8 +19,4 @@ export function AlertProvider({ children }) {
             </div>
         </AlertContext>
     );
-}
-
-export function useAlert() {
-    return useContext(AlertContext);
 }

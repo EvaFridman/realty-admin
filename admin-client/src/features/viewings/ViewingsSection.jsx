@@ -1,8 +1,8 @@
 import styles from './ViewingsSection.module.css';
 import { useSearchParams } from 'react-router';
-import { useEffect, useState, useRef } from 'react';
+import { useState, useOptimistic, startTransition, useRef } from 'react';
 import { viewingsApi } from '../../api/resources';
-import { useAlert } from '../../components/common/AlertProvider';
+import { useAlert } from '../../components/common/AlertContext';
 import { parseViewingSearchParams } from '../../shared/utils/parseViewingSearchParams';
 import ViewingFilterPanel from './ViewingFilterPanel';
 import ViewingListItem from './ViewingListItem';
@@ -12,6 +12,7 @@ import useFetch from '../../hooks/useFetch';
 
 export default function ViewingsSection() {
     const [searchParams, setSearchParams] = useSearchParams();
+    const [refreshKey, setRefreshKey] = useState(0);
     const filters = parseViewingSearchParams(searchParams);
     const { data, isLoading, error } = useFetch(
         (signal) => {
@@ -24,13 +25,13 @@ export default function ViewingsSection() {
 
             return viewingsApi.list(query, { signal });
         },
-        [searchParams.toString()]
+        [searchParams.toString(), refreshKey]
     );
-    const [viewingsState, setViewingsState] = useState([]);
+    const [viewingsState, setViewingsState] = useOptimistic(
+        data?.data ?? [],
+        (current, { viewingId, status }) => current.map((viewing) => viewing.id === viewingId ? { ...viewing, status, _pending: true } : viewing)
+    );
     const meta = data?.meta ?? null;
-    useEffect(() => {
-        if (data?.data) setViewingsState(data.data);
-    }, [data]);
     const previousViewingsRef = useRef([]);
     const { showAlert } = useAlert();
 
@@ -54,12 +55,12 @@ export default function ViewingsSection() {
 
     async function handleTransition(viewingId, newStatus) {
         previousViewingsRef.current = viewingsState;
-        setViewingsState((prev) => prev.map((v) => v.id === viewingId ? { ...v, status: newStatus, _pending: true } : v));
+        startTransition(() => { setViewingsState({ viewingId, status: newStatus }) });
         try {
-            const json = await viewingsApi.patchSubresource(viewingId, '/status', { status: newStatus });
-            setViewingsState((prev) => prev.map((v) => v.id === viewingId ? { ...json.data, _pending: false } : v));
+            await viewingsApi.patchSubresource(viewingId, '/status', { status: newStatus });
+            setRefreshKey((value) => value + 1);
         } catch (err) {
-            setViewingsState(previousViewingsRef.current);
+            startTransition(() => {setViewingsState({ viewingId, status: previousViewingsRef.current.find((viewing) => viewing.id === viewingId)?.status});});
             showAlert(`Не удалось изменить статус заявки: ${err.message}`);
         }
     }
@@ -74,7 +75,7 @@ export default function ViewingsSection() {
 
             {!isLoading && !error && viewingsState.length > 0 && (
                 <div className={styles.viewingsList}>
-                    {viewingsState.map((v) => (<ViewingListItem key={v.id} viewing={v} onTransition={handleTransition} />))}
+                    {viewingsState.map((viewing) => (<ViewingListItem key={viewing.id} viewing={viewing} onTransition={handleTransition} />))}
                 </div>
             )}
 
