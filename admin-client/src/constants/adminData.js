@@ -8,7 +8,7 @@ export const viewingStatusLabels = {
     approved: 'Согласована', rejected: 'Отклонена', closed: 'Закрыта',
 };
 
-export const sections = [
+export const navItems = [
     { id: 'queue', title: 'Очередь модерации', path: '/' },
     { id: 'listings', title: 'Все объявления', path: '/listings' },
     { id: 'viewings', title: 'Заявки на просмотр', path: '/viewings' },
