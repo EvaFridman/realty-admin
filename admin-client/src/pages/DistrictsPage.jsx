@@ -1,4 +1,4 @@
-import DistrictsSection from '../components/districts/DistrictsSection';
+import DistrictsSection from '../features/districts/DistrictsSection';
 
 export default function DistrictsPage() {
     return <DistrictsSection />;
