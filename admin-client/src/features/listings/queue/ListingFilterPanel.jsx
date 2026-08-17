@@ -1,33 +1,28 @@
 import styles from './ListingFilterPanel.module.css';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { dealTypeLabels, propertyTypeLabels } from '../../../constants/adminData';
+import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 
 const ROOM_OPTIONS = [1, 2, 3, 4, 5];
 const SEARCH_DELAY_MS = 350;
 
 export default function ListingFilterPanel({ filters, districts, onFieldChange, onRoomsToggle }) {
     const [searchInput, setSearchInput] = useState(filters.search);
-    const [isSearchPending, setIsSearchPending] = useState(false);
-    const timerRef = useRef(null);
+    const debouncedSearch = useDebouncedValue(searchInput, SEARCH_DELAY_MS);
 
     useEffect(() => {
-        return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-    }, []);
+        onFieldChange('search', debouncedSearch);
+    }, [debouncedSearch, onFieldChange]);
 
     function handleSearchChange(e) {
-        const value = e.target.value;
-        setSearchInput(value);
-        setIsSearchPending(true);
-        if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => {
-            onFieldChange('search', value);
-            setIsSearchPending(false);
-        }, SEARCH_DELAY_MS);
+        setSearchInput(e.target.value);
     }
 
     function handleSelectChange(e) {
         onFieldChange(e.target.name, e.target.value);
     }
+
+    const isPending = searchInput !== debouncedSearch;
 
     return (
         <div className={styles.filterPanel}>
@@ -62,7 +57,7 @@ export default function ListingFilterPanel({ filters, districts, onFieldChange, 
 
             <div>
                 <input type="text" placeholder="Поиск" value={searchInput} onChange={handleSearchChange} />
-                {isSearchPending && <span className={styles.pending}>ожидание…</span>}
+                {isPending && <span className={styles.pending}>ожидание…</span>}
             </div>
 
             <select name="sortBy" value={filters.sortBy} onChange={handleSelectChange}>
