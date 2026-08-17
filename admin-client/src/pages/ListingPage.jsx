@@ -1,15 +1,15 @@
 import styles from './ListingPage.module.css';
-import { useParams, Link, useLocation, Links } from 'react-router';
-import { useOptimistic, useState, useRef, useEffect, startTransition } from 'react';
+import { useParams, Link, useLocation } from 'react-router';
+import { useOptimistic, useState, startTransition } from 'react';
 import { listingsApi } from '../api/resources.js';
-import { useAlert } from '../components/common/AlertProvider.jsx';
+import { useAlert } from '../components/common/AlertContext.jsx';
 import ListingPhotos from '../features/listings/components/ListingPhotos';
 import StatusTransitionButtons from '../features/listings/components/StatusTransitionButtons';
 import RejectionForm from '../features/listings/components/RejectionForm';
 import PublishRequirementsList from '../features/listings/components/PublishRequirementsList';
 import ListingViewingsList from '../features/listings/components/ListingViewingsList';
 import StatusMessage from '../components/common/StatusMessage';
-import ErrorView from '../shared/utils/ErrorView.jsx';
+import ErrorView from '../shared/ui/ErrorView.jsx';
 import useFetch from '../hooks/useFetch';
 
 export default function ListingPage() {
@@ -20,53 +20,41 @@ export default function ListingPage() {
     const [publishErrors, setPublishErrors] = useState([]);
     const [pendingRejectStatus, setPendingRejectStatus] = useState(false);
     const { showAlert } = useAlert();
+
     const { data, isLoading, error } = useFetch(
         (signal) => listingsApi.getById(id, '', { signal }),
         [id]
     );
     const listing = data?.data ?? null;
 
-    const [listingState, setListingState] = useState(null);
+    const [prevId, setPrevId] = useState(id);
+    const [confirmedListing, setConfirmedListing] = useState(null);
+    if (id !== prevId) {
+        setPrevId(id);
+        setConfirmedListing(null);
+    }
 
-    useEffect(() => {
-        if (listing) {
-            setListingState(listing);
-        }
-    }, [listing]);
+    const sourceListing = confirmedListing ?? listing;
 
     const [optimisticListing, setOptimisticStatus] = useOptimistic(
-        listingState,
+        sourceListing,
         (current, newStatus) => ({ ...current, status: newStatus, _pending: true })
     );
 
-    useEffect(() => {
-        if (listingState) {
-            startTransition(() => {
-                setOptimisticStatus({ ...listingState, _pending: false });
-            });
-        }
-    }, [listingState]);
-
-    const previousListingRef = useRef(null);
-
     async function applyTransition(newStatus, rejectionReason) {
         setPublishErrors([]);
-        previousListingRef.current = optimisticListing;
         startTransition(() => {
             setOptimisticStatus(newStatus);
         });
-    
+
         try {
             const body = { status: newStatus };
             if (newStatus === 'rejected' && rejectionReason) {
                 body.rejectionReason = rejectionReason;
             }
             const json = await listingsApi.patchSubresource(id, '/status', body);
-            setListingState({ ...json.data, _pending: false });
+            setConfirmedListing(json.data);
         } catch (err) {
-            startTransition(() => {
-                setOptimisticStatus(previousListingRef.current);
-            });
             if (err.details) {
                 const detailsArray = Array.isArray(err.details) ? err.details : [String(err.details)];
                 setPublishErrors(detailsArray);
@@ -75,6 +63,7 @@ export default function ListingPage() {
             }
         }
     }
+
     function handleTransitionClick(status) {
         if (status === 'rejected') {
             setPendingRejectStatus(true);

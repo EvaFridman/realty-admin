@@ -1,5 +1,5 @@
 import styles from './ModeratorSelect.module.css';
-import { useModerator } from "./ModeratorProvider.jsx";
+import { useModerator } from "./ModeratorContext.jsx";
 
 export default function ModeratorSelect({ onSelect }) {
     const { moderators, currentModeratorId, setCurrentModeratorId } = useModerator();

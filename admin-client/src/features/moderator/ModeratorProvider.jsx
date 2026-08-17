@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { ModeratorContext } from './ModeratorContext';
 import { usersApi } from '../../api/resources';
 
@@ -24,7 +24,4 @@ export function ModeratorProvider({ children }) {
             {children}
         </ModeratorContext>
     );
-}
-export function useModerator() {
-    return useContext(ModeratorContext);
 }

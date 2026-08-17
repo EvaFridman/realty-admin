@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from "react-router";
-import { useModerator } from '../../features/moderator/ModeratorProvider.jsx';
+import { useModerator } from '../../features/moderator/ModeratorContext.jsx';
 
-export default function RequireModerator({children}) {
+export default function RequireModeratorGuard({children}) {
     const location = useLocation();
     const { currentModeratorId } = useModerator();
 

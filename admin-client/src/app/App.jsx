@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router";
 import Layout from "./routes/Layout.jsx";
 import SelectModeratorPage from "../pages/SelectModeratorPage.jsx";
-import RequireModerator from "./guards/RequireModerator.jsx";
+import RequireModeratorGuard from "./guards/RequireModeratorGuard.jsx";
 import QueuePage from "../pages/QueuePage.jsx";
 import ListingsPage from "../pages/ListingsPage.jsx";
 import ListingPage from "../pages/ListingPage.jsx";
@@ -14,7 +14,7 @@ function App() {
         <Routes>
             <Route path="/select-moderator" element={<SelectModeratorPage />} />
 
-            <Route path="/" element={<RequireModerator><Layout /></RequireModerator>}>
+            <Route path="/" element={<RequireModeratorGuard><Layout /></RequireModeratorGuard>}>
                 <Route index element={<QueuePage />} />
                 <Route path="listings" element={<ListingsPage />} />
                 <Route path="listings/:id" element={<ListingPage />} />
