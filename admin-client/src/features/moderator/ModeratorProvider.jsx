@@ -10,8 +10,8 @@ export function ModeratorProvider({ children }) {
         async function loadModerators() {
             try {
                 const json = await usersApi.list();
-                const onlyModerators = (json.data ?? []).filter((u) => u.role === 'moderator');                setModerators(onlyModerators);
-                if (onlyModerators.length > 0) setCurrentModeratorId(onlyModerators[0].id);
+                const onlyModerators = (json.data ?? []).filter((u) => u.role === 'moderator');
+                setModerators(onlyModerators);
             } catch (error) {
                 console.error('Failed to load moderators:', error);
             }

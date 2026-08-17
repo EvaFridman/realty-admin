@@ -1,5 +1,5 @@
 import styles from './ListingPage.module.css';
-import { useParams, Link, useLocation } from 'react-router';
+import { useParams, Link, useLocation, Links } from 'react-router';
 import { useOptimistic, useState, useRef, useEffect, startTransition } from 'react';
 import { listingsApi } from '../api/resources.js';
 import { useAlert } from '../components/common/AlertProvider.jsx';
@@ -9,7 +9,7 @@ import RejectionForm from '../features/listings/components/RejectionForm';
 import PublishRequirementsList from '../features/listings/components/PublishRequirementsList';
 import ListingViewingsList from '../features/listings/components/ListingViewingsList';
 import StatusMessage from '../components/common/StatusMessage';
-import ListingErrorView from '../shared/utils/ListingErrorView';
+import ErrorView from '../shared/utils/ErrorView.jsx';
 import useFetch from '../hooks/useFetch';
 
 export default function ListingPage() {
@@ -92,10 +92,7 @@ export default function ListingPage() {
 
     if (error) {
         return (
-            <ListingErrorView 
-                error={error} 
-                backLink={backLink}
-            />
+            <ErrorView error={error}><Link to={backLink} className={styles.backBtn}>к списку объявлений</Link></ErrorView>
         );
     }
 
