@@ -6,13 +6,18 @@ import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 const ROOM_OPTIONS = [1, 2, 3, 4, 5];
 const SEARCH_DELAY_MS = 350;
 
-export default function ListingFilterPanel({ filters, districts, onFieldChange, onRoomsToggle }) {
+export default function ListingFilterPanel({ filters, districts, onFieldChange, onSearchChange, onRoomsToggle }) {
     const [searchInput, setSearchInput] = useState(filters.search);
     const debouncedSearch = useDebouncedValue(searchInput, SEARCH_DELAY_MS);
 
     useEffect(() => {
-        onFieldChange('search', debouncedSearch);
-    }, [debouncedSearch, onFieldChange]);
+        setSearchInput(filters.search);
+    }, [filters.search]);
+
+    useEffect(() => {
+        if (debouncedSearch === filters.search) return;
+        onSearchChange(debouncedSearch);
+    }, [debouncedSearch, filters.search, onSearchChange]);
 
     function handleSearchChange(e) {
         setSearchInput(e.target.value);
