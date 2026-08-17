@@ -1,5 +1,4 @@
-.item,
-.itemActive {
+.item {
     display: block;
     width: 100%;
     text-align: left;
@@ -8,10 +7,7 @@
     border-radius: var(--radius-sm);
     padding: var(--spacing-lg);
     cursor: pointer;
-}
-
-.itemActive {
-    border-left: 3px solid var(--color-text-secondary);
+    text-decoration: none;
 }
 
 .title {

@@ -1,22 +1,28 @@
-import styles from './ListingDetailPanel.module.css';
+import styles from './ListingPage.module.css';
+import { useParams, Link, useLocation } from 'react-router';
 import { useOptimistic, useState, useRef, useEffect, startTransition } from 'react';
-import { listingsApi } from '../../../api/resources.js';
-import { useAlert } from '../../../components/common/AlertProvider.jsx';
-import ListingPhotos from './ListingPhotos';
-import StatusTransitionButtons from './StatusTransitionButtons';
-import RejectionForm from './RejectionForm';
-import PublishRequirementsList from './PublishRequirementsList';
-import ListingViewingsList from './ListingViewingsList';
-import StatusMessage from '../../../components/common/StatusMessage';
-import useFetch from '../../../hooks/useFetch';
+import { listingsApi } from '../api/resources.js';
+import { ApiError } from '../api/ApiError.js'; 
+import { useAlert } from '../components/common/AlertProvider.jsx';
+import ListingPhotos from '../features/listings/components/ListingPhotos';
+import StatusTransitionButtons from '../features/listings/components/StatusTransitionButtons';
+import RejectionForm from '../features/listings/components/RejectionForm';
+import PublishRequirementsList from '../features/listings/components/PublishRequirementsList';
+import ListingViewingsList from '../features/listings/components/ListingViewingsList';
+import StatusMessage from '../components/common/StatusMessage';
+import useFetch from '../hooks/useFetch';
 
-export default function ListingDetailPanel({ listingId }) {
+export default function ListingPage() {
+    const location = useLocation();
+    const backLink = location.state?.from || '/listings';
+
+    const { id } = useParams();
     const [publishErrors, setPublishErrors] = useState([]);
     const [pendingRejectStatus, setPendingRejectStatus] = useState(false);
     const { showAlert } = useAlert();
     const { data, isLoading, error } = useFetch(
-        (signal) => listingsApi.getById(listingId, '', { signal }),
-        [listingId]
+        (signal) => listingsApi.getById(id, '', { signal }),
+        [id]
     );
     const listing = data?.data ?? null;
 
@@ -55,7 +61,7 @@ export default function ListingDetailPanel({ listingId }) {
             if (newStatus === 'rejected' && rejectionReason) {
                 body.rejectionReason = rejectionReason;
             }
-            const json = await listingsApi.patchSubresource(listingId, '/status', body);
+            const json = await listingsApi.patchSubresource(id, '/status', body);
             setListingState({ ...json.data, _pending: false });
         } catch (err) {
             startTransition(() => {
@@ -83,12 +89,34 @@ export default function ListingDetailPanel({ listingId }) {
     }
 
     if (isLoading && !optimisticListing) return <StatusMessage>Загрузка…</StatusMessage>;
-    if (error) return <StatusMessage>Ошибка: {error}</StatusMessage>;
+
+    const is404 = error instanceof ApiError ? error.status === 404 : String(error).toLowerCase().includes('not found') || String(error).includes('404');
+
+    if (is404) {
+        return (
+            <div className={styles.errorPage}>
+                <StatusMessage>Объявления с таким ID не существует.</StatusMessage>
+                <Link className={styles.backBtn} to={backLink}>к списку объявлений</Link>
+            </div>
+        );
+    }
+
+    if (error) {
+        const errorMessage = error instanceof ApiError ? error.message : String(error);
+        return (
+            <div className={styles.errorPage}>
+                <StatusMessage>Ошибка: {errorMessage}</StatusMessage>
+                <Link className={styles.backBtn} to={backLink}>к списку объявлений</Link>
+            </div>
+        );
+    }
+
     if (!optimisticListing) return null;
 
     return (
-        <div className={optimisticListing._pending ? styles.listingDetailPanelPending : styles.listingDetailPanel}>
+        <div className={optimisticListing._pending ? styles.listingDetailPending : styles.listingDetail}>
             <p className={styles.listingTitle}>{optimisticListing.title}</p>
+            <Link className={styles.backBtn} to={backLink}>к списку объявлений</Link>
             <p className={styles.listingMeta}>{optimisticListing.address}, {optimisticListing.district?.title}</p>
             <p className={styles.listingMeta}>агент: {optimisticListing.agent?.name}</p>
 
@@ -105,7 +133,7 @@ export default function ListingDetailPanel({ listingId }) {
 
             <PublishRequirementsList requirements={publishErrors} />
 
-            <ListingViewingsList listingId={listingId} />
+            <ListingViewingsList listingId={id} />
         </div>
     );
 }
