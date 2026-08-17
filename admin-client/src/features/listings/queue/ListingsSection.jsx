@@ -1,7 +1,8 @@
 import styles from './ListingsSection.module.css';
-import { useState } from 'react';
+import { useCallback } from 'react';
+import { useSearchParams } from 'react-router';
 import { listingsApi, districtsApi } from "../../../api/resources.js";
-import { emptyListingFilters } from "../../../constants/adminData.js";
+import { parseListingSearchParams } from '../../../shared/utils/parseListingSearchParams';
 import ListingFilterPanel from './ListingFilterPanel';
 import ListingListItem from './ListingListItem';
 import StatusMessage from "../../../components/common/StatusMessage.jsx";
@@ -9,7 +10,8 @@ import Pagination from "../../../components/common/Pagination.jsx";
 import useFetch from '../../../hooks/useFetch';
 
 export default function ListingsSection({ statusFilter }) {
-    const [filters, setFilters] = useState(emptyListingFilters);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const filters = parseListingSearchParams(searchParams);
 
     const { data: districtsData } = useFetch((signal) => districtsApi.list(undefined, { signal }), []);
     const districts = districtsData?.data ?? [];
@@ -21,41 +23,77 @@ export default function ListingsSection({ statusFilter }) {
             if (statusFilter) query.status = statusFilter;
             return listingsApi.list(query, { signal });
         },
-        [filters, statusFilter]
+        [searchParams.toString(), statusFilter]
     );
 
     const listings = data?.data ?? [];
     const meta = data?.meta ?? null;
+    const page = filters.page;
+
+    const handleSearchParamChange = useCallback((value) => {
+        setSearchParams((params) => {
+            if (value) {
+                params.set('search', value);
+            } else {
+                params.delete('search');
+            }
+
+            params.set('page', '1');
+
+            return params;
+        }, { replace: true });
+    }, [setSearchParams]);
 
     function handleFieldChange(name, value) {
-        setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
+        setSearchParams((params) => {
+            if (value) {
+                params.set(name, value);
+            } else {
+                params.delete(name);
+            }
+            params.set('page', '1');
+            return params;
+        });
     }
 
     function handleRoomsToggle(room) {
-        setFilters((prev) => {
-            const rooms = prev.rooms.includes(room) ? prev.rooms.filter((r) => r !== room) : [...prev.rooms, room];
-            return { ...prev, rooms, page: 1 };
+        setSearchParams((params) => {
+            const newParams = new URLSearchParams(params);
+            const rooms = newParams.getAll('rooms');
+            const roomValue = String(room);
+
+            newParams.delete('rooms');
+            const newRooms = rooms.includes(roomValue) ? rooms.filter((value) => value !== roomValue) : [...rooms, roomValue];
+            newRooms.forEach((value) => newParams.append('rooms', value));
+            newParams.set('page', '1');
+
+            return newParams;
         });
     }
 
     function handlePageChange(page) {
-        setFilters((prev) => ({ ...prev, page }));
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('page', String(page));
+        setSearchParams(newParams);
+    }
+
+    function renderList() {
+        if (isLoading) return <StatusMessage>Загрузка…</StatusMessage>;
+        if (error) return <StatusMessage>Ошибка: {error}</StatusMessage>;
+        if (listings.length === 0) return <StatusMessage>Ничего не найдено</StatusMessage>;
+
+        return (
+            <div className={styles.list}>
+                {listings.map((listing) => (<ListingListItem key={listing.id} listing={listing} />))}
+            </div>
+        );
     }
 
     return (
         <div className={styles.layout}>
-            <ListingFilterPanel filters={filters} districts={districts} onFieldChange={handleFieldChange} onRoomsToggle={handleRoomsToggle} />
-
-            {isLoading && <StatusMessage>Загрузка…</StatusMessage>}
-            {!isLoading && error && <StatusMessage>Ошибка: {error}</StatusMessage>}
-            {!isLoading && !error && listings.length === 0 && <StatusMessage>Ничего не найдено</StatusMessage>}
-            {!isLoading && !error && listings.length > 0 && (
-                <div className={styles.list}>
-                    {listings.map((listing) => (<ListingListItem key={listing.id} listing={listing} />))}
-                </div>
-            )}
-
-            {meta && <Pagination page={meta.page} totalPages={meta.totalPages} onPageChange={handlePageChange} />}
+            <ListingFilterPanel filters={filters} districts={districts} onSearchChange={handleSearchParamChange} onFieldChange={handleFieldChange} onRoomsToggle={handleRoomsToggle} />
+            {renderList()}
+            {meta && <Pagination page={page} totalPages={meta?.totalPages ?? 1} onPageChange={handlePageChange} />}
         </div>
     );
 }

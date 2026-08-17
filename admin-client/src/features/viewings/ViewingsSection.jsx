@@ -1,8 +1,9 @@
 import styles from './ViewingsSection.module.css';
+import { useSearchParams } from 'react-router';
 import { useEffect, useState, useRef } from 'react';
 import { viewingsApi } from '../../api/resources';
 import { useAlert } from '../../components/common/AlertProvider';
-import { emptyViewingFilters } from '../../constants/adminData';
+import { parseViewingSearchParams } from '../../shared/utils/parseViewingSearchParams';
 import ViewingFilterPanel from './ViewingFilterPanel';
 import ViewingListItem from './ViewingListItem';
 import StatusMessage from '../../components/common/StatusMessage';
@@ -10,19 +11,20 @@ import Pagination from '../../components/common/Pagination';
 import useFetch from '../../hooks/useFetch';
 
 export default function ViewingsSection() {
-    const [filters, setFilters] = useState(emptyViewingFilters);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const filters = parseViewingSearchParams(searchParams);
     const { data, isLoading, error } = useFetch(
         (signal) => {
             const query = new URLSearchParams();
 
             if (filters.status) query.set('status', filters.status);
             query.set('sortOrder', filters.sortOrder);
-            query.set('page', filters.page);
-            query.set('limit', filters.limit);
+            query.set('page', String(filters.page));
+            query.set('limit', String(filters.limit));
 
             return viewingsApi.list(query, { signal });
         },
-        [filters]
+        [searchParams.toString()]
     );
     const [viewingsState, setViewingsState] = useState([]);
     const meta = data?.meta ?? null;
@@ -33,11 +35,21 @@ export default function ViewingsSection() {
     const { showAlert } = useAlert();
 
     function handleFieldChange(name, value) {
-        setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
+        setSearchParams((params) => {
+            if (value) {
+                params.set(name, value);
+            } else {
+                params.delete(name);
+            }
+            params.set('page', '1');
+            return params;
+        });
     }
 
     function handlePageChange(page) {
-        setFilters((prev) => ({ ...prev, page }));
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('page', String(page));
+        setSearchParams(newParams);
     }
 
     async function handleTransition(viewingId, newStatus) {
