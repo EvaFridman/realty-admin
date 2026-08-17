@@ -42,19 +42,22 @@ export default function ListingsSection({ statusFilter }) {
         setFilters((prev) => ({ ...prev, page }));
     }
 
+    function renderList() {
+        if (isLoading) return <StatusMessage>Загрузка…</StatusMessage>;
+        if (error) return <StatusMessage>Ошибка: {error}</StatusMessage>;
+        if (listings.length === 0) return <StatusMessage>Ничего не найдено</StatusMessage>;
+
+        return (
+            <div className={styles.list}>
+                {listings.map((listing) => (<ListingListItem key={listing.id} listing={listing} />))}
+            </div>
+        );
+    }
+
     return (
         <div className={styles.layout}>
             <ListingFilterPanel filters={filters} districts={districts} onFieldChange={handleFieldChange} onRoomsToggle={handleRoomsToggle} />
-
-            {isLoading && <StatusMessage>Загрузка…</StatusMessage>}
-            {!isLoading && error && <StatusMessage>Ошибка: {error}</StatusMessage>}
-            {!isLoading && !error && listings.length === 0 && <StatusMessage>Ничего не найдено</StatusMessage>}
-            {!isLoading && !error && listings.length > 0 && (
-                <div className={styles.list}>
-                    {listings.map((listing) => (<ListingListItem key={listing.id} listing={listing} />))}
-                </div>
-            )}
-
+            {renderList()}
             {meta && <Pagination page={meta.page} totalPages={meta.totalPages} onPageChange={handlePageChange} />}
         </div>
     );

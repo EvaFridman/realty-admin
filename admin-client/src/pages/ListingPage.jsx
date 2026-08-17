@@ -2,7 +2,6 @@ import styles from './ListingPage.module.css';
 import { useParams, Link, useLocation } from 'react-router';
 import { useOptimistic, useState, useRef, useEffect, startTransition } from 'react';
 import { listingsApi } from '../api/resources.js';
-import { ApiError } from '../api/ApiError.js'; 
 import { useAlert } from '../components/common/AlertProvider.jsx';
 import ListingPhotos from '../features/listings/components/ListingPhotos';
 import StatusTransitionButtons from '../features/listings/components/StatusTransitionButtons';
@@ -10,6 +9,7 @@ import RejectionForm from '../features/listings/components/RejectionForm';
 import PublishRequirementsList from '../features/listings/components/PublishRequirementsList';
 import ListingViewingsList from '../features/listings/components/ListingViewingsList';
 import StatusMessage from '../components/common/StatusMessage';
+import ListingErrorView from '../shared/utils/ListingErrorView';
 import useFetch from '../hooks/useFetch';
 
 export default function ListingPage() {
@@ -90,24 +90,12 @@ export default function ListingPage() {
 
     if (isLoading && !optimisticListing) return <StatusMessage>Загрузка…</StatusMessage>;
 
-    const is404 = error instanceof ApiError ? error.status === 404 : String(error).toLowerCase().includes('not found') || String(error).includes('404');
-
-    if (is404) {
-        return (
-            <div className={styles.errorPage}>
-                <StatusMessage>Объявления с таким ID не существует.</StatusMessage>
-                <Link className={styles.backBtn} to={backLink}>к списку объявлений</Link>
-            </div>
-        );
-    }
-
     if (error) {
-        const errorMessage = error instanceof ApiError ? error.message : String(error);
         return (
-            <div className={styles.errorPage}>
-                <StatusMessage>Ошибка: {errorMessage}</StatusMessage>
-                <Link className={styles.backBtn} to={backLink}>к списку объявлений</Link>
-            </div>
+            <ListingErrorView 
+                error={error} 
+                backLink={backLink}
+            />
         );
     }
 
