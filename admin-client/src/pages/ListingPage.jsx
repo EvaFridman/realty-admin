@@ -3,6 +3,7 @@ import { useParams, Link, useLocation } from 'react-router';
 import { useOptimistic, useState, startTransition } from 'react';
 import { listingsApi } from '../api/resources.js';
 import { useAlert } from '../components/common/AlertContext.jsx';
+import { usePageTitle } from '../hooks/usePageTitle';
 import ListingPhotos from '../features/listings/components/ListingPhotos';
 import StatusTransitionButtons from '../features/listings/components/StatusTransitionButtons';
 import RejectionForm from '../features/listings/components/RejectionForm';
@@ -40,6 +41,8 @@ export default function ListingPage() {
         sourceListing,
         (current, newStatus) => ({ ...current, status: newStatus, _pending: true })
     );
+
+    usePageTitle(optimisticListing?.title);
 
     async function applyTransition(newStatus, rejectionReason) {
         setPublishErrors([]);
