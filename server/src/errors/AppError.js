@@ -38,10 +38,16 @@ class UnauthorizedError extends AppError {
     }
 }
 
+class UnprocessableEntityError extends AppError {
+    constructor(message = 'UnprocessableEntity', details = null, code = null) {
+        super(message, 422, details, code);
+    }
+}
+
 class ForbiddenError extends AppError {
     constructor(message = 'Forbidden', details = null, code = null) {
         super(message, 403, details, code);
     }
 }
 
-module.exports = { AppError, NotFoundError, ConflictError, ValidationError, ExternalServiceError, UnauthorizedError, ForbiddenError };
+module.exports = { AppError, NotFoundError, ConflictError, ValidationError, ExternalServiceError, UnauthorizedError, UnprocessableEntityError, ForbiddenError };
