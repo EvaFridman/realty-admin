@@ -1,9 +1,13 @@
 import { Link } from 'react-router';
-import { usePageTitle } from '../hooks/usePageTitle';
+import { useEffect } from 'react';
+import { useTitle } from '../components/common/TitleContext';
 import StatusMessage from '../components/common/StatusMessage';
 
 export default function NotFoundPage() {
-    usePageTitle('Страница не найдена');
+    const { setTitle } = useTitle();
+    useEffect(() => {
+        setTitle('Страница не найдена');
+    }, [setTitle]);
     return (
         <div>
             <StatusMessage>Такой страницы не существует.</StatusMessage>

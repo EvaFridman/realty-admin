@@ -1,10 +1,7 @@
 import { useLocation, useNavigate } from 'react-router';
-import { usePageTitle } from '../hooks/usePageTitle';
 import ModeratorSelect from '../features/moderator/ModeratorSelect';
 
 export default function SelectModeratorPage() {
-    usePageTitle('Выбор модератора');
-
     const location = useLocation();
     const navigate = useNavigate();
 
