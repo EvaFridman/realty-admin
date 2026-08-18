@@ -7,7 +7,10 @@ const { pdfQuerySchema, pdfBundleQuerySchema } = require('../schemas/pdfSchema')
 
 const pdfRouter = express.Router();
 
-pdfRouter.get('/listings/:id/pdf', verifyAccessToken, requireRole('moderator'), validate(pathIdSchema, 'params'), validate(pdfQuerySchema, 'query'), pdfController.listingCard);
-pdfRouter.get('/listings/pdf', verifyAccessToken, requireRole('moderator'), validate(pdfBundleQuerySchema, 'query'), pdfController.listingsBundle);
+pdfRouter.use(verifyAccessToken);
+pdfRouter.use(requireRole('moderator'));
+
+pdfRouter.get('/listings/:id/pdf', validate(pathIdSchema, 'params'), validate(pdfQuerySchema, 'query'), pdfController.listingCard);
+pdfRouter.get('/listings/pdf', validate(pdfBundleQuerySchema, 'query'), pdfController.listingsBundle);
 
 module.exports = pdfRouter;

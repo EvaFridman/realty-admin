@@ -5,7 +5,10 @@ const { verifyAccessToken, requireRole } = require('../middleware/auth');
 const { pathIdSchema } = require('../schemas/pathSchema');
 const { changeViewingStatusSchema, viewingsListQuerySchema } = require('../schemas/viewingsSchema');
 
-viewingsStatusRouter.get('/', verifyAccessToken, requireRole('moderator'), validate(viewingsListQuerySchema, 'query'), viewingsController.listAll);
-viewingsStatusRouter.patch('/:id/status', verifyAccessToken, requireRole('moderator'), validate(pathIdSchema, 'params'), validate(changeViewingStatusSchema, 'body'), viewingsController.changeStatus);
+router.use(verifyAccessToken);
+router.use(requireRole('moderator'));
+
+viewingsStatusRouter.get('/', validate(viewingsListQuerySchema, 'query'), viewingsController.listAll);
+viewingsStatusRouter.patch('/:id/status', validate(pathIdSchema, 'params'), validate(changeViewingStatusSchema, 'body'), viewingsController.changeStatus);
 
 module.exports = viewingsStatusRouter;

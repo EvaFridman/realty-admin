@@ -3,7 +3,7 @@ const sendResponse = require('../utils/response');
 
 async function list(req, res, next) {
     try {
-        const viewings = await viewingsService.listViewings(req.params.id);
+        const viewings = await viewingsService.listViewings(req.user, req.params.id);
         sendResponse(res, 200, viewings, null, null);
     } catch (err) {
         next(err);
