@@ -19,11 +19,13 @@ module.exports = (sequelize, DataTypes) => {
   User.init({
     name: { type: DataTypes.STRING, allowNull: false, validate: { len: [2, 50] } },
     email: { type: DataTypes.STRING, allowNull: false, unique: true, validate: { isEmail: true } },
-    phone: { type: DataTypes.STRING(20), allowNull: false, unique: true, validate: { is: /^\+[1-9]\d{1,14}$/ } },
-    role: { type: DataTypes.ENUM('agent', 'moderator'), allowNull: false, defaultValue: 'agent' }
+    phone: { type: DataTypes.STRING(20), unique: true, validate: { is: /^\+[1-9]\d{1,14}$/ } },
+    role: { type: DataTypes.ENUM('agent', 'moderator'), allowNull: false, defaultValue: 'agent' },
+    passwordHash: { type: DataTypes.STRING(60), allowNull: false, defaultValue: '' }
   }, {
     sequelize,
     modelName: 'User',
+    defaultScope: { attributes: { exclude: ['passwordHash'] } },
   });
   return User;
 };

@@ -117,14 +117,14 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Listings');
-    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_Listings_dealType";');
-    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_Listings_propertyType";');
-    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_Listings_status";');
     await queryInterface.removeIndex('Listings', 'listings_filter_idx');
     await queryInterface.removeIndex('Listings', 'listings_published_partial_idx');
     await queryInterface.removeIndex('Listings', 'listings_lat_lng_idx');
     await queryInterface.removeIndex('Listings', 'listings_agent_id_idx');
     await queryInterface.removeIndex('Listings', 'listings_district_id_idx');
+    await queryInterface.dropTable('Listings');
+    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_Listings_dealType";');
+    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_Listings_propertyType";');
+    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_Listings_status";');
   }
 };

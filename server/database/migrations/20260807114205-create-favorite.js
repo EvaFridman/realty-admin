@@ -50,8 +50,7 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Favorites');
     await queryInterface.removeIndex('Favorites', 'favorites_userId_listingId_unique_idx');
-
+    await queryInterface.dropTable('Favorites');
   }
 };

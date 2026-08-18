@@ -43,7 +43,7 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('ListingPhotos');
     await queryInterface.removeIndex('ListingPhotos', 'listingPhotos_listingId_idx');
+    await queryInterface.dropTable('ListingPhotos');
   }
 };

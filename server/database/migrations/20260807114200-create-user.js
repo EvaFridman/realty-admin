@@ -20,7 +20,6 @@ module.exports = {
       },
       phone: {
         type: Sequelize.STRING(20),
-        allowNull: false,
         unique: true
       },
       role: {
@@ -38,6 +37,10 @@ module.exports = {
       }
     });
 
+    await queryInterface.addIndex('Users', ['role'], {
+      name: 'users_role_idx'
+    });
+    
     await queryInterface.addConstraint('Users', {
       fields: ['name'],
       type: 'check',
@@ -45,11 +48,16 @@ module.exports = {
       where: Sequelize.literal('LENGTH(name) BETWEEN 2 AND 50')
     });
 
+    await queryInterface.addIndex('Users', ['email'], {
+      unique: true,
+      name: 'users_email_unique_idx'
+    });
+
     await queryInterface.addConstraint('Users', {
       fields: ['email'],
       type: 'check',
       name: 'users_email_check',
-      where: Sequelize.literal("email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$'")
+      where: Sequelize.literal("email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$'")
     });
 
     await queryInterface.addConstraint('Users', {
@@ -59,20 +67,10 @@ module.exports = {
       where: Sequelize.literal("phone ~* '^\\+[1-9]\\d{1,14}$'")
     });
 
-    await queryInterface.addIndex('Users', ['email'], {
-      unique: true,
-      name: 'users_email_unique_idx'
-    });
-
-    await queryInterface.addIndex('Users', ['role'], {
-      name: 'users_role_idx'
-    });
-
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Users');
-    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_Users_role";');
     await queryInterface.removeIndex('Users', 'users_email_unique_idx');
     await queryInterface.removeIndex('Users', 'users_role_idx');
-  }
+    await queryInterface.dropTable('Users');
+    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_Users_role";');  }
 };
