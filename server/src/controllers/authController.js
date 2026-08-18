@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const usersRepo = require('../repositories/usersRepository');
-const { NotFoundError, ConflictError, UnauthorizedError } = require('../errors/AppError');
+const { NotFoundError, ConflictError, UnauthorizedError, UnprocessableEntityError } = require('../errors/AppError');
 const sendResponse = require('../utils/response');
 const { issuePair } = require('../services/tokensService');
 
@@ -25,10 +25,10 @@ async function login(req, res, next) {
         const { email, password } = req.body;
 
         const user = await usersRepo.findByEmailWithPassword(email);
-        if (!user) throw new UnauthorizedError('Invalid email or password');
+        if (!user) throw new UnprocessableEntityError('Invalid email or password');
 
         const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-        if (!isPasswordValid) throw new UnauthorizedError('Invalid email or password');
+        if (!isPasswordValid) throw new UnprocessableEntityError('Invalid email or password');
 
         sendResponse(res, 200, issuePair(res, user), null, null);
     } catch (err) {

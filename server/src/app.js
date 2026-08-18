@@ -19,8 +19,8 @@ app.use(loggerMiddleware);
 
 setupMiddleware(app);
 
-app.use('/users', usersRouter);
 app.use('/auth', authRouter);
+app.use('/users', usersRouter);
 app.use('/districts', districtsRouter);
 app.use('/listings', listingsRouter);
 app.use('/users/:id/favorites', favoritesRouter);
