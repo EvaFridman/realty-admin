@@ -80,8 +80,8 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
+    await queryInterface.removeIndex('Viewings', 'viewings_listingId_idx');
     await queryInterface.dropTable('Viewings');
     await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_Viewings_status";');
-    await queryInterface.removeIndex('Viewings', 'viewings_listingId_idx');
   }
 };
