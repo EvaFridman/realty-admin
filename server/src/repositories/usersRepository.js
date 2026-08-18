@@ -17,4 +17,15 @@ async function updateUser(id, data) {
     return findUserById(id);
 }
 
-module.exports = { findAllUsers, findUserById, createUser, updateUser };
+async function findUserWithEmail(email) {
+    return User.findOne({where: { email } });
+}
+
+async function findUserWithEmailAndPassword(email) {
+    return User.findOne({
+        where: { email },
+        attributes: { include: ['passwordHash'] },
+    });
+}
+
+module.exports = { findAllUsers, findUserById, createUser, updateUser, findUserWithEmail, findUserWithEmailAndPassword };

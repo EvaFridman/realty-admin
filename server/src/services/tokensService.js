@@ -1,3 +1,4 @@
+const ms = require('ms');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 
@@ -17,7 +18,7 @@ function setRefreshCookie(res, token) {
         secure: process.env.NODE_ENV === "production",
         sameSite: 'lax',
         path: '/auth',
-        maxAge: 30 * 24 * 60 * 60 * 1000,
+        maxAge: ms(config.jwt.refreshTtl),
     });
 }
 
