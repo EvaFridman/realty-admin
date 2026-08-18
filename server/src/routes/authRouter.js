@@ -1,6 +1,7 @@
 const authRouter = require('express').Router();
 const authController = require('../controllers/authController');
 const { validate } = require('../middleware/validate');
+const { verifyAccessToken, verifyRefreshToken } = require('../middleware/auth');
 const { loginSchema, registerSchema } = require('../schemas/authSchema');
 
 authRouter.get('/me', verifyAccessToken, authController.me);
