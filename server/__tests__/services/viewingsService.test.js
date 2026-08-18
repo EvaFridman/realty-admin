@@ -37,20 +37,22 @@ describe('viewingsService', () => {
 
     describe('listViewings', () => {
         it('should return viewings for listing if listing exists', async () => {
-            const listing = { id: 1 };
-            const viewings = [{ id: 1 }];
+            const user = { id: 1, role: 'moderator' };
+            const listing = { id: 1, agentId: 1 };
+            const viewings = [{ id: 1, toJSON() { return { id: 1 }; } }];
             listingsRepo.findListingById.mockResolvedValue(listing);
             viewingsRepo.findViewingsByListingId.mockResolvedValue(viewings);
 
-            const result = await viewingsService.listViewings(1);
-            expect(result).toEqual(viewings);
+            const result = await viewingsService.listViewings(user, 1);
+            expect(result[0].id).toBe(1);
             expect(listingsRepo.findListingById).toHaveBeenCalledWith(1);
             expect(viewingsRepo.findViewingsByListingId).toHaveBeenCalledWith(1);
         });
 
         it('should throw NotFoundError if listing does not exist', async () => {
+            const user = { id: 1, role: 'agent' };
             listingsRepo.findListingById.mockResolvedValue(null);
-            await expect(viewingsService.listViewings(1)).rejects.toThrow(NotFoundError);
+            await expect(viewingsService.listViewings(user, 1)).rejects.toThrow(NotFoundError);
         });
     });
 

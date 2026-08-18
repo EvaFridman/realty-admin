@@ -1,10 +1,10 @@
 const favoritesRepo = require('../repositories/favoritesRepository');
 const usersRepo = require('../repositories/usersRepository');
 const listingsRepo = require('../repositories/listingsRepository');
-const { NotFoundError, ConflictError } = require('../errors/AppError');
+const { NotFoundError, ConflictError, ForbiddenError } = require('../errors/AppError');
 
 async function listFavorites(user, userId) {
-    if (user.id !== Number(userId) && user.role !== 'moderator') throw new ForbiddenError('Not enough rights to view this user\'s favorites');
+    if (user.id !== Number(userId) && user.role !== 'moderator') throw new ForbiddenError("Not enough rights to view this user's favorites");
     const userExists = await usersRepo.findUserById(userId);
     if (!userExists) throw new NotFoundError('User not found');
     return favoritesRepo.findFavoritesByUserId(userId);

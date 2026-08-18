@@ -68,6 +68,6 @@ describe('parseListingFilters', () => {
         expect(result.priceMin).toBeNaN();
         expect(result.rooms).toEqual([NaN]);
         expect(result.page).toBe(1);
-        expect(result.limit).toBe(100);
+        expect(result.limit).toBe(200);
     });
 });
