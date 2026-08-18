@@ -1,0 +1,45 @@
+import { useState, useEffect } from 'react';
+import { useLocation, matchPath } from 'react-router';
+import { TitleContext } from './TitleContext';
+
+const staticTitles = {
+    '/': 'Очередь модерации',
+    '/listings': 'Все объявления',
+    '/viewings': 'Заявки на просмотр',
+    '/districts': 'Районы',
+    '/select-moderator': 'Выбор модератора',
+};
+
+const dynamicTitles = [
+    { path: '/listings/:id', title: (params) => `Объявление #${params.id}` },
+];
+
+export function TitleProvider({ children }) {
+    const location = useLocation();
+    const [title, setTitle] = useState('Админ-панель');
+
+    useEffect(() => {
+        if (staticTitles[location.pathname]) {
+            setTitle(staticTitles[location.pathname]);
+            return;
+        }
+
+        for (const route of dynamicTitles) {
+            const match = matchPath(route.path, location.pathname);
+            if (match) {
+                setTitle(route.title(match.params));
+                return;
+            }
+        }
+
+        setTitle('Админ-панель');
+    }, [location.pathname]);
+
+    useEffect(() => {
+        document.title = title ? `${title} - Админ-панель` : 'Админ-панель';
+    }, [title]);
+
+    const value = { title, setTitle };
+
+    return <TitleContext.Provider value={value}>{children}</TitleContext.Provider>;
+}

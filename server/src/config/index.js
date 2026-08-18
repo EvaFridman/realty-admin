@@ -11,4 +11,10 @@ module.exports = {
         defaultSize: Number(process.env.PAGE_SIZE_DEFAULT) || 20,
         maxSize: Number(process.env.PAGE_SIZE_MAX) || 2000,
     },
+    jwt: {
+        accessSecret: process.env.JWT_ACCESS_SECRET,
+        refreshSecret: process.env.JWT_REFRESH_SECRET,
+        accessTtl: process.env.ACCESS_TTL || '15m',
+        refreshTtl: process.env.REFRESH_TTL || '30d',
+    },
 };

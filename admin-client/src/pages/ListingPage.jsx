@@ -1,9 +1,9 @@
 import styles from './ListingPage.module.css';
 import { useParams, Link, useLocation } from 'react-router';
-import { useOptimistic, useState, startTransition } from 'react';
+import { useOptimistic, useState, startTransition, useEffect } from 'react';
 import { listingsApi } from '../api/resources.js';
 import { useAlert } from '../components/common/AlertContext.jsx';
-import { usePageTitle } from '../hooks/usePageTitle';
+import { useTitle } from '../components/common/TitleContext';
 import ListingPhotos from '../features/listings/components/ListingPhotos';
 import StatusTransitionButtons from '../features/listings/components/StatusTransitionButtons';
 import RejectionForm from '../features/listings/components/RejectionForm';
@@ -21,6 +21,7 @@ export default function ListingPage() {
     const [publishErrors, setPublishErrors] = useState([]);
     const [pendingRejectStatus, setPendingRejectStatus] = useState(false);
     const { showAlert } = useAlert();
+    const { setTitle } = useTitle();
 
     const { data, isLoading, error } = useFetch(
         (signal) => listingsApi.getById(id, '', { signal }),
@@ -42,8 +43,12 @@ export default function ListingPage() {
         (current, newStatus) => ({ ...current, status: newStatus, _pending: true })
     );
 
-    usePageTitle(optimisticListing?.title);
-
+    useEffect(() => {
+        if (optimisticListing?.title) {
+            setTitle(optimisticListing.title);
+        }
+    }, [optimisticListing, setTitle]);
+    
     async function applyTransition(newStatus, rejectionReason) {
         setPublishErrors([]);
         startTransition(() => {
@@ -55,8 +60,8 @@ export default function ListingPage() {
             if (newStatus === 'rejected' && rejectionReason) {
                 body.rejectionReason = rejectionReason;
             }
-            const json = await listingsApi.patchSubresource(id, '/status', body);
-            setConfirmedListing(json.data);
+            const { data: updatedListing } = await listingsApi.patchSubresource(id, '/status', body);
+            setConfirmedListing(updatedListing);
         } catch (err) {
             if (err.details) {
                 const detailsArray = Array.isArray(err.details) ? err.details : [String(err.details)];

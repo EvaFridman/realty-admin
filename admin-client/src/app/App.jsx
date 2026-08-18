@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router';
+import { TitleProvider } from '../components/common/TitleProvider';
 import Layout from "./routes/Layout.jsx";
 import SelectModeratorPage from "../pages/SelectModeratorPage.jsx";
 import RequireModeratorGuard from "./guards/RequireModeratorGuard.jsx";
@@ -13,21 +14,23 @@ const DistrictsPage = lazy(() => import("../pages/DistrictsPage.jsx"));
 
 function App() {
     return (
-        <Suspense fallback={<p>Загрузка раздела…</p>}>
-            <Routes>
-                <Route path="/select-moderator" element={<SelectModeratorPage />} />
+        <TitleProvider>
+            <Suspense fallback={<p>Загрузка раздела…</p>}>
+                <Routes>
+                    <Route path="/select-moderator" element={<SelectModeratorPage />} />
 
-                <Route path="/" element={<RequireModeratorGuard><Layout /></RequireModeratorGuard>}>
-                    <Route index element={<QueuePage />} />
-                    <Route path="listings" element={<ListingsPage />} />
-                    <Route path="listings/:id" element={<ListingPage />} />
-                    <Route path="viewings" element={<ViewingsPage />} />
-                    <Route path="districts" element={<DistrictsPage />} />
-                </Route>
+                    <Route path="/" element={<RequireModeratorGuard><Layout /></RequireModeratorGuard>}>
+                        <Route index element={<QueuePage />} />
+                        <Route path="listings" element={<ListingsPage />} />
+                        <Route path="listings/:id" element={<ListingPage />} />
+                        <Route path="viewings" element={<ViewingsPage />} />
+                        <Route path="districts" element={<DistrictsPage />} />
+                    </Route>
 
-                <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-        </Suspense>
+                    <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+            </Suspense>
+        </TitleProvider>
     );
 }
 
