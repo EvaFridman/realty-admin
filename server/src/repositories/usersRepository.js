@@ -21,11 +21,15 @@ async function findUserWithEmail(email) {
     return User.findOne({where: { email } });
 }
 
-async function findUserWithEmailAndPassword(email) {
-    return User.findOne({
+async function findByEmailWithPassword(email) {
+    return User.unscoped().findOne({
         where: { email },
-        attributes: { include: ['passwordHash'] },
+        attributes: ['id', 'email', 'role', 'passwordHash', 'name', 'phone'],
     });
 }
 
-module.exports = { findAllUsers, findUserById, createUser, updateUser, findUserWithEmail, findUserWithEmailAndPassword };
+async function findById(id) {
+    return User.findByPk(id);
+}
+
+module.exports = { findAllUsers, findUserById, createUser, updateUser, findUserWithEmail, findByEmailWithPassword, findById };

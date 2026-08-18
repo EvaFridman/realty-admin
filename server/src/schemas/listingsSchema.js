@@ -6,7 +6,6 @@ const STATUSES = ['draft', 'moderation', 'published', 'rejected', 'unpublished']
 const SORT_FIELDS = ['price', 'area', 'publishedAt', 'createdAt'];
 
 const createListingSchema = z.object({
-    agentId: z.coerce.number().int().positive(),
     districtId: z.coerce.number().int().positive(),
     title: z.string().min(1, 'Title is required'),
     description: z.string().optional(),

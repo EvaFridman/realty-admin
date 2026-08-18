@@ -7,7 +7,7 @@ function errorHandler(err, req, res, next) {
         log.warn({ err }, err.message);
         return res.status(err.status).json({
             data: null,
-            error: { message: err.message, details: err.details ?? null },
+            error: { message: err.message, details: err.details ?? null, code: err.code ?? null },
             meta: null,
         });
     }

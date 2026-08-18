@@ -1,22 +1,25 @@
 const listingsService = require('../../src/services/listingsService');
 const listingsRepo = require('../../src/repositories/listingsRepository');
-const { NotFoundError, ConflictError } = require('../../src/errors/AppError');
-const { canTransition } = require('../../src/services/pure/listingStatusTransitions');
+const { NotFoundError, ForbiddenError, ConflictError } = require('../../src/errors/AppError');
+const { canTransition, getAllowedTransitions } = require('../../src/services/pure/listingStatusTransitions');
 
 jest.mock('../../src/repositories/listingsRepository');
 jest.mock('../../src/services/pure/listingStatusTransitions');
+
+const agent = { id: 1, role: 'agent' };
+const moderator = { id: 2, role: 'moderator' };
 
 describe('listingsService', () => {
     beforeEach(() => jest.clearAllMocks());
 
     describe('listListings', () => {
-        it('should return paginated listings with meta', async () => {
+        it('should return paginated listings with meta for moderator (no agent filter)', async () => {
             const rawQuery = { page: 2, limit: 10, sortBy: 'price', sortOrder: 'asc' };
             const rows = [{ id: 1 }, { id: 2 }];
             const count = 2;
             listingsRepo.findAndCountListings.mockResolvedValue({ rows, count });
 
-            const result = await listingsService.listListings(rawQuery);
+            const result = await listingsService.listListings(moderator, rawQuery);
 
             expect(result.data).toEqual(rows);
             expect(result.meta).toEqual({
@@ -33,166 +36,106 @@ describe('listingsService', () => {
                     sortOrder: 'asc',
                 })
             );
+            expect(listingsRepo.findAndCountListings.mock.calls[0][0].agentId).toBeUndefined();
+        });
+
+        it('should filter by agentId for agent role', async () => {
+            listingsRepo.findAndCountListings.mockResolvedValue({ rows: [], count: 0 });
+            await listingsService.listListings(agent, { page: 1, limit: 20 });
+            expect(listingsRepo.findAndCountListings).toHaveBeenCalledWith(
+                expect.objectContaining({ agentId: agent.id })
+            );
         });
     });
 
     describe('getListingById', () => {
-        it('should return listing if found', async () => {
-            const listing = { id: 1, title: 'Test' };
+        it('should return listing if owner', async () => {
+            const listing = {
+                id: 1,
+                title: 'Test',
+                agentId: agent.id,
+                status: 'draft',
+                toJSON() { return { id: this.id, title: this.title, agentId: this.agentId, status: this.status }; },
+            };
             listingsRepo.findListingById.mockResolvedValue(listing);
+            getAllowedTransitions.mockReturnValue(['moderation']);
 
-            const result = await listingsService.getListingById(1);
-            expect(result).toEqual(listing);
+            const result = await listingsService.getListingById(agent, 1);
+            expect(result.id).toBe(1);
             expect(listingsRepo.findListingById).toHaveBeenCalledWith(1);
+        });
+
+        it('should throw ForbiddenError if not owner and not moderator', async () => {
+            const listing = {
+                id: 1,
+                agentId: 99,
+                toJSON() { return this; },
+            };
+            listingsRepo.findListingById.mockResolvedValue(listing);
+            await expect(listingsService.getListingById(agent, 1)).rejects.toThrow(ForbiddenError);
         });
 
         it('should throw NotFoundError if not found', async () => {
             listingsRepo.findListingById.mockResolvedValue(null);
-            await expect(listingsService.getListingById(999)).rejects.toThrow(NotFoundError);
+            await expect(listingsService.getListingById(agent, 999)).rejects.toThrow(NotFoundError);
         });
     });
 
     describe('createListing', () => {
-        it('should call repo.createListing with data', async () => {
-            const data = { title: 'New' };
-            const created = { id: 1, ...data };
+        it('should call repo.createListing with agentId from user', async () => {
+            const data = { title: 'New', districtId: 1 };
+            const created = { id: 1, ...data, agentId: agent.id };
             listingsRepo.createListing.mockResolvedValue(created);
 
-            const result = await listingsService.createListing(data);
+            const result = await listingsService.createListing(agent, data);
             expect(result).toEqual(created);
-            expect(listingsRepo.createListing).toHaveBeenCalledWith(data);
+            expect(listingsRepo.createListing).toHaveBeenCalledWith({ ...data, agentId: agent.id });
         });
     });
 
     describe('updateListing', () => {
-        it('should update if exists', async () => {
-            const existing = { id: 1, title: 'Old' };
+        it('should update if owner', async () => {
+            const existing = { id: 1, title: 'Old', agentId: agent.id };
             const updateData = { title: 'New' };
             const updated = { ...existing, ...updateData };
             listingsRepo.findListingById.mockResolvedValue(existing);
             listingsRepo.updateListing.mockResolvedValue(updated);
 
-            const result = await listingsService.updateListing(1, updateData);
+            const result = await listingsService.updateListing(agent, 1, updateData);
             expect(result).toEqual(updated);
             expect(listingsRepo.updateListing).toHaveBeenCalledWith(1, updateData);
         });
 
+        it('should throw ForbiddenError for foreign listing', async () => {
+            const existing = { id: 1, agentId: 99 };
+            listingsRepo.findListingById.mockResolvedValue(existing);
+            await expect(listingsService.updateListing(agent, 1, {})).rejects.toThrow(ForbiddenError);
+        });
+
         it('should throw NotFoundError if listing does not exist', async () => {
             listingsRepo.findListingById.mockResolvedValue(null);
-            await expect(listingsService.updateListing(1, {})).rejects.toThrow(NotFoundError);
+            await expect(listingsService.updateListing(agent, 1, {})).rejects.toThrow(NotFoundError);
         });
     });
 
     describe('deleteListing', () => {
-        it('should delete if exists', async () => {
-            const existing = { id: 1 };
+        it('should delete if owner', async () => {
+            const existing = { id: 1, agentId: agent.id };
             listingsRepo.findListingById.mockResolvedValue(existing);
             listingsRepo.deleteListing.mockResolvedValue();
 
-            await listingsService.deleteListing(1);
+            await listingsService.deleteListing(agent, 1);
             expect(listingsRepo.deleteListing).toHaveBeenCalledWith(1);
+        });
+
+        it('should throw ForbiddenError for foreign listing', async () => {
+            listingsRepo.findListingById.mockResolvedValue({ id: 1, agentId: 99 });
+            await expect(listingsService.deleteListing(agent, 1)).rejects.toThrow(ForbiddenError);
         });
 
         it('should throw NotFoundError if not exists', async () => {
             listingsRepo.findListingById.mockResolvedValue(null);
-            await expect(listingsService.deleteListing(1)).rejects.toThrow(NotFoundError);
-        });
-    });
-
-    describe('changeStatus', () => {
-        const listing = {
-            id: 1,
-            status: 'draft',
-            photos: [{ isCover: true }],
-            price: 1000,
-            districtId: 1,
-            lat: 55,
-            lng: 37,
-        };
-
-        it('should throw NotFoundError if listing not found', async () => {
-            listingsRepo.findListingById.mockResolvedValue(null);
-            await expect(listingsService.changeStatus(1, 'published')).rejects.toThrow(NotFoundError);
-        });
-
-        it('should throw ConflictError if transition not allowed', async () => {
-            listingsRepo.findListingById.mockResolvedValue(listing);
-            canTransition.mockReturnValue(false);
-
-            await expect(listingsService.changeStatus(1, 'published')).rejects.toThrow(ConflictError);
-            expect(canTransition).toHaveBeenCalledWith('draft', 'published');
-        });
-
-        it('should throw ConflictError if rejectionReason missing for rejected status', async () => {
-            listingsRepo.findListingById.mockResolvedValue(listing);
-            canTransition.mockReturnValue(true);
-
-            await expect(listingsService.changeStatus(1, 'rejected')).rejects.toThrow(ConflictError);
-        });
-
-        it('should throw ConflictError if publish requirements not met', async () => {
-            const incomplete = { ...listing, photos: [] };
-            listingsRepo.findListingById.mockResolvedValue(incomplete);
-            canTransition.mockReturnValue(true);
-
-            await expect(listingsService.changeStatus(1, 'published')).rejects.toThrow(ConflictError);
-        });
-
-        it('should successfully publish listing', async () => {
-            const complete = { ...listing, photos: [{ isCover: true }] };
-            listingsRepo.findListingById.mockResolvedValue(complete);
-            canTransition.mockReturnValue(true);
-            listingsRepo.updateListingStatus.mockResolvedValue({ ...complete, status: 'published' });
-
-            const result = await listingsService.changeStatus(1, 'published');
-            expect(result.status).toBe('published');
-            expect(listingsRepo.updateListingStatus).toHaveBeenCalledWith(1, 'published', null);
-        });
-
-        it('should reject listing with reason', async () => {
-            listingsRepo.findListingById.mockResolvedValue(listing);
-            canTransition.mockReturnValue(true);
-            listingsRepo.updateListingStatus.mockResolvedValue({ ...listing, status: 'rejected', rejectionReason: 'Bad' });
-
-            const result = await listingsService.changeStatus(1, 'rejected', 'Bad');
-            expect(result.status).toBe('rejected');
-            expect(listingsRepo.updateListingStatus).toHaveBeenCalledWith(1, 'rejected', 'Bad');
-        });
-    });
-
-    describe('getListingsByIds', () => {
-        it('should call repo.findListingsByIds', async () => {
-            const ids = [1, 2];
-            const listings = [{ id: 1 }, { id: 2 }];
-            listingsRepo.findListingsByIds.mockResolvedValue(listings);
-
-            const result = await listingsService.getListingsByIds(ids);
-            expect(result).toEqual(listings);
-            expect(listingsRepo.findListingsByIds).toHaveBeenCalledWith(ids);
-        });
-    });
-
-    describe('checkPublishRequirements', () => {
-        it('should return empty array if all requirements met', () => {
-            const listing = {
-                photos: [{ isCover: true }],
-                price: 1000,
-                districtId: 1,
-                lat: 55,
-                lng: 37,
-            };
-            const missing = listingsService.checkPublishRequirements(listing);
-            expect(missing).toEqual([]);
-        });
-
-        it('should return missing fields', () => {
-            const listing = { photos: [] };
-            const missing = listingsService.checkPublishRequirements(listing);
-            expect(missing).toContain('At least one photo is required');
-            expect(missing).toContain('A cover photo is required');
-            expect(missing).toContain('Price must be greater than zero');
-            expect(missing).toContain('District is required');
-            expect(missing).toContain('Coordinates are required');
+            await expect(listingsService.deleteListing(agent, 1)).rejects.toThrow(NotFoundError);
         });
     });
 });

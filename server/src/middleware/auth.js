@@ -6,7 +6,7 @@ function verifyAccessToken(req, res, next) {
     const header = req.headers.authorization ?? "";
     const [scheme, token] = header.split(" ");
 
-    if (scheme !== "Bearer" || !token) return new UnauthorizedError("No access token");
+    if (scheme !== "Bearer" || !token) return next(new UnauthorizedError("No access token"));
 
     try {
         const payload = jwt.verify(token, config.jwt.accessSecret);
@@ -21,7 +21,7 @@ function verifyAccessToken(req, res, next) {
 function verifyRefreshToken(req, res, next) {
     const token = req.cookies?.refreshToken;
 
-    if (!token) return new UnauthorizedError("No refresh token");
+    if (!token) return next(new UnauthorizedError("No refresh token"));
 
     try {
         const payload = jwt.verify(token, config.jwt.refreshSecret);

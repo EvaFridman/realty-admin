@@ -11,7 +11,7 @@ function setupMiddleware(app) {
     }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-    app.use(cookieParser);
+    app.use(cookieParser());
 }
 
 module.exports = setupMiddleware;
