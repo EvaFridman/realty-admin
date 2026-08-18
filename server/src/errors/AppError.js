@@ -31,4 +31,10 @@ class ExternalServiceError extends AppError {
     }
 }
 
-module.exports = { AppError, NotFoundError, ConflictError, ValidationError, ExternalServiceError };
+class UnauthorizedError extends AppError {
+    constructor(message = 'Unauthorized', details = null) {
+        super(message, 401, details);
+    }
+}
+
+module.exports = { AppError, NotFoundError, ConflictError, ValidationError, ExternalServiceError, UnauthorizedError };

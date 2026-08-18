@@ -8,6 +8,7 @@ const logsRouter = require('./routes/logsRouter');
 const listingPhotosRouter = require('./routes/listingPhotosRouter');
 const viewingsStatusRouter = require('./routes/viewingsStatusRouter');
 const pdfRouter = require('./routes/pdfRouter');
+const authRouter = require('./routes/authRouter');
 const setupMiddleware = require('./bootstrap/middleware');
 const errorHandler = require('./middleware/errorHandler');
 const loggerMiddleware = require('./middleware/loggerMiddleware');
@@ -19,6 +20,7 @@ app.use(loggerMiddleware);
 setupMiddleware(app);
 
 app.use('/users', usersRouter);
+app.use('/auth', authRouter);
 app.use('/districts', districtsRouter);
 app.use('/listings', listingsRouter);
 app.use('/users/:id/favorites', favoritesRouter);
