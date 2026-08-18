@@ -5,9 +5,11 @@ const { verifyAccessToken, requireRole } = require('../middleware/auth');
 const { pathIdSchema, userFavoriteParamsSchema } = require('../schemas/pathSchema');
 const { createFavoriteSchema, updateFavoriteSchema } = require('../schemas/favoritesSchema');
 
-favoritesRouter.get('/', verifyAccessToken, validate(pathIdSchema, 'params'), favoritesController.list);
-favoritesRouter.post('/', verifyAccessToken, validate(pathIdSchema, 'params'), validate(createFavoriteSchema, 'body'), favoritesController.create);
-favoritesRouter.put('/:listingId', verifyAccessToken, validate(userFavoriteParamsSchema, 'params'), validate(updateFavoriteSchema, 'body'), favoritesController.update);
-favoritesRouter.delete('/:listingId', verifyAccessToken, validate(userFavoriteParamsSchema, 'params'), favoritesController.remove);
+favoritesRouter.use(verifyAccessToken);
+
+favoritesRouter.get('/', validate(pathIdSchema, 'params'), favoritesController.list);
+favoritesRouter.post('/', validate(pathIdSchema, 'params'), validate(createFavoriteSchema, 'body'), favoritesController.create);
+favoritesRouter.put('/:listingId', validate(userFavoriteParamsSchema, 'params'), validate(updateFavoriteSchema, 'body'), favoritesController.update);
+favoritesRouter.delete('/:listingId', validate(userFavoriteParamsSchema, 'params'), favoritesController.remove);
 
 module.exports = favoritesRouter;

@@ -5,9 +5,12 @@ const { verifyAccessToken, requireRole } = require('../middleware/auth');
 const { pathIdSchema } = require('../schemas/pathSchema');
 const { createUserSchema, updateUserSchema } = require('../schemas/usersSchema');
 
-usersRouter.get('/', verifyAccessToken, requireRole('moderator'), usersController.list);
-usersRouter.get('/:id', verifyAccessToken, requireRole('moderator'), validate(pathIdSchema, 'params'), usersController.getById);
-usersRouter.post('/', verifyAccessToken, requireRole('moderator'), validate(createUserSchema, 'body'), usersController.create);
-usersRouter.put('/:id', verifyAccessToken, requireRole('moderator'), validate(pathIdSchema, 'params'), validate(updateUserSchema, 'body'), usersController.update);
+usersRouter.use(verifyAccessToken);
+usersRouter.use(requireRole('moderator'));
+
+usersRouter.get('/', usersController.list);
+usersRouter.get('/:id', validate(pathIdSchema, 'params'), usersController.getById);
+usersRouter.post('/', validate(createUserSchema, 'body'), usersController.create);
+usersRouter.put('/:id', validate(pathIdSchema, 'params'), validate(updateUserSchema, 'body'), usersController.update);
 
 module.exports = usersRouter;

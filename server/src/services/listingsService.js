@@ -1,12 +1,13 @@
 const listingsRepo = require('../repositories/listingsRepository');
 const parseListingFilters = require('./pure/parseListingFilters');
 const { canTransition, getAllowedTransitions } = require('./pure/listingStatusTransitions');
-const { NotFoundError, ConflictError } = require('../errors/AppError');
+const { NotFoundError, ConflictError, ForbiddenError } = require('../errors/AppError');
 const config = require('../config');
 const defaultLogger = require('../../logger');
 
-async function listListings(rawQuery) {
+async function listListings(user, rawQuery) {
     const filters = parseListingFilters(rawQuery);
+    if (user.role !== 'moderator') filters.agentId = user.id;
     filters.limit = Math.min(filters.limit, config.pagination.maxSize);
 
     const { rows, count } = await listingsRepo.findAndCountListings(filters);
@@ -21,9 +22,14 @@ async function listListings(rawQuery) {
     };
 }
 
-async function getListingById(id) {
+async function getListingById(user, id) {
     const listing = await listingsRepo.findListingById(id);
     if (!listing) throw new NotFoundError('Listing not found');
+
+    const isOwner = listing.agentId === user.id;
+    const isModerator = user.role === 'moderator';
+    if (!isOwner && !isModerator) throw new ForbiddenError('Not enough rights to access this listing');
+
     const plainListing = listing.toJSON();
     plainListing.allowedTransitions = getAllowedTransitions(listing.status);
     return plainListing;
@@ -33,19 +39,27 @@ async function getListingsByIds(ids) {
     return listingsRepo.findListingsByIds(ids);
 }
 
-async function createListing(data) {
-    return listingsRepo.createListing(data);
+async function createListing(user, data) {
+    const listingData = { ...data, agentId: user.id };
+    const listing = await listingsRepo.createListing(listingData);
+    return listing;
 }
 
-async function updateListing(id, data) {
+async function updateListing(user, id, data) {
     const listing = await listingsRepo.findListingById(id);
     if (!listing) throw new NotFoundError('Listing not found');
+    const isOwner = listing.agentId === user.id;
+    const isModerator = user.role === 'moderator';
+    if (!isOwner && !isModerator) throw new ForbiddenError('Not enough rights to update this listing');
     return listingsRepo.updateListing(id, data);
 }
 
-async function deleteListing(id) {
+async function deleteListing(user, id) {
     const listing = await listingsRepo.findListingById(id);
     if (!listing) throw new NotFoundError('Listing not found');
+    const isOwner = listing.agentId === user.id;
+    const isModerator = user.role === 'moderator';
+    if (!isOwner && !isModerator) throw new ForbiddenError('Not enough rights to delete this listing');
     await listingsRepo.deleteListing(id);
 }
 

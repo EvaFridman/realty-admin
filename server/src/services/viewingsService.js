@@ -2,12 +2,15 @@ const viewingsRepo = require('../repositories/viewingsRepository');
 const listingsRepo = require('../repositories/listingsRepository');
 const mailService = require('./mailService');
 const { canTransition, getAllowedTransitions } = require('./pure/viewingStatusTransitions');
-const { NotFoundError, ConflictError } = require('../errors/AppError');
+const { NotFoundError, ConflictError, ForbiddenError } = require('../errors/AppError');
 const defaultLogger = require('../../logger');
 
-async function listViewings(listingId) {
+async function listViewings(user, listingId) {
     const listing = await listingsRepo.findListingById(listingId);
     if (!listing) throw new NotFoundError('Listing not found');
+    const isOwner = listing.agentId === user.id;
+    const isModerator = user.role === 'moderator';
+    if (!isOwner && !isModerator) throw new ForbiddenError('Not enough rights to access this listing');
     const viewings = await viewingsRepo.findViewingsByListingId(listingId);
     return viewings.map((v) => {
         const plain = v.toJSON ? v.toJSON() : v;
