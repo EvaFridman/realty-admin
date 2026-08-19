@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAccessToken } from './tokenStore.js'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -13,3 +14,14 @@ export const refreshClient = axios.create({
     withCredentials: true,
     timeout: 10000,
 })
+
+api.interceptors.request.use((config) => {
+    const token = getAccessToken();
+    if(token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+})
+
+api.interceptors.response.use(
+    (response) => { return response.data },
+    (error) => { return Promise.reject(error) }
+);

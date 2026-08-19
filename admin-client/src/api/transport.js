@@ -4,17 +4,13 @@ export class Transport {
     constructor(resource = "") { this.resource = resource }
 
     async request(path = "", { method = "GET", body, query, signal } = {}) {
-        const response = await api({
+        return api({
             url: `${this.resource}${path}`,
             method,
             params: query,
             data: body,
             signal,
         });
-
-        if (response.status === 204) return null;
-
-        return response.data;
     }
 
     list(query, options = {}) { return this.request('', { query, ...options }) }
