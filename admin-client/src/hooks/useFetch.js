@@ -25,7 +25,8 @@ export default function useFetch(request, dependencies = []) {
                 if (axios.isCancel(err)) {
                     return; 
                 }
-                setError(err);
+                const errorMessage = err.response?.data?.error?.message ?? err.message ?? 'Unknown Error';
+                setError(errorMessage);
             } finally {
                 if (!controller.signal.aborted) {
                     setIsLoading(false);
