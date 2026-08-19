@@ -1,0 +1,50 @@
+import { useState, useEffect, useMemo } from 'react';
+import { setAccessToken } from "../tokenStore";
+import { AuthContext } from "./AuthContext";
+import { setAuthFailureHandler, refreshClient, api } from '../client'
+
+export default function AuthProvider({ children }) {
+    const [user, setUser] = useState(null);
+    const [isBootstrapping, setIsBootstrapping] = useState(true);
+
+    useEffect(() => {
+        setAuthFailureHandler(() => {
+            setUser(null);
+            setAccessToken(null);
+        });
+        return () => setAuthFailureHandler(null);
+    }, []);
+
+    useEffect(() => {
+        const restore = async () => {
+            try {
+                const envelope = await refreshClient.post("/auth/refresh");
+                setAccessToken(envelope.data?.data?.accessToken);
+                setUser(envelope.data?.data?.user);
+            } catch {
+                setAccessToken(null);
+                setUser(null);
+            } finally {
+                setIsBootstrapping(false);
+            }
+        };
+        restore();
+    }, []);
+
+    const login = async (email, password) => {
+        const envelope = await api.post("/auth/login", { email, password });
+        setAccessToken(envelope?.data?.accessToken);
+        setUser(envelope?.data?.user);
+    };
+
+    const logout = async () => {
+        try { await api.post("/auth/logout"); } finally {
+            setAccessToken(null);
+            setUser(null);
+        }
+    };
+
+    const value = useMemo(() => ({ user, isBootstrapping, login, logout }), [user, isBootstrapping]);
+
+    return <AuthContext value={value}>{children}</AuthContext>;
+}
