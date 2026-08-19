@@ -1,30 +1,27 @@
-import { ApiError } from './ApiError';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { api } from './client';
 
 export class Transport {
-    constructor(resource = "") { this.resource = resource; }
+    constructor(resource = "") { this.resource = resource }
 
     async request(path = "", { method = "GET", body, query, signal } = {}) {
-        const queryString = query ? `?${query instanceof URLSearchParams ? query : new URLSearchParams(query)}` : '';
-        const res = await fetch(`${API_BASE_URL}${this.resource}${path}${queryString}`, {
+        const response = await api({
+            url: `${this.resource}${path}`,
             method,
-            headers: body ? { "Content-Type": "application/json" } : undefined,
-            body: body ? JSON.stringify(body) : undefined,
+            params: query,
+            data: body,
             signal,
         });
 
-        if (res.status === 204) return null;
-        const json = await res.json().catch(() => null);
-        if (!res.ok) throw new ApiError(json?.error?.message ?? `HTTP ${res.status}`, res.status, json?.error?.details);
+        if (response.status === 204) return null;
 
-        return json;
+        return response.data;
     }
-    list(query, options = {}) { return this.request('', { query, ...options }); }
-    getById(id, subpath = '', options = {}) { return this.request(`/${id}${subpath}`, options); }
-    create(body, subpath = '') { return this.request(`${subpath}`, { method: "POST", body }); }
-    update(id, body, subpath = '') { return this.request(`/${id}${subpath}`, { method: "PUT", body }); }
-    patchSubresource(id, subpath = '', body) { return this.request(`/${id}${subpath}`, { method: 'PATCH', body }); }
-    getSubresource(id, subpath, options = {}) { return this.request(`/${id}${subpath}`, options); }
-    remove(id, subpath = '') { return this.request(`/${id}${subpath}`, { method: "DELETE" }); }
+
+    list(query, options = {}) { return this.request('', { query, ...options }) }
+    getById(id, subpath = '', options = {}) { return this.request(`/${id}${subpath}`, options) }
+    create(body, subpath = '') { return this.request(`${subpath}`, { method: "POST", body }) }
+    update(id, body, subpath = '') { return this.request(`/${id}${subpath}`, { method: "PUT", body }) }
+    patchSubresource(id, subpath = '', body) { return this.request(`/${id}${subpath}`, { method: 'PATCH', body }) }
+    getSubresource(id, subpath, options = {}) { return this.request(`/${id}${subpath}`, options) }
+    remove(id, subpath = '') { return this.request(`/${id}${subpath}`, { method: "DELETE" }) }
 }

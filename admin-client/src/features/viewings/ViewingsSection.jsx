@@ -16,13 +16,13 @@ export default function ViewingsSection() {
     const filters = parseViewingSearchParams(searchParams);
     const { data, isLoading, error } = useFetch(
         (signal) => {
-            const query = new URLSearchParams();
-
-            if (filters.status) query.set('status', filters.status);
-            query.set('sortOrder', filters.sortOrder);
-            query.set('page', String(filters.page));
-            query.set('limit', String(filters.limit));
-
+            const query = {
+                ...(filters.status ? { status: filters.status } : {}),
+                sortOrder: filters.sortOrder,
+                page: filters.page,
+                limit: filters.limit,
+            };
+            
             return viewingsApi.list(query, { signal });
         },
         [searchParams.toString(), refreshKey]

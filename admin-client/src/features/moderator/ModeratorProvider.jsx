@@ -9,8 +9,9 @@ export function ModeratorProvider({ children }) {
     useEffect(() => {
         async function loadModerators() {
             try {
-                const json = await usersApi.list();
-                const onlyModerators = (json.data ?? []).filter((u) => u.role === 'moderator');
+                const responseData = await usersApi.list();
+                const usersArray = Array.isArray(responseData) ? responseData : (responseData?.data ?? []);
+                const onlyModerators = usersArray.filter((u) => u.role === 'moderator');
                 setModerators(onlyModerators);
             } catch (error) {
                 console.error('Failed to load moderators:', error);
