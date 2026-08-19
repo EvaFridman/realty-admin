@@ -1,0 +1,80 @@
+.loginContainer {
+    max-width: 360px;
+    margin: 80px auto 0;
+    padding: var(--spacing-3xl);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.loginContainer h2 {
+    margin: 0 0 var(--spacing-lg);
+    font-size: var(--font-size-lg);
+    color: var(--color-text);
+    text-align: center;
+}
+
+.loginForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.loginForm label {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+    margin-top: var(--spacing-sm);
+}
+
+.loginForm label:first-child {
+    margin-top: 0;
+}
+
+.loginForm input {
+    height: 36px;
+    padding: 0 var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+}
+
+.loginForm input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.loginForm input:invalid:not(:placeholder-shown) {
+    border-color: var(--color-danger);
+}
+
+.btn {
+    margin-top: var(--spacing-lg);
+    height: 40px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-accent);
+    color: var(--color-surface);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+}
+
+.btn:hover {
+    filter: brightness(0.95);
+}
+
+.btn:active {
+    filter: brightness(0.9);
+}
+
+.errorMessage {
+    margin: var(--spacing-md) 0 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    font-size: var(--font-size-base);
+    text-align: center;
+}
