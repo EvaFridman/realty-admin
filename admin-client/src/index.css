@@ -8,6 +8,7 @@
     --color-text-secondary: #4b5157;
     --color-text-muted: #838a92;
     --color-accent: #1a7f37;
+    --color-accent-2: #3498db;
     --color-danger: #cf222e;
 
     /* Шрифты */
@@ -55,4 +56,38 @@ body {
 
 button {
     cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0 0 var(--spacing-md, 8px) 0;
+    font-weight: var(--font-weight-medium, 500);
+    color: var(--color-text, #1f2328);
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: var(--font-weight-bold, 700);
+}
+
+h2 {
+    font-size: var(--font-size-lg, 16px);
+    font-weight: var(--font-weight-medium, 500);
+}
+
+h3 {
+    font-size: var(--font-size-md, 13px);
+    font-weight: var(--font-weight-medium, 500);
+}
+
+h4,
+h5,
+h6 {
+    font-size: var(--font-size-sm, 12px);
+    font-weight: var(--font-weight-normal, 400);
 }

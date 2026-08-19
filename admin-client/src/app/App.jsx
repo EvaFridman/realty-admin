@@ -2,10 +2,11 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router';
 import { TitleProvider } from '../components/common/TitleProvider';
 import Layout from './routes/Layout.jsx';
+import Loader from '../widgets/Loader.jsx'
 import LoginPage from '../pages/LoginPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import RequireAuthGuard from '../api/guards/RequireAuthGuard.jsx';
-import RequireRole from '../api/guards/RequireRole.jsx';
+import RequireRoleGuard from '../api/guards/RequireRoleGuard.jsx';
 
 const QueuePage = lazy(() => import('../pages/QueuePage.jsx'));
 const ListingsPage = lazy(() => import('../pages/ListingsPage.jsx'));
@@ -16,10 +17,10 @@ const DistrictsPage = lazy(() => import('../pages/DistrictsPage.jsx'));
 function App() {
     return (
         <TitleProvider>
-            <Suspense fallback={<div>Загрузка раздела…</div>}>
+            <Suspense fallback={<Loader />}>
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/" element={<RequireAuthGuard><RequireRole roles={['moderator']}><Layout /></RequireRole></RequireAuthGuard>}>
+                    <Route path="/" element={<RequireAuthGuard><RequireRoleGuard roles={['moderator']}><Layout /></RequireRoleGuard></RequireAuthGuard>}>
                         <Route index element={<QueuePage />} />
                         <Route path="listings" element={<ListingsPage />} />
                         <Route path="listings/:id" element={<ListingPage />} />

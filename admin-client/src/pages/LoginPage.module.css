@@ -7,13 +7,6 @@
     border-radius: var(--radius-md);
 }
 
-.loginContainer h2 {
-    margin: 0 0 var(--spacing-lg);
-    font-size: var(--font-size-lg);
-    color: var(--color-text);
-    text-align: center;
-}
-
 .loginForm {
     display: flex;
     flex-direction: column;

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router';
 import { setAccessToken } from '../tokenStore';
 import { AuthContext } from './AuthContext';
 import { setAuthFailureHandler, refreshClient, api } from '../client';
@@ -6,6 +7,8 @@ import { setAuthFailureHandler, refreshClient, api } from '../client';
 export default function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [isBootstrapping, setIsBootstrapping] = useState(true);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         setAuthFailureHandler(() => {
@@ -34,14 +37,18 @@ export default function AuthProvider({ children }) {
         restore();
     }, []);
 
-    const login = async (email, password) => {
-        const response = await api.post('/auth/login', {
-            email,
-            password,
-        });
+    useEffect(() => {
+        if (!isBootstrapping && !user && location.pathname !== '/login') {
+            navigate('/login', { state: { from: location }, replace: true });
+        }
+    }, [user, isBootstrapping, location, navigate]);
 
-        setAccessToken(response.data?.accessToken);
-        setUser(response.data?.user);
+
+    const login = async (email, password) => {
+        const response = await api.post('/auth/login', { email, password });
+        const { accessToken, user } = response.data?.data ?? {};
+        setAccessToken(accessToken);
+        setUser(user);
     };
 
     const logout = async () => {
