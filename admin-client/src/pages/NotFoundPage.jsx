@@ -2,7 +2,6 @@ import { Link } from 'react-router';
 import { useEffect } from 'react';
 import { useTitle } from '../components/common/TitleContext';
 import StatusMessage from '../components/common/StatusMessage';
-import LogoutButton from "../widgets/LogoutButton"
 
 export default function NotFoundPage() {
     const { setTitle } = useTitle();
@@ -11,7 +10,6 @@ export default function NotFoundPage() {
     }, [setTitle]);
     return (
         <div>
-            <LogoutButton />
             <StatusMessage>Такой страницы не существует.</StatusMessage>
             <Link to="/">к очереди</Link>
         </div>

@@ -8,3 +8,15 @@
     gap: var(--spacing-3xl);
     width: 100%;
 }
+
+.btn {
+    margin-top: var(--spacing-lg);
+    height: 40px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+}

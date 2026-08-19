@@ -23,7 +23,7 @@ export default function ListingPage() {
     const { showAlert } = useAlert();
     const { setTitle } = useTitle();
 
-    const { data, isLoading, error } = useFetch(
+    const { data, isLoading, error, refetch } = useFetch(
         (signal) => listingsApi.getById(id, '', { signal }),
         [id]
     );
@@ -63,7 +63,9 @@ export default function ListingPage() {
             const { data: updatedListing } = await listingsApi.patchSubresource(id, '/status', body);
             setConfirmedListing(updatedListing);
         } catch (err) {
-            if (err.details) {
+            if (err.response?.status === 403) {
+                showAlert('Недостаточно прав для изменения статуса');
+            } else if (err.details) {
                 const detailsArray = Array.isArray(err.details) ? err.details : [String(err.details)];
                 setPublishErrors(detailsArray);
             } else {
@@ -88,8 +90,17 @@ export default function ListingPage() {
     if (isLoading && !optimisticListing) return <StatusMessage>Загрузка…</StatusMessage>;
 
     if (error) {
+        let errorMessage = 'Ошибка загрузки объявления';
+        if (error.response?.status === 404) errorMessage = 'Объявление не найдено';
+        else if (error.response?.status === 403) errorMessage = 'Недостаточно прав для просмотра этого объявления';
+        else if (!error.response) errorMessage = 'Сервер недоступен';
+        const showRetry = !error.response;
+    
         return (
-            <ErrorView error={error}><Link to={backLink} className={styles.backBtn}>к списку объявлений</Link></ErrorView>
+            <ErrorView error={error} onRetry={showRetry ? refetch : undefined}>
+                <p>{errorMessage}</p>
+                <Link to={backLink} className={styles.backBtn}>к списку объявлений</Link>
+            </ErrorView>
         );
     }
 

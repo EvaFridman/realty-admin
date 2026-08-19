@@ -9,10 +9,10 @@ export const viewingStatusLabels = {
 };
 
 export const navItems = [
-    { id: 'queue', title: 'Очередь модерации', path: '/' },
-    { id: 'listings', title: 'Все объявления', path: '/listings' },
-    { id: 'viewings', title: 'Заявки на просмотр', path: '/viewings' },
-    { id: 'districts', title: 'Районы', path: '/districts' },
+    { id: 'queue', title: 'Очередь модерации', path: '/', moderatorOnly: true },
+    { id: 'listings', title: 'Все объявления', path: '/listings', moderatorOnly: true },
+    { id: 'viewings', title: 'Заявки на просмотр', path: '/viewings', moderatorOnly: true },
+    { id: 'districts', title: 'Районы', path: '/districts', moderatorOnly: true },
 ];
 
 export const emptyListingFilters = {

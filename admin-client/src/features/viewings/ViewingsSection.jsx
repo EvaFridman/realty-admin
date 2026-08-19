@@ -14,7 +14,7 @@ export default function ViewingsSection() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [refreshKey, setRefreshKey] = useState(0);
     const filters = parseViewingSearchParams(searchParams);
-    const { data, isLoading, error } = useFetch(
+    const { data, isLoading, error, refetch } = useFetch(
         (signal) => {
             const query = {
                 ...(filters.status ? { status: filters.status } : {}),
@@ -22,7 +22,7 @@ export default function ViewingsSection() {
                 page: filters.page,
                 limit: filters.limit,
             };
-            
+
             return viewingsApi.list(query, { signal });
         },
         [searchParams.toString(), refreshKey]
@@ -60,8 +60,12 @@ export default function ViewingsSection() {
             await viewingsApi.patchSubresource(viewingId, '/status', { status: newStatus });
             setRefreshKey((value) => value + 1);
         } catch (err) {
-            startTransition(() => {setViewingsState({ viewingId, status: previousViewingsRef.current.find((viewing) => viewing.id === viewingId)?.status});});
-            showAlert(`Не удалось изменить статус заявки: ${err.message}`);
+            startTransition(() => { setViewingsState({ viewingId, status: previousViewingsRef.current.find((viewing) => viewing.id === viewingId)?.status }); });
+            if (err.response?.status === 403) {
+                showAlert('Недостаточно прав для изменения статуса заявки');
+            } else {
+                showAlert(`Не удалось изменить статус заявки: ${err.message}`);
+            }
         }
     }
 
@@ -70,7 +74,12 @@ export default function ViewingsSection() {
             <ViewingFilterPanel filters={filters} onFieldChange={handleFieldChange} />
 
             {isLoading && <StatusMessage>Загрузка…</StatusMessage>}
-            {!isLoading && error && <StatusMessage>Ошибка: {error}</StatusMessage>}
+            {!isLoading && error && (
+                <div>
+                    <StatusMessage>{!error.response ? 'Сервер недоступен' : `Ошибка: ${error.message}`}</StatusMessage>
+                    {!error.response && <button onClick={refetch}>Повторить</button>}
+                </div>
+            )}
             {!isLoading && !error && viewingsState.length === 0 && <StatusMessage>Заявок не найдено</StatusMessage>}
 
             {!isLoading && !error && viewingsState.length > 0 && (
