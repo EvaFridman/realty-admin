@@ -4,16 +4,16 @@ import { useTitle } from '../components/common/TitleContext';
 import StatusMessage from '../components/common/StatusMessage';
 import LogoutButton from "../widgets/LogoutButton"
 
-export default function NotFoundPage() {
+export default function ForbiddenPage() {
     const { setTitle } = useTitle();
     useEffect(() => {
-        setTitle('Страница не найдена');
+        setTitle('Доступ запрещен');
     }, [setTitle]);
     return (
         <div>
             <LogoutButton />
-            <StatusMessage>Такой страницы не существует.</StatusMessage>
-            <Link to="/">к очереди</Link>
+            <StatusMessage>Не хватает прав для доступа к странице.</StatusMessage>
+            <Link to="/districts">назад</Link>
         </div>
     );
 }

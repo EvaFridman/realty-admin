@@ -4,6 +4,8 @@ import { TitleProvider } from '../components/common/TitleProvider';
 import Layout from './routes/Layout.jsx';
 import LoginPage from '../pages/LoginPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
+import RequireAuthGuard from '../api/guards/RequireAuthGuard.jsx';
+import RequireRole from '../api/guards/RequireRole.jsx';
 
 const QueuePage = lazy(() => import('../pages/QueuePage.jsx'));
 const ListingsPage = lazy(() => import('../pages/ListingsPage.jsx'));
@@ -17,7 +19,7 @@ function App() {
             <Suspense fallback={<div>Загрузка раздела…</div>}>
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/" element={<Layout />}>
+                    <Route path="/" element={<RequireAuthGuard><RequireRole roles={['moderator']}><Layout /></RequireRole></RequireAuthGuard>}>
                         <Route index element={<QueuePage />} />
                         <Route path="listings" element={<ListingsPage />} />
                         <Route path="listings/:id" element={<ListingPage />} />
