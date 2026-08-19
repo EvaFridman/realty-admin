@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { setAccessToken } from "../tokenStore";
-import { AuthContext } from "./AuthContext";
-import { setAuthFailureHandler, refreshClient, api } from '../client'
+import { setAccessToken } from '../tokenStore';
+import { AuthContext } from './AuthContext';
+import { setAuthFailureHandler, refreshClient, api } from '../client';
 
 export default function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -9,18 +9,20 @@ export default function AuthProvider({ children }) {
 
     useEffect(() => {
         setAuthFailureHandler(() => {
-            setUser(null);
             setAccessToken(null);
+            setUser(null);
         });
+
         return () => setAuthFailureHandler(null);
     }, []);
 
     useEffect(() => {
         const restore = async () => {
             try {
-                const envelope = await refreshClient.post("/auth/refresh");
-                setAccessToken(envelope.data?.data?.accessToken);
-                setUser(envelope.data?.data?.user);
+                const response = await refreshClient.post('/auth/refresh');
+
+                setAccessToken(response.data?.data?.accessToken);
+                setUser(response.data?.data?.user);
             } catch {
                 setAccessToken(null);
                 setUser(null);
@@ -28,17 +30,24 @@ export default function AuthProvider({ children }) {
                 setIsBootstrapping(false);
             }
         };
+
         restore();
     }, []);
 
     const login = async (email, password) => {
-        const envelope = await api.post("/auth/login", { email, password });
-        setAccessToken(envelope?.data?.accessToken);
-        setUser(envelope?.data?.user);
+        const response = await api.post('/auth/login', {
+            email,
+            password,
+        });
+
+        setAccessToken(response.data?.accessToken);
+        setUser(response.data?.user);
     };
 
     const logout = async () => {
-        try { await api.post("/auth/logout"); } finally {
+        try {
+            await api.post('/auth/logout');
+        } finally {
             setAccessToken(null);
             setUser(null);
         }
@@ -46,5 +55,5 @@ export default function AuthProvider({ children }) {
 
     const value = useMemo(() => ({ user, isBootstrapping, login, logout }), [user, isBootstrapping]);
 
-    return <AuthContext value={value}>{children}</AuthContext>;
+    return <AuthContext value={value}>{children}</AuthContext>
 }

@@ -7,6 +7,8 @@
     --color-text: #1f2328;
     --color-text-secondary: #4b5157;
     --color-text-muted: #838a92;
+    --color-accent: #1a7f37;
+    --color-danger: #cf222e;
 
     /* Шрифты */
     --font-family: system-ui, sans-serif;
