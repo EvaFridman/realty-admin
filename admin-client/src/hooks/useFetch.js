@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 
 export default function useFetch(request, dependencies = []) {
@@ -21,9 +22,10 @@ export default function useFetch(request, dependencies = []) {
                 const result = await requestRef.current(controller.signal);
                 setData(result);
             } catch (err) {
-                if (err.name !== 'AbortError') {
-                    setError(err.message);
+                if (axios.isCancel(err)) {
+                    return; 
                 }
+                setError(err);
             } finally {
                 if (!controller.signal.aborted) {
                     setIsLoading(false);
