@@ -10,6 +10,7 @@
     --color-accent: #1a7f37;
     --color-accent-2: #3498db;
     --color-danger: #cf222e;
+    --color-danger-bg: #cf222e14;
 
     /* Шрифты */
     --font-family: system-ui, sans-serif;

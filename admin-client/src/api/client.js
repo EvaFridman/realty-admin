@@ -45,7 +45,8 @@ api.interceptors.response.use(
     (response) => response.data,
     async (error) => {
         const original = error.config;
-        const needRefresh = error.response?.status === 401 && !original._retry;
+        const isFormData = original?.data instanceof FormData;
+        const needRefresh = error.response?.status === 401 && !original._retry && !isFormData;
         if (!original) return Promise.reject(error);
         if (!needRefresh) return Promise.reject(error);
 

@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'ListingPhoto',
-    tableName: 'ListingPhoto',
+    tableName: 'ListingPhotos',
     validate: {
       hasExactlyOneSource() {
         const hasExternal = !!this.externalUrl;

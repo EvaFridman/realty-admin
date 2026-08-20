@@ -3,8 +3,8 @@ const photosController = require('../controllers/listingPhotosController');
 const { validate } = require('../middleware/validate');
 const { verifyAccessToken } = require('../middleware/auth');
 const { pathIdSchema, listingPhotoParamsSchema } = require('../schemas/pathSchema');
-const { createPhotoSchema, updatePhotoSchema } = require('../schemas/listingPhotosSchema');
-const listingPhotosUpload = require('../middleware/uploads/listingPhotos');
+const { updatePhotoSchema } = require('../schemas/listingPhotosSchema');
+const listingPhotosUpload = require('../middleware/uploadEntities/listingPhotos');
 const checkListingAccess = require('../middleware/checkListingAccess');
 
 listingPhotosRouter.use(verifyAccessToken);
