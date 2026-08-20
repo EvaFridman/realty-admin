@@ -16,7 +16,7 @@ const createImageUpload = ({ folder, maxFileSizeMb = 5, maxFiles = 5 }) => {
 
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            const destPath = path.join(__dirname, "..", "..", "uploads", folder);
+            const destPath = path.join(__dirname, "..", "uploads", folder);
             cb(null, destPath);
         },
         filename: (req, file, cb) => {

@@ -22,10 +22,11 @@ export default function ListingPage() {
     const [pendingRejectStatus, setPendingRejectStatus] = useState(false);
     const { showAlert } = useAlert();
     const { setTitle } = useTitle();
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const { data, isLoading, error, refetch } = useFetch(
         (signal) => listingsApi.getById(id, '', { signal }),
-        [id]
+        [id, refreshKey]
     );
     const listing = data?.data ?? null;
 
@@ -48,7 +49,7 @@ export default function ListingPage() {
             setTitle(optimisticListing.title);
         }
     }, [optimisticListing, setTitle]);
-    
+
     async function applyTransition(newStatus, rejectionReason) {
         setPublishErrors([]);
         startTransition(() => {
@@ -95,7 +96,7 @@ export default function ListingPage() {
         else if (error.response?.status === 403) errorMessage = 'Недостаточно прав для просмотра этого объявления';
         else if (!error.response) errorMessage = 'Сервер недоступен';
         const showRetry = !error.response;
-    
+
         return (
             <ErrorView error={error} onRetry={showRetry ? refetch : undefined}>
                 <p>{errorMessage}</p>
@@ -113,7 +114,15 @@ export default function ListingPage() {
             <p className={styles.listingMeta}>{optimisticListing.address}, {optimisticListing.district?.title}</p>
             <p className={styles.listingMeta}>агент: {optimisticListing.agent?.name}</p>
 
-            <ListingPhotos photos={optimisticListing.photos} />
+            <ListingPhotos
+                photos={optimisticListing.photos || []}
+                listingId={id}
+                listingAgentId={optimisticListing.agent?.id || optimisticListing.agentId}
+                onChange={() => {
+                    setRefreshKey(prev => prev + 1);
+                }}
+            />
+
 
             {pendingRejectStatus ? (
                 <RejectionForm onSubmit={handleRejectSubmit} onCancel={() => setPendingRejectStatus(false)} />

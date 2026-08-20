@@ -39,7 +39,8 @@ async function remove(req, res, next) {
 
 async function setCover(req, res, next) {
     try {
-        const photo = await photosService.setCover(req.user, req.params.id, req.params.photoId);
+        const listingId = req.params.id || req.params.listingId;
+        const photo = await photosService.setCover(req.user, listingId, req.params.photoId);
         sendResponse(res, 200, photo, null, null);
     } catch (err) {
         next(err);
