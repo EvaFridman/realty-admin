@@ -17,7 +17,7 @@ function errorHandler(err, req, res, next) {
         const multerErrors = {
             LIMIT_FILE_SIZE: [413, "File is too large, maximum is 5 MB"],
             LIMIT_FILE_COUNT: [400, "Too many files, maximum is 5"],
-            LIMIT_UNEXPECTED_FILE: [400, "Unexpected field name"],
+            LIMIT_UNEXPECTED_FILE: [400, "Unexpected field name. Expected field name is 'photos'"],
         };
         const [status, message] = multerErrors[err.code] ?? [400, "Upload failed"];
         return res.status(status).json({ data: null, error: { message, code: err.code }, meta: null });
@@ -26,8 +26,7 @@ function errorHandler(err, req, res, next) {
     if (err.message === "UNSUPPORTED_FILE_TYPE") {
         return res.status(415).json({
             data: null,
-            error: { message: "Only jpeg, png and webp are allowed" }, meta: null
-        });
+            error: { message: "Only jpeg, png and webp are allowed", code: "UNSUPPORTED_FILE_TYPE" }, meta: null});
     }
 
     log.error({ err }, 'Unexpected error');

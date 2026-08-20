@@ -3,7 +3,7 @@ const listingsRepo = require('../repositories/listingsRepository');
 const { NotFoundError, ForbiddenError } = require('../errors/AppError');
 const { sequelize, ListingPhoto } = require('../database/models');
 const { toPhotoDto, deletePhysicalFile } = require('./imagesService');
-const { ValidationError } = require('../errors/AppError'); 
+const { ValidationError, ConflictError } = require('../errors/AppError'); 
 
 async function listPhotos(user, listingId) {
     const listing = await listingsRepo.findListingById(listingId);
@@ -33,7 +33,7 @@ async function addPhoto(user, listingId, files = []) {
 
         if (currentPhotosCount + files.length > 5) {
             await cleanUploadedFiles();
-            throw new ValidationError(`Limit exceeded. Already has ${currentPhotosCount} photos. Cannot add ${files.length} more (max 5).`);
+            throw new ConflictError(`Limit exceeded. Already has ${currentPhotosCount} photos. Cannot add ${files.length} more (max 5).`);
         }
 
         const photos = [];
