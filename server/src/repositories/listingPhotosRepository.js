@@ -8,8 +8,8 @@ async function findPhotoById(id) {
     return ListingPhoto.findByPk(id);
 }
 
-async function createPhoto(listingId, data) {
-    return ListingPhoto.create({ ...data, listingId, isCover: false });
+async function createPhoto(listingId, fileData, options = {}) {
+    return ListingPhoto.create({listingId, fileName: fileData.fileName, sizeBytes: fileData.sizeBytes, isCover: false, externalUrl: null }, options);
 }
 
 async function updatePhoto(id, data) {

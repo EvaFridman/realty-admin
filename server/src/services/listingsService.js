@@ -1,9 +1,11 @@
 const listingsRepo = require('../repositories/listingsRepository');
+const listingsPhotoRepo = require('../repositories/listingPhotosRepository');
 const parseListingFilters = require('./pure/parseListingFilters');
 const { canTransition, getAllowedTransitions } = require('./pure/listingStatusTransitions');
 const { NotFoundError, ConflictError, ForbiddenError } = require('../errors/AppError');
 const config = require('../config');
 const defaultLogger = require('../../logger');
+const { deletePhysicalFile } = require('./imagesService');
 
 async function listListings(user, rawQuery) {
     const filters = parseListingFilters(rawQuery);
@@ -60,7 +62,11 @@ async function deleteListing(user, id) {
     const isOwner = listing.agentId === user.id;
     const isModerator = user.role === 'moderator';
     if (!isOwner && !isModerator) throw new ForbiddenError('Not enough rights to delete this listing');
+    const photos = await listingsPhotoRepo.findPhotosByListingId(id);
     await listingsRepo.deleteListing(id);
+    for (const photo of photos) {
+        if (photo.fileName) await deletePhysicalFile(photo.fileName);
+    }
 }
 
 function checkPublishRequirements(listing) {
