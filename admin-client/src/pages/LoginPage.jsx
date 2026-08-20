@@ -2,7 +2,7 @@ import styles from './LoginPage.module.css';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { useAuth } from "../api/auth/useAuth.js";
 import { useState } from 'react';
-import Loader from '../widgets/Loader.jsx';
+import PageLoader from '../widgets/PageLoader.jsx';
 
 const INITIAL_STATE = { email: '', password: '', error: null };
 
@@ -14,7 +14,7 @@ export default function LoginPage() {
 
     const from = location.state?.from?.pathname ?? "/";
 
-    if (isBootstrapping) return <Loader />;
+    if (isBootstrapping) return <PageLoader />;
 
     if (user) return <Navigate to={from} replace />
 
@@ -50,7 +50,7 @@ export default function LoginPage() {
                 <input type='password' id='password' required autoComplete='current-password' placeholder="Введите пароль" value={form.password} onChange={handleChange}></input>
                 <button type='submit' className={styles.btn}>Войти</button>
             </form>
-            {error && <p className={styles.errorMessage}>{form.error}</p>}
+            {form.error && <p className={styles.errorMessage}>{form.error}</p>}
         </div>
     )
 }

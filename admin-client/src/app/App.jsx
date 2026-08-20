@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router';
 import { TitleProvider } from '../components/common/TitleProvider';
 import Layout from './routes/Layout.jsx';
-import Loader from '../widgets/Loader.jsx'
+import PageLoader from '../widgets/PageLoader.jsx'
 import LoginPage from '../pages/LoginPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import RequireAuthGuard from '../api/guards/RequireAuthGuard.jsx';
@@ -17,7 +17,7 @@ const DistrictsPage = lazy(() => import('../pages/DistrictsPage.jsx'));
 function App() {
     return (
         <TitleProvider>
-            <Suspense fallback={<Loader />}>
+            <Suspense fallback={<PageLoader />}>
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/" element={<RequireAuthGuard><RequireRoleGuard roles={['moderator']}><Layout /></RequireRoleGuard></RequireAuthGuard>}>
