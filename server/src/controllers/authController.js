@@ -4,15 +4,17 @@ const { NotFoundError, ConflictError, UnauthorizedError, UnprocessableEntityErro
 const sendResponse = require('../utils/response');
 const { issuePair } = require('../services/tokensService');
 
+const DEFAULT_ROLE = 'agent';
+
 async function register(req, res, next) {
     try {
-        const { email, password, role = 'agent' } = req.body;
+        const { email, password } = req.body;
 
         const userExists = await usersRepo.findUserWithEmail(email);
         if (userExists) throw new ConflictError('User with such an email already exists');
 
         const passwordHash = await bcrypt.hash(password, 12);
-        const user = await usersRepo.createUser({email, passwordHash, role, name: email.split('@')[0]})
+        const user = await usersRepo.createUser({email, passwordHash, DEFAULT_ROLE, name: email.split('@')[0]})
 
         sendResponse(res, 201, issuePair(res, user), null, null);
     } catch (err) {

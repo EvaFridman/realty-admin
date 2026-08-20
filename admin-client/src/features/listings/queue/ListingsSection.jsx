@@ -8,7 +8,7 @@ import ListingListItem from './ListingListItem';
 import StatusMessage from "../../../components/common/StatusMessage.jsx";
 import Pagination from "../../../components/common/Pagination.jsx";
 import useFetch from '../../../hooks/useFetch';
-import Loader from '../../../widgets/Loader.jsx'
+import PageLoader from '../../../widgets/PageLoader.jsx'
 
 export default function ListingsSection({ statusFilter }) {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -79,7 +79,7 @@ export default function ListingsSection({ statusFilter }) {
     }
 
     function renderList() {
-        if (isLoading) return <StatusMessage><Loader /></StatusMessage>;
+        if (isLoading) return <StatusMessage><PageLoader /></StatusMessage>;
         if (error) {
             let errorMessage = 'Ошибка загрузки объявлений';
             if (error.response?.status === 403) errorMessage = 'Недостаточно прав для просмотра этого раздела';

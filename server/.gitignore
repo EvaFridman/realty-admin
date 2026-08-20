@@ -143,3 +143,6 @@ vite.config.ts.timestamp-*
 .vite/
 database/config/config.json
 .DS_Store
+
+src/middleware/uploads/**/*
+!src/middleware/uploads/photos/.gitkeep
