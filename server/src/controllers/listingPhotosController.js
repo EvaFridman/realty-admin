@@ -12,8 +12,8 @@ async function list(req, res, next) {
 
 async function create(req, res, next) {
     try {
-        const photo = await photosService.addPhoto(req.user, req.params.id, req.body);
-        sendResponse(res, 201, photo, null, null);
+        const photos = await photosService.addPhoto(req.user, req.params.id, req.files);
+        sendResponse(res, 201, photos, null, null);
     } catch (err) {
         next(err);
     }
