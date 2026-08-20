@@ -4,13 +4,23 @@ const { validate } = require('../middleware/validate');
 const { verifyAccessToken } = require('../middleware/auth');
 const { pathIdSchema, listingPhotoParamsSchema } = require('../schemas/pathSchema');
 const { createPhotoSchema, updatePhotoSchema } = require('../schemas/listingPhotosSchema');
+const listingPhotosUpload = require('../middleware/uploads/listingPhotos');
+const checkListingAccess = require('../middleware/checkListingAccess');
 
 listingPhotosRouter.use(verifyAccessToken);
 
 listingPhotosRouter.get('/', validate(pathIdSchema, 'params'), photosController.list);
-listingPhotosRouter.post('/', validate(pathIdSchema, 'params'), validate(createPhotoSchema, 'body'), photosController.create);
 listingPhotosRouter.put('/:photoId', validate(listingPhotoParamsSchema, 'params'), validate(updatePhotoSchema, 'body'), photosController.update);
 listingPhotosRouter.delete('/:photoId', validate(listingPhotoParamsSchema, 'params'), photosController.remove);
 listingPhotosRouter.patch('/:photoId/cover', validate(listingPhotoParamsSchema, 'params'), photosController.setCover);
+listingPhotosRouter.post('/', validate(pathIdSchema, 'params'), checkListingAccess,
+    (req, res, next) => {
+        listingPhotosUpload(req, res, (err) => {
+            if (err) return next(err);
+            next();
+        });
+    },
+    photosController.create
+);
 
 module.exports = listingPhotosRouter;
