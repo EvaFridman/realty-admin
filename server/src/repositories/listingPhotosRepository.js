@@ -23,8 +23,8 @@ async function deletePhoto(id) {
 
 async function setCoverPhoto(listingId, photoId) {
     return sequelize.transaction(async (t) => {
-        await ListingPhoto.update({ isCover: false }, { where: { listingId }, transaction: t });
-        await ListingPhoto.update({ isCover: true }, { where: { id: photoId }, transaction: t });
+        await ListingPhoto.update({ isCover: false }, { where: { listingId }, transaction: t, validate: false });
+        await ListingPhoto.update({ isCover: true }, { where: { id: photoId }, transaction: t, validate: false });
         return ListingPhoto.findByPk(photoId, { transaction: t });
     });
 }

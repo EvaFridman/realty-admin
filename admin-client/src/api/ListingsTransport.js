@@ -11,5 +11,8 @@ export class ListingsTransport extends Transport {
             signal,
         });
     }
+    setCoverPhoto(id, photoId) {
+        return api.patch(`/listings/${id}/photos/${photoId}/cover`);
+    }
     removePhoto(id, photoId) { return api.delete(`/listings/${id}/photos/${photoId}`); }
 }

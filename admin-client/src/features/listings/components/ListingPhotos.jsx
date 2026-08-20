@@ -1,13 +1,15 @@
 import styles from './ListingPhotos.module.css';
+import PhotoGallery from './PhotoGallery';
 
-export default function ListingPhotos({ photos }) {
-    if (!photos || photos.length === 0) {
-        return <p className={styles.empty}>Фотографий нет</p>;
-    }
-
+export default function ListingPhotos({ photos, listingId, listingAgentId, onChange }) {
     return (
         <div className={styles.photosContainer}>
-            {photos.map((photo) => (<div key={photo.id} className={styles.photo}>{photo.isCover && <span className={styles.coverBadge}>обложка</span>}</div>))}
+            <PhotoGallery 
+                listingId={listingId} 
+                listingAgentId={listingAgentId} 
+                photos={photos} 
+                onChange={onChange}
+            />
         </div>
     );
 }
