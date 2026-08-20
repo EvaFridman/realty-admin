@@ -12,7 +12,7 @@ function setupMiddleware(app) {
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     }));
-    app.use("/uploads", express.static(path.join(__dirname, "..", "uploads"), MAX_AGE));
+    app.use("/uploads", express.static(path.join(__dirname, "..", "uploads"), { maxAge: MAX_AGE }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());

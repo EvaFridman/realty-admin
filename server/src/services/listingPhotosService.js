@@ -1,7 +1,7 @@
 const photosRepo = require('../repositories/listingPhotosRepository');
 const listingsRepo = require('../repositories/listingsRepository');
 const { NotFoundError, ForbiddenError } = require('../errors/AppError');
-const { sequelize, ListingPhoto } = require('../database/models');
+const { sequelize, ListingPhoto } = require('../../database/models');
 const { toPhotoDto, deletePhysicalFile } = require('./imagesService');
 const { ValidationError, ConflictError } = require('../errors/AppError'); 
 

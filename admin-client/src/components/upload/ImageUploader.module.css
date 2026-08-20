@@ -1,0 +1,106 @@
+.uploader {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg) 0;
+}
+
+.input {
+    width: 100%;
+    height: var(--control-height);
+    padding: 0 var(--spacing-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.error {
+    margin: 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    font-size: var(--font-size-md);
+    text-align: center;
+}
+
+.progressRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.progress {
+    flex: 1;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-muted);
+    border: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.progress::-webkit-progress-bar {
+    background: var(--color-surface-muted);
+    border-radius: var(--radius-full);
+}
+
+.progress::-webkit-progress-value {
+    background: var(--color-accent-2);
+    border-radius: var(--radius-full);
+}
+
+.progress::-moz-progress-bar {
+    background: var(--color-accent-2);
+    border-radius: var(--radius-full);
+}
+
+.cancelButton {
+    padding: var(--spacing-sm) var(--spacing-2xl);
+    font-size: var(--font-size-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.cancelButton:hover {
+    background: var(--color-surface-muted);
+}
+
+.uploadButton {
+    height: 40px;
+    padding: 0 var(--spacing-2xl);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-accent);
+    color: var(--color-surface);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.uploadButton:hover {
+    filter: brightness(0.95);
+}
+
+.uploadButton:active {
+    filter: brightness(0.9);
+}
+
+.uploadButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: none;
+}
