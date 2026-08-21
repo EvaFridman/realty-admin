@@ -125,7 +125,7 @@ describe('Auth API', () => {
 
             expect(res.body.data).toHaveProperty('accessToken');
             expect(usersRepo.createUser).toHaveBeenCalledWith(
-                expect.objectContaining({ email: 'new@test.local', role: 'agent' })
+                expect.objectContaining({ email: 'new@test.local', DEFAULT_ROLE: 'agent' })
             );
         });
 

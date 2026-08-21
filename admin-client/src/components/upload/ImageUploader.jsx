@@ -1,25 +1,15 @@
 import styles from "./ImageUploader.module.css"
 import { useState } from "react";
 import Preview from "./Preview";
+import describeUploadError from "../../shared/utils/describeUploadError";
 
-export default function ImageUploader({ upload, onDone }) {
+export default function ImageUploader({ upload, onDone, maxSize = 5, maxFiles = 5  }) {
     const [files, setFiles] = useState([]);
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState(null);
     const [isSending, setIsSending] = useState(false);
     const [abortController, setAbortController] = useState(null);
     const [uploaderKey, setUploaderKey] = useState(Date.now());
-
-    function describeUploadError(uploadError) {
-        if (uploadError.code === "ERR_CANCELED") return null;
-        switch (uploadError.response?.status) {
-            case 413: return "Файл больше 5 МБ — уменьшите или выберите другой";
-            case 415: return "Поддерживаются только jpeg, png и webp";
-            case 409: return "У объявления уже 5 фотографий";
-            case 403: return "Это объявление не ваше";
-            default: return uploadError.response ? "Не удалось загрузить, попробуйте ещё раз" : "Нет связи с сервером";
-        }
-    }
 
     const send = async () => {
         const controller = new AbortController();
@@ -32,7 +22,7 @@ export default function ImageUploader({ upload, onDone }) {
             setUploaderKey(Date.now());
             onDone(result);
         } catch (uploadError) {
-            setError(describeUploadError(uploadError))
+            setError(describeUploadError(uploadError, maxSize, maxFiles))
         } finally {
             setIsSending(false);
             setProgress(0);

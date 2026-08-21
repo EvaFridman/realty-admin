@@ -1,15 +1,13 @@
 const usersRepo = require('../repositories/usersRepository');
-const { deletePhysicalFile, buildImageUrl } = require('../services/imagesService');
+const imagesService = require('../services/imagesService');
 const sendResponse = require('../utils/response');
 
 const toUserDto = (user) => {
     const rawUserData = user.get ? user.get({ plain: true }) : user;
+    const { avatarFileName, ...userData } = rawUserData;
     return {
-        id: rawUserData.id,
-        name: rawUserData.name,
-        email: rawUserData.email,
-        role: rawUserData.role,
-        avatarUrl: rawUserData.avatarFileName ? buildImageUrl('avatars', rawUserData.avatarFileName) : null
+        ...userData,
+        avatarUrl: avatarFileName && imagesService.buildImageUrl('avatars', avatarFileName)
     };
 };
 
@@ -19,7 +17,7 @@ async function create(req, res, next) {
         const user = req.currentUser;
         const oldFileName = user.avatarFileName;
         const updatedUser = await usersRepo.updateUser(user.id, { avatarFileName: req.file.filename });
-        if (oldFileName) await deletePhysicalFile(oldFileName, 'avatars'); 
+        if (oldFileName) await imagesService.deletePhysicalFile(oldFileName, 'avatars'); 
         sendResponse(res, 200, toUserDto(updatedUser), null, null);
     } catch (err) {
         next(err);
@@ -32,7 +30,7 @@ async function remove(req, res, next) {
         const oldFileName = user.avatarFileName;
         if (!oldFileName) return sendResponse(res, 200, toUserDto(user), null, null);
         const updatedUser = await usersRepo.updateUser(user.id, { avatarFileName: null });
-        await deletePhysicalFile(oldFileName, 'avatars');
+        await imagesService.deletePhysicalFile(oldFileName, 'avatars');
         res.status(204).send();
     } catch (err) {
         next(err);

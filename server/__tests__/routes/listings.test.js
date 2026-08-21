@@ -1,3 +1,23 @@
+jest.mock('../../database/models', () => {
+    const mockModel = {
+        findAll: jest.fn().mockResolvedValue([]),
+        findOne: jest.fn().mockResolvedValue(null),
+        findByPk: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({}),
+        update: jest.fn().mockResolvedValue([1]),
+        destroy: jest.fn().mockResolvedValue(1),
+    };
+    return {
+        sequelize: {
+            transaction: jest.fn((cb) => cb()),
+        },
+        Listing: mockModel,
+        ListingPhoto: mockModel,
+        User: mockModel,
+    };
+});
+
+
 require('../helpers/auth');
 const request = require('supertest');
 const app = require('../../src/app');
@@ -8,6 +28,10 @@ jest.mock('../../src/repositories/listingsRepository');
 jest.mock('../../src/services/mailService', () => ({
     sendNewViewingNotice: jest.fn().mockResolvedValue(undefined),
     sendViewingConfirmation: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock('../../src/services/imagesService', () => ({
+    deletePhysicalFile: jest.fn().mockResolvedValue(undefined),
+    buildImageUrl: jest.fn().mockReturnValue('http://test.local')
 }));
 
 const agent = { id: 1, role: 'agent' };

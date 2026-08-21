@@ -1,3 +1,22 @@
+jest.mock('../../database/models', () => {
+    const mockModel = {
+        findAll: jest.fn().mockResolvedValue([]),
+        findOne: jest.fn().mockResolvedValue(null),
+        findByPk: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({}),
+        update: jest.fn().mockResolvedValue([1]),
+        destroy: jest.fn().mockResolvedValue(1),
+    };
+    return {
+        sequelize: {
+            transaction: jest.fn((cb) => cb()),
+        },
+        Listing: mockModel,
+        ListingPhoto: mockModel,
+        User: mockModel,
+    };
+});
+
 const listingsService = require('../../src/services/listingsService');
 const listingsRepo = require('../../src/repositories/listingsRepository');
 const { NotFoundError, ForbiddenError, ConflictError } = require('../../src/errors/AppError');
@@ -5,6 +24,9 @@ const { canTransition, getAllowedTransitions } = require('../../src/services/pur
 
 jest.mock('../../src/repositories/listingsRepository');
 jest.mock('../../src/services/pure/listingStatusTransitions');
+jest.mock('../../src/services/imagesService', () => ({
+    deletePhysicalFile: jest.fn().mockResolvedValue(undefined)
+}));
 
 const agent = { id: 1, role: 'agent' };
 const moderator = { id: 2, role: 'moderator' };
