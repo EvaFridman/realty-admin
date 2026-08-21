@@ -14,6 +14,11 @@ const ListingPage = lazy(() => import('../pages/ListingPage.jsx'));
 const ViewingsPage = lazy(() => import('../pages/ViewingsPage.jsx'));
 const DistrictsPage = lazy(() => import('../pages/DistrictsPage.jsx'));
 
+const UsersListPage = lazy(() => import('../pages/UsersListPage.jsx'));
+const UserDetailPage = lazy(() => import('../pages/UserDetailPage.jsx'));
+const UserCreatePage = lazy(() => import('../pages/UserCreatePage.jsx'));
+const ProfilePage = lazy(() => import('../pages/ProfilePage.jsx'));
+
 function App() {
     return (
         <TitleProvider>
@@ -26,7 +31,12 @@ function App() {
                         <Route path="listings/:id" element={<ListingPage />} />
                         <Route path="viewings" element={<ViewingsPage />} />
                         <Route path="districts" element={<DistrictsPage />} />
+                        <Route path="users" element={<UsersListPage />} />
+                        <Route path="users/new" element={<UserCreatePage />} />
+                        <Route path="users/:id" element={<UserDetailPage />} />
+                        <Route path="profile" element={<ProfilePage />} />
                     </Route>
+                    
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>
             </Suspense>

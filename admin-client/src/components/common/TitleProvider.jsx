@@ -8,10 +8,14 @@ const staticTitles = {
     '/viewings': 'Заявки на просмотр',
     '/districts': 'Районы',
     '/select-moderator': 'Выбор модератора',
+    '/users': 'Список пользователей',
+    '/users/new': 'Создание агента',
+    '/profile': 'Личный профиль',
 };
 
 const dynamicTitles = [
     { path: '/listings/:id', title: (params) => `Объявление #${params.id}` },
+    { path: '/users/:id', title: (params) => `Пользователь #${params.id}` },
 ];
 
 export function TitleProvider({ children }) {
