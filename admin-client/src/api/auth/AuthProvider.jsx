@@ -60,7 +60,7 @@ export default function AuthProvider({ children }) {
         }
     };
 
-    const value = useMemo(() => ({ user, isBootstrapping, login, logout }), [user, isBootstrapping]);
+    const value = useMemo(() => ({ user, setUser, isBootstrapping, login, logout }), [user, setUser, isBootstrapping]);
 
     return <AuthContext value={value}>{children}</AuthContext>
 }

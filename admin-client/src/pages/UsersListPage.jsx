@@ -1,7 +1,7 @@
 import styles from './Users.module.css';
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { usersTransport } from '../api/usersTransport.js';
+import { usersTransport } from '../api/UsersTransport.js';
 import Pagination from '../components/common/Pagination.jsx';
 import StatusMessage from '../components/common/StatusMessage.jsx';
 import PageLoader from '../widgets/PageLoader.jsx';

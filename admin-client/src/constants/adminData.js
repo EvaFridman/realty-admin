@@ -15,6 +15,7 @@ export const navItems = [
     { id: 'districts', title: 'Районы', path: '/districts', moderatorOnly: true },
     { id: 'users', title: 'Пользователи', path: '/users', moderatorOnly: true },
     { id: 'user-create', title: 'Создать агента', path: '/users/new', moderatorOnly: true },
+    { id: 'profile', title: 'Профиль', path: '/profile' },
 ];
 
 export const emptyListingFilters = {

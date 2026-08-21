@@ -1,15 +1,11 @@
-/* Общий контейнер страниц раздела */
-.container,
-.formCard {
+.container {
     max-width: var(--content-width, 1100px);
     margin: 0 auto;
     padding: 0 var(--spacing-2xl);
 }
 
-/* Карточка формы создания/профиля */
 .formCard,
 .profileCard {
-    max-width: 540px;
     background: var(--color-surface);
     padding: var(--spacing-3xl);
     border-radius: var(--radius-sm);
@@ -17,7 +13,17 @@
     margin: var(--spacing-xl) auto;
 }
 
-/* Верхняя строка с заголовком и кнопкой */
+.formCard {
+    max-width: 540px;
+}
+
+.profileCard {
+    max-width: var(--content-width, 1100px);
+    display: flex;
+    gap: var(--spacing-3xl);
+    align-items: flex-start;
+}
+
 .headerRow {
     display: flex;
     justify-content: space-between;
@@ -25,7 +31,57 @@
     margin-bottom: var(--spacing-2xl);
 }
 
-/* Общая кнопка в стиле вашего проекта */
+.filterSection {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+}
+
+.fieldGroup label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+.filterSection select,
+.fieldGroup input,
+.fieldGroup select {
+    height: var(--control-height, 40px);
+    padding: 0 var(--spacing-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+    outline: none;
+}
+
+.fieldGroup input:focus,
+.fieldGroup select:focus,
+.filterSection select:focus {
+    border-color: var(--color-accent-2);
+}
+
+.passwordForm {
+    max-width: 400px;
+}
+
+.errorMessage {
+    font-size: var(--font-size-sm);
+    color: var(--color-danger);
+    margin-top: 2px;
+}
+
 .createBtn,
 .submitButton {
     height: 40px;
@@ -49,63 +105,27 @@
     margin-top: var(--spacing-lg);
 }
 
+.logoutButton {
+    height: 40px;
+    width: 100%;
+    margin-top: var(--spacing-md);
+    padding: 0 var(--spacing-2xl);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-muted, #f3f4f6);
+    color: var(--color-danger);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: filter 0.2s ease;
+}
+
 .createBtn:hover,
-.submitButton:hover {
+.submitButton:hover,
+.logoutButton:hover {
     filter: brightness(0.95);
 }
 
-/* Секция фильтрации */
-.filterSection {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
-    font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
-}
-
-/* Стилизация выпадающих списков и инпутов в стиле вашего аплоудера */
-.filterSection select,
-.fieldGroup input,
-.fieldGroup select {
-    height: var(--control-height, 40px);
-    padding: 0 var(--spacing-md);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    font-size: var(--font-size-md);
-    color: var(--color-text);
-    outline: none;
-}
-
-.fieldGroup input:focus,
-.fieldGroup select:focus,
-.filterSection select:focus {
-    border-color: var(--color-accent-2);
-}
-
-/* Группа полей формы */
-.fieldGroup {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-}
-
-.fieldGroup label {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text);
-}
-
-/* ТЗ ВЫПОЛНЕНО: Сообщение об ошибке проверки строго под своим полем */
-.errorMessage {
-    font-size: var(--font-size-sm);
-    color: var(--color-danger);
-    margin-top: 2px;
-}
-
-/* Административная таблица списка */
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -133,7 +153,6 @@
     border-bottom: none;
 }
 
-/* Ссылки-действия */
 .actionLink {
     color: var(--color-accent-2);
     text-decoration: none;
@@ -144,7 +163,6 @@
     text-decoration: underline;
 }
 
-/* Бейджи ролей пользователей */
 .badge {
     padding: var(--spacing-xs) var(--spacing-md);
     border-radius: var(--radius-sm);
@@ -164,29 +182,12 @@
     color: var(--color-text-secondary);
 }
 
-/* Блок профиля для UserDetailPage */
-.profileCard {
-    max-width: var(--content-width, 1100px);
-    display: flex;
-    gap: var(--spacing-3xl);
-    align-items: flex-start;
-}
-
 .avatarBlock {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-md);
     width: 200px;
-}
-
-.profileAvatar {
-    width: 160px;
-    height: 160px;
-    border-radius: var(--radius-sm);
-    object-fit: cover;
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-muted);
 }
 
 .profileInfo {
@@ -202,6 +203,24 @@
 .profileInfo p {
     margin: var(--spacing-sm) 0;
     color: var(--color-text-secondary);
+}
+
+.profileAvatar {
+    width: 160px;
+    height: 160px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-muted);
+}
+
+.roundAvatar {
+    width: 160px;
+    height: 160px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-muted);
 }
 
 .listingsBlock {

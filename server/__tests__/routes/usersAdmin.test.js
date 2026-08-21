@@ -44,6 +44,8 @@ describe('Users Administration & Password API (Release 2)', () => {
                 newPassword: 'newSuperPassword123'
             };
 
+            usersRepo.findUserById.mockResolvedValue(mockAgent);
+
             usersRepo.findByEmailWithPassword.mockResolvedValue({
                 id: mockAgent.id,
                 email: mockAgent.email,
