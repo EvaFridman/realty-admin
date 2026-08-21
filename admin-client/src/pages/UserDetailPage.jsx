@@ -31,12 +31,12 @@ export default function UserDetailPage() {
 
     const handleAvatarUploadDone = (result) => {
         setRefreshKey(prev => prev + 1);
-        showAlert('Фотография профиля успешно обновлена!');
+        showAlert('Фотография профиля успешно обновлена');
         if (currentUser && currentUser.id === Number(id)) setUser(prev => ({ ...prev, avatarUrl: result?.data?.avatarUrl }));
     };
 
     if (isUserLoading || isListingsLoading) return <StatusMessage><PageLoader /></StatusMessage>;
-    if (userError || !profile) return <StatusMessage>{userError || 'Пользователь не найден.'}</StatusMessage>;
+    if (userError || !profile) return <StatusMessage>{userError || 'Пользователь не найден'}</StatusMessage>;
 
     return (
         <div className={styles.container}>

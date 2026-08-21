@@ -80,10 +80,13 @@ async function me(req, res, next) {
 async function updatePassword(req, res, next) {
     try {
         const { currentPassword, newPassword } = req.body;
-        const result = await usersService.changeUserPassword(req.user.email, currentPassword, newPassword);
+        const user = await usersRepo.findUserById(req.user.id);
+        if (!user) throw new NotFoundError('User not found');
+        const result = await usersService.changeUserPassword(user.email, currentPassword, newPassword);
         sendResponse(res, 200, result, null, null);
     } catch (err) {
         next(err);
     }
 }
+
 module.exports = { register, login, refresh, logout, me, updatePassword };
