@@ -146,3 +146,4 @@ database/config/config.json
 
 src/uploads/**/*
 src/uploads/photos/.gitkeep
+src/uploads/avatars/.gitkeep

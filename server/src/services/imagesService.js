@@ -1,8 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-const UPLOADS_DIR = path.join(__dirname, '..', 'uploads', 'photos');
-
 const buildImageUrl = (folder, fileName) => {
     return `/uploads/${folder}/${fileName}`.replace('//', '/');
 };
@@ -19,9 +17,9 @@ const toPhotoDto = (photo) => {
     };
 };
 
-const deletePhysicalFile = async (fileName) => {
+const deletePhysicalFile = async (fileName, subfolder = 'photos') => {
     if (!fileName) return;
-    const filePath = path.join(UPLOADS_DIR, fileName);
+    const filePath = path.join(__dirname, '..', 'uploads', subfolder, fileName);
 
     try {
         await fs.access(filePath);
@@ -32,4 +30,4 @@ const deletePhysicalFile = async (fileName) => {
     }
 };
 
-module.exports = { toPhotoDto, deletePhysicalFile };
+module.exports = { toPhotoDto, deletePhysicalFile, buildImageUrl };
