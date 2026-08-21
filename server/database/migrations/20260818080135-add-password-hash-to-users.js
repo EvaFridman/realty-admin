@@ -4,9 +4,8 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addColumn('Users', 'passwordHash', {
-      type: Sequelize.STRING(60),
+      type: Sequelize.STRING,
       allowNull: false,
-      defaultValue: ''
     });
   },
 

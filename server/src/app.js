@@ -1,5 +1,6 @@
 const express = require('express');
 const usersRouter = require('./routes/usersRouter');
+const userAvatarRouter = require('./routes/userAvatarRouter');
 const districtsRouter = require('./routes/districtsRouter');
 const listingsRouter = require('./routes/listingsRouter');
 const favoritesRouter = require('./routes/favoritesRouter');
@@ -21,6 +22,7 @@ setupMiddleware(app);
 
 app.use('/auth', authRouter);
 app.use('/users', usersRouter);
+app.use('/users', userAvatarRouter);
 app.use('/districts', districtsRouter);
 app.use('/listings/:id/viewings', viewingsRouter);
 app.use('/listings/:id/photos', listingPhotosRouter);

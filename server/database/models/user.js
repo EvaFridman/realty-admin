@@ -21,7 +21,8 @@ module.exports = (sequelize, DataTypes) => {
     email: { type: DataTypes.STRING, allowNull: false, unique: true, validate: { isEmail: true } },
     phone: { type: DataTypes.STRING(20), unique: true, validate: { is: /^\+[1-9]\d{1,14}$/ } },
     role: { type: DataTypes.ENUM('agent', 'moderator'), allowNull: false, defaultValue: 'agent' },
-    passwordHash: { type: DataTypes.STRING(60), allowNull: false, defaultValue: '' }
+    passwordHash: { type: DataTypes.STRING, allowNull: false, defaultValue: '' },
+    avatarFileName: { type: DataTypes.STRING, allowNull: true }
   }, {
     sequelize,
     modelName: 'User',
