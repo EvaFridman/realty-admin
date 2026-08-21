@@ -4,7 +4,7 @@ import { useOptimistic, useState, startTransition, useEffect } from 'react';
 import { listingsApi } from '../api/resources.js';
 import { useAlert } from '../components/common/AlertContext.jsx';
 import { useTitle } from '../components/common/TitleContext';
-import ListingPhotos from '../features/listings/components/ListingPhotos';
+import PhotoGallery from '../features/listings/components/PhotoGallery'; 
 import StatusTransitionButtons from '../features/listings/components/StatusTransitionButtons';
 import RejectionForm from '../features/listings/components/RejectionForm';
 import PublishRequirementsList from '../features/listings/components/PublishRequirementsList';
@@ -114,7 +114,7 @@ export default function ListingPage() {
             <p className={styles.listingMeta}>{optimisticListing.address}, {optimisticListing.district?.title}</p>
             <p className={styles.listingMeta}>агент: {optimisticListing.agent?.name}</p>
 
-            <ListingPhotos
+            <PhotoGallery
                 photos={optimisticListing.photos || []}
                 listingId={id}
                 listingAgentId={optimisticListing.agent?.id || optimisticListing.agentId}

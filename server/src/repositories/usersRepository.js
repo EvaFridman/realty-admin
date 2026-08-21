@@ -32,4 +32,10 @@ async function findById(id) {
     return User.findByPk(id);
 }
 
-module.exports = { findAllUsers, findUserById, createUser, updateUser, findUserWithEmail, findByEmailWithPassword, findById };
+async function findAndCountAllUsers({ role, limit, offset }) {
+    const where = {};
+    if (role) where.role = role;    
+    return User.findAndCountAll({  where, limit, offset, order: [['createdAt', 'DESC']] });
+}
+
+module.exports = { findAllUsers, findUserById, createUser, updateUser, findUserWithEmail, findByEmailWithPassword, findById, findAndCountAllUsers };

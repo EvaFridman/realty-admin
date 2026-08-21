@@ -9,5 +9,6 @@ authRouter.post('/register', validate(registerSchema, 'body'), authController.re
 authRouter.post('/login', validate(loginSchema, 'body'), authController.login);
 authRouter.post('/refresh', verifyRefreshToken, authController.refresh);
 authRouter.post('/logout', authController.logout);
+authRouter.patch('/password', verifyAccessToken, authController.updatePassword);
 
 module.exports = authRouter;

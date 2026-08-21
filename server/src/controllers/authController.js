@@ -3,6 +3,7 @@ const usersRepo = require('../repositories/usersRepository');
 const { NotFoundError, ConflictError, UnauthorizedError, UnprocessableEntityError } = require('../errors/AppError');
 const sendResponse = require('../utils/response');
 const { issuePair } = require('../services/tokensService');
+const usersService = require('../services/usersService');
 
 const DEFAULT_ROLE = 'agent';
 
@@ -76,4 +77,13 @@ async function me(req, res, next) {
     }
 }
 
-module.exports = { register, login, refresh, logout, me };
+async function updatePassword(req, res, next) {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const result = await usersService.changeUserPassword(req.user.email, currentPassword, newPassword);
+        sendResponse(res, 200, result, null, null);
+    } catch (err) {
+        next(err);
+    }
+}
+module.exports = { register, login, refresh, logout, me, updatePassword };
