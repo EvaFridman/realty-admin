@@ -5,10 +5,14 @@ function errorHandler(err, req, res, next) {
     const log = req.log || console;
 
     if (err instanceof AppError) {
-        log.warn({ err }, err.message);
+        if (err.status === 502) log.error({ err }, err.message);
+        else log.warn({ err }, err.message);
+
+        const detailsToShow = err.status === 502 ? null : (err.details ?? null);
+        
         return res.status(err.status).json({
             data: null,
-            error: { message: err.message, details: err.details ?? null, code: err.code ?? null },
+            error: { message: err.message, details: detailsToShow, code: err.code ?? null },
             meta: null,
         });
     }
@@ -26,7 +30,9 @@ function errorHandler(err, req, res, next) {
     if (err.message === "UNSUPPORTED_FILE_TYPE") {
         return res.status(415).json({
             data: null,
-            error: { message: "Only jpeg, png and webp are allowed", code: "UNSUPPORTED_FILE_TYPE" }, meta: null});
+            error: { message: "Only jpeg, png and webp are allowed", code: "UNSUPPORTED_FILE_TYPE" },
+            meta: null
+        });
     }
 
     log.error({ err }, 'Unexpected error');

@@ -12,7 +12,7 @@ async function list(req, res, next) {
 
 async function create(req, res, next) {
     try {
-        const photos = await photosService.addPhoto(req.user, req.params.id, req.files);
+        const photos = await photosService.addPhoto(req.user, req.params.id, req.files, req.log);
         sendResponse(res, 201, photos, null, null);
     } catch (err) {
         next(err);
@@ -30,7 +30,7 @@ async function update(req, res, next) {
 
 async function remove(req, res, next) {
     try {
-        await photosService.deletePhoto(req.user, req.params.id, req.params.photoId);
+        await photosService.deletePhoto(req.user, req.params.id, req.params.photoId, req.log);
         res.status(204).send();
     } catch (err) {
         next(err);

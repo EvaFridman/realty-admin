@@ -49,7 +49,7 @@ async function changeStatus(req, res, next) {
 
 async function remove(req, res, next) {
     try {
-        await listingsService.deleteListing(req.user, req.params.id);
+        await listingsService.deleteListing(req.user, req.params.id, req.log);
         res.status(204).send();
     } catch (err) {
         next(err);

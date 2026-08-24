@@ -2,15 +2,16 @@ const photosRepo = require('../repositories/listingPhotosRepository');
 const { NotFoundError, ValidationError, ConflictError } = require('../errors/AppError');
 const { sequelize, ListingPhoto } = require('../../database/models');
 const { toPhotoDto, deletePhysicalFile } = require('./imagesService');
+const defaultLogger = require('../../logger');
 
 async function listPhotos(user, listingId) {
     return photosRepo.findPhotosByListingId(listingId);
 }
 
-async function addPhoto(user, listingId, files = []) {
+async function addPhoto(user, listingId, files = [], log = defaultLogger) {
     const cleanUploadedFiles = async () => {
         for (const file of files) {
-            await deletePhysicalFile(file.filename);
+            await deletePhysicalFile(file.filename, 'photos', log);
         }
     };
 
@@ -50,11 +51,11 @@ async function updatePhoto(user, listingId, photoId, data) {
     return photosRepo.updatePhoto(photoId, data);
 }
 
-async function deletePhoto(user, listingId, photoId) {
+async function deletePhoto(user, listingId, photoId, log = defaultLogger) {
     const photo = await photosRepo.findPhotoById(photoId);
     if (!photo || photo.listingId !== Number(listingId)) throw new NotFoundError('Photo not found');
     await photosRepo.deletePhoto(photoId);
-    if (photo.fileName) await deletePhysicalFile(photo.fileName);
+    if (photo.fileName) await deletePhysicalFile(photo.fileName, 'photos', log);
 }
 
 async function setCover(user, listingId, photoId) {

@@ -56,7 +56,7 @@ async function updateListing(user, id, data) {
     return listingsRepo.updateListing(id, data);
 }
 
-async function deleteListing(user, id) {
+async function deleteListing(user, id, log = defaultLogger) {
     const listing = await listingsRepo.findListingById(id);
     if (!listing) throw new NotFoundError('Listing not found');
     const isOwner = listing.agentId === user.id;
@@ -65,7 +65,7 @@ async function deleteListing(user, id) {
     const photos = await listingsPhotoRepo.findPhotosByListingId(id);
     await listingsRepo.deleteListing(id);
     for (const photo of photos) {
-        if (photo.fileName) await deletePhysicalFile(photo.fileName);
+        if (photo.fileName) await deletePhysicalFile(photo.fileName, 'photos', log);
     }
 }
 
