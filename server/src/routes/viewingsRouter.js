@@ -4,8 +4,9 @@ const { validate } = require('../middleware/validate');
 const { verifyAccessToken } = require('../middleware/auth');
 const { pathIdSchema } = require('../schemas/pathSchema');
 const { createViewingSchema } = require('../schemas/viewingsSchema');
+const { viewingLimiter } = require('../middleware/rateLimiters')
 
 viewingsRouter.get('/', verifyAccessToken, validate(pathIdSchema, 'params'), viewingsController.list);
-viewingsRouter.post('/', validate(pathIdSchema, 'params'), validate(createViewingSchema, 'body'), viewingsController.create);
+viewingsRouter.post('/', viewingLimiter, validate(pathIdSchema, 'params'), validate(createViewingSchema, 'body'), viewingsController.create);
 
 module.exports = viewingsRouter;

@@ -5,10 +5,9 @@ const avatarUpload = require('../middleware/uploadEntities/userAvatar');
 const checkAvatarAccess = require('../middleware/checkAvatarAccess');
 const { validate } = require('../middleware/validate');
 const { pathIdSchema } = require('../schemas/pathSchema');
+const { uploadLimiter } = require('../middleware/rateLimiters')
 
-userAvatarRouter.use(verifyAccessToken);
-
-userAvatarRouter.post('/:id/avatar', validate(pathIdSchema, 'params'), checkAvatarAccess,
+userAvatarRouter.post('/:id/avatar', uploadLimiter, verifyAccessToken, validate(pathIdSchema, 'params'), checkAvatarAccess,
 (req, res, next) => {
     avatarUpload(req, res, (err) => {
         if (err) return next(err);
@@ -17,6 +16,6 @@ userAvatarRouter.post('/:id/avatar', validate(pathIdSchema, 'params'), checkAvat
 },
 userAvatarController.create);
 
-userAvatarRouter.delete('/:id/avatar', checkAvatarAccess, userAvatarController.remove);
+userAvatarRouter.delete('/:id/avatar', verifyAccessToken, checkAvatarAccess, userAvatarController.remove);
 
 module.exports = userAvatarRouter;
