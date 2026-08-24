@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const path = require("path");
+const { apiLimiter } = require('../middleware/rateLimiters')
 
 const MAX_AGE = 1000 * 60 * 60 * 24 * 365;
 
@@ -20,6 +21,7 @@ function setupMiddleware(app) {
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     }));
+    app.use(apiLimiter);
     app.use("/uploads", express.static(path.join(__dirname, "..", "uploads"), { maxAge: MAX_AGE }));
     app.use(express.json({ limit: '100kb' }));
     app.use(express.urlencoded({ extended: true }));

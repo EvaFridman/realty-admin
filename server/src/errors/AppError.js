@@ -50,4 +50,10 @@ class ForbiddenError extends AppError {
     }
 }
 
-module.exports = { AppError, NotFoundError, ConflictError, ValidationError, ExternalServiceError, UnauthorizedError, UnprocessableEntityError, ForbiddenError };
+class TooManyRequestsError extends AppError {
+    constructor(message = 'Too many requests', details = null, code = null) {
+        super(message, 429, details, code);
+    }
+}
+
+module.exports = { AppError, NotFoundError, ConflictError, ValidationError, ExternalServiceError, UnauthorizedError, UnprocessableEntityError, ForbiddenError, TooManyRequestsError };
