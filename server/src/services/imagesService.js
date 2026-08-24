@@ -1,5 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
+const defaultLogger = require('../../logger');
 
 const buildImageUrl = (folder, fileName) => {
     return `/uploads/${folder}/${fileName}`.replace('//', '/');
@@ -17,16 +18,16 @@ const toPhotoDto = (photo) => {
     };
 };
 
-const deletePhysicalFile = async (fileName, subfolder = 'photos') => {
+const deletePhysicalFile = async (fileName, subfolder = 'photos', log = defaultLogger) => {
     if (!fileName) return;
     const filePath = path.join(__dirname, '..', 'uploads', subfolder, fileName);
 
     try {
         await fs.access(filePath);
         await fs.unlink(filePath);
-        console.log(`File ${fileName} deleted successfully.`);
+        log.info({ fileName, subfolder }, 'File deleted successfully');
     } catch (error) {
-        console.error("orphan file", fileName, error.code);
+        log.warn({ fileName, subfolder, code: error.code }, 'Orphan file cleanup failed');
     }
 };
 
