@@ -10,6 +10,7 @@ const listingPhotosRouter = require('./routes/listingPhotosRouter');
 const viewingsStatusRouter = require('./routes/viewingsStatusRouter');
 const pdfRouter = require('./routes/pdfRouter');
 const authRouter = require('./routes/authRouter');
+const cspReportRouter = require('./routes/cspReportRouter');
 const setupMiddleware = require('./bootstrap/middleware');
 const errorHandler = require('./middleware/errorHandler');
 const loggerMiddleware = require('./middleware/loggerMiddleware');
@@ -17,6 +18,8 @@ const loggerMiddleware = require('./middleware/loggerMiddleware');
 const app = express();
 
 app.use(loggerMiddleware);
+
+app.use(cspReportRouter);
 
 setupMiddleware(app);
 

@@ -35,4 +35,10 @@ const apiLimiter = rateLimit({
     handler: (req, res, next) => next(new TooManyRequestsError("Too many attempts, try again later"))
 });
 
-module.exports = { loginLimiter, registerLimiter, viewingLimiter, uploadLimiter, apiLimiter }
+const cspReportLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    handler: (req, res, next) => next(new TooManyRequestsError("Too many CSP reports"))
+});
+
+module.exports = { loginLimiter, registerLimiter, viewingLimiter, uploadLimiter, apiLimiter, cspReportLimiter }
