@@ -1,13 +1,14 @@
 const { z } = require('zod');
+const { loginSchema, registerSchema } = require('./authSchema');
 
 const createUserSchema = z.object({
-  name: z.string().min(2).max(50),
-  email: z.string().email(),
-  password: z.string().min(6),
-  phone: z.string().min(5),
+  name: registerSchema.shape.name,
+  email: loginSchema.shape.email,
+  password: loginSchema.shape.password,
+  phone: z.string().min(5, 'Телефон слишком короткий'),
   role: z.enum(['agent', 'moderator']).optional().default('agent'),
 });
 
-const updateUserSchema = createUserSchema.partial();
+const updateUserSchema = createUserSchema.omit({ role: true }).partial();
 
 module.exports = { createUserSchema, updateUserSchema };
