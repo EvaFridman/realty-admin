@@ -3,6 +3,7 @@ const transport = require('./mailTransport');
 const pdfService = require('./pdfService');
 const config = require('../config');
 const { ExternalServiceError } = require('../errors/AppError');
+const escapeHtml = require('./pure/escapeHtml');
 
 async function renderListingCardBuffer(listing) {
     const stream = new PassThrough();
@@ -35,6 +36,7 @@ async function sendNewViewingNotice(listing, viewing) {
         to: listing.agent.email,
         subject: `Новая заявка на просмотр: "${listing.title}"`,
         text: `${viewing.clientName} (${viewing.clientPhone}) хочет посмотреть объявление ${viewing.preferredAt}.`,
+        html: `<h1>${escapeHtml(listing.title)}</h1> <p>${escapeHtml(viewing.clientName)} (${escapeHtml(viewing.clientPhone)}) хочет посмотреть объявление ${escapeHtml(viewing.preferredAt)}.</p>`,
         attachments: [{ filename: `listing-${listing.id}.pdf`, content: pdfBuffer }],
     });
 }
@@ -44,6 +46,7 @@ async function sendViewingConfirmation(listing, viewing) {
         to: viewing.clientEmail,
         subject: 'Просмотр подтверждён',
         text: `Ваш просмотр объявления "${listing.title}" подтверждён на ${viewing.preferredAt}.`,
+        html: `<h1>${escapeHtml(listing.title)}</h1> <p>Ваш просмотр подтверждён на ${escapeHtml(viewing.preferredAt)}.</p>`,
     });
 }
 
