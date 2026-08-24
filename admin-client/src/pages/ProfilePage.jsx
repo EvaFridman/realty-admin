@@ -5,6 +5,7 @@ import { useAlert } from '../components/common/AlertContext.jsx';
 import { usersTransport } from '../api/UsersTransport.js';
 import { api } from '../api/client.js';
 import ImageUploader from '../components/upload/ImageUploader.jsx';
+import { getUrl } from '../shared/utils/safeUrl';
 
 export default function ProfilePage() {
     const { user, setUser, logout } = useAuth();
@@ -12,6 +13,7 @@ export default function ProfilePage() {
     const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
     const [errors, setErrors] = useState({});
     const [isSending, setIsSending] = useState(false);
+    const secureAvatarUrl = getUrl(user?.avatarUrl) || '/default-avatar.png';
 
     const handleInputChange = (e) => {
         setPasswordForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -54,7 +56,7 @@ export default function ProfilePage() {
             <div className={styles.profileCard}>
 
                 <div className={styles.avatarBlock}>
-                    <img src={user.avatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${user.avatarUrl}` : '/default-avatar.png'} alt="Аватар" className={styles.roundAvatar} />
+                    <img src={secureAvatarUrl} alt="Аватар" className={styles.roundAvatar} />
                     <ImageUploader 
                         upload={(files, options) => usersTransport.uploadAvatar(user.id, files, options)} 
                         onDone={handleAvatarUploadDone}

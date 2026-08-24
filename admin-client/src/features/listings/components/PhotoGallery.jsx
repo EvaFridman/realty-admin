@@ -3,6 +3,7 @@ import { useAuth } from "../../../api/auth/useAuth.js";
 import { ListingsTransport } from '../../../api/ListingsTransport';
 import { useAlert } from '../../../components/common/AlertContext.jsx';
 import ImageUploader from '../../../components/upload/ImageUploader';
+import { getUrl } from '../../../shared/utils/safeUrl';
 
 const listingsTransport = new ListingsTransport();
 
@@ -43,11 +44,16 @@ export default function PhotoGallery({ listingId, listingAgentId, photos, onChan
                 ) : (
                     photosArray.map((photo) => {
                         const figureClassName = `${styles.figure} ${photo.isCover ? styles.cover : ''}`;
-
+                        const urlOrPath = photo.externalUrl || photo.url || (photo.fileName ? `/uploads/photos/${photo.fileName}` : null);
+                        const secureUrl = getUrl(urlOrPath);
                         return (
                             <figure key={photo.id} className={figureClassName}>
-                                <img src={photo.url || (photo.fileName ? `http://localhost:3000/uploads/photos/${photo.fileName}` : null)} alt="" loading="lazy" width={200} height={200} className={styles.image}/>
-                                
+                                {secureUrl ? (<img src={secureUrl} alt="" loading="lazy" width={200} height={200} className={styles.image}/>
+                                ) : (
+                                    <div className={styles.imagePlaceholder}>
+                                        <span>Фото недоступно</span>
+                                    </div>
+                                )}                                
                                 {photo.isCover && (<span className={styles.coverBadge}>обложка</span>)}
                                 
                                 {canEdit && (

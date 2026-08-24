@@ -1,13 +1,11 @@
 import styles from './Header.module.css';
 import SectionSwitcher from "../features/navigation/SectionSwitcher.jsx";
 import { useAuth } from '../api/auth/useAuth.js';
+import { getUrl } from '../shared/utils/safeUrl';
 
 export default function Header() {
     const { user } = useAuth();
-    const getAvatarUrl = (url) => {
-        if (!url) return '/default-avatar.png';
-        return url.startsWith('http') ? url : `${import.meta.env.VITE_API_BASE_URL}${url}`;
-    };
+    const secureAvatarUrl = getUrl(user?.avatarUrl) || '/default-avatar.png';
 
     return (
         <header className={styles.header}>
@@ -15,7 +13,7 @@ export default function Header() {
                 <h1>Админ-панель</h1>
                 {user && (
                     <div className={styles.userInfo}>
-                        <img src={ getAvatarUrl(user.avatarUrl)} alt="Аватар" className={styles.avatar} />
+                        <img src={secureAvatarUrl} alt="Аватар" className={styles.avatar} />
                         <span className={styles.username}>{user.name}</span>
                     </div>
                 )}

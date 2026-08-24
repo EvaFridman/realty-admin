@@ -103,3 +103,22 @@
     color: var(--color-text-muted);
     margin: 0;
 }
+
+.imagePlaceholder {
+    width: 200px;
+    height: 200px;
+    background-color: var(--color-surface-muted);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    box-sizing: border-box;
+}
+
+.imagePlaceholder span {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+}
