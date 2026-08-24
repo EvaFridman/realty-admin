@@ -20,9 +20,12 @@ listingPhotosRouter.post('/', uploadLimiter, verifyAccessToken, validate(pathIdS
 
 listingPhotosRouter.use(verifyAccessToken);
 
-listingPhotosRouter.get('/', validate(pathIdSchema, 'params'), photosController.list);
-listingPhotosRouter.put('/:photoId', validate(listingPhotoParamsSchema, 'params'), validate(updatePhotoSchema, 'body'), photosController.update);
-listingPhotosRouter.delete('/:photoId', validate(listingPhotoParamsSchema, 'params'), photosController.remove);
-listingPhotosRouter.patch('/:photoId/cover', validate(listingPhotoParamsSchema, 'params'), photosController.setCover);
+listingPhotosRouter.get('/', validate(pathIdSchema, 'params'), checkListingAccess, photosController.list);
+
+listingPhotosRouter.use(validate(listingPhotoParamsSchema, 'params'), checkListingAccess);
+
+listingPhotosRouter.put('/:photoId', validate(updatePhotoSchema, 'body'), photosController.update);
+listingPhotosRouter.delete('/:photoId', photosController.remove);
+listingPhotosRouter.patch('/:photoId/cover', photosController.setCover);
 
 module.exports = listingPhotosRouter;
