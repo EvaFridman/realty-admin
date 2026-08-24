@@ -1,12 +1,17 @@
 const { z } = require('zod');
 
 const loginSchema = z.object({
-    email: z.email(),
-    password: z.string().min(8).max(72),
+    email: z.string().email('Некорректный формат email'),
+    password: z.string().min(8, 'Минимум 8 символов').max(72, 'Максимум 72 символа'),
 });
 
 const registerSchema = loginSchema.extend({
-    role: z.enum(['agent', 'moderator']).default('agent'),
+    name: z.string().min(2, 'Имя слишком короткое, минимум 2 символа').max(50, 'Имя слишком длинное, максимум 50 символов'),
 });
 
-module.exports = { loginSchema, registerSchema };
+const changePasswordSchema = z.object({
+    currentPassword: z.string().min(1, 'Текущий пароль обязателен для проверки'),
+    newPassword: loginSchema.shape.password,
+});
+
+module.exports = { loginSchema, registerSchema, changePasswordSchema };
