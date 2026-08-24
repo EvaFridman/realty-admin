@@ -120,12 +120,12 @@ describe('Auth API', () => {
 
             const res = await request(app)
                 .post('/auth/register')
-                .send({ email: 'new@test.local', password: 'Password123' })
+                .send({ email: 'new@test.local', password: 'Password123', name: 'New User' })
                 .expect(201);
 
             expect(res.body.data).toHaveProperty('accessToken');
             expect(usersRepo.createUser).toHaveBeenCalledWith(
-                expect.objectContaining({ email: 'new@test.local', DEFAULT_ROLE: 'agent' })
+                expect.objectContaining({ email: 'new@test.local', role: 'agent' })
             );
         });
 
@@ -134,7 +134,7 @@ describe('Auth API', () => {
 
             await request(app)
                 .post('/auth/register')
-                .send({ email: 'agent@test.local', password: 'Password123' })
+                .send({ email: 'agent@test.local', password: 'Password123', name: 'Agent User' })
                 .expect(409);
         });
     });
