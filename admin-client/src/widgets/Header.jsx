@@ -2,6 +2,7 @@ import styles from './Header.module.css';
 import SectionSwitcher from "../features/navigation/SectionSwitcher.jsx";
 import { useAuth } from '../api/auth/useAuth.js';
 import { getUrl } from '../shared/utils/safeUrl';
+import ConnectionStatus from './ConnectionStatus.jsx';
 
 export default function Header() {
     const { user } = useAuth();
@@ -18,6 +19,7 @@ export default function Header() {
                     </div>
                 )}
             </div>
+            <ConnectionStatus />
             <SectionSwitcher />
         </header>
     )
