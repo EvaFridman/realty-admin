@@ -2,15 +2,34 @@ import { useEffect, useState } from 'react';
 import { useSocket } from './SocketProvider.jsx';
 
 export function useOnlineUsers() {
-    const { socket } = useSocket();
+    const { socket, isConnected } = useSocket();
     const [onlineUsers, setOnlineUsers] = useState([]);
 
     useEffect(() => {
         if (!socket) return;
-        const handler = (list) => setOnlineUsers(list);
+
+        const handler = (list) => {
+            console.log("КЛИЕНТ: Получен список онлайн:", list);
+            setOnlineUsers(list);
+        };
+
         socket.on('presence:online', handler);
-        return () => socket.off('presence:online', handler);
-    }, [socket]);
+
+        if (socket.connected) {
+            socket.emit('presence:request');
+        }
+
+        const handleConnect = () => {
+            socket.emit('presence:request');
+        };
+
+        socket.on('connect', handleConnect);
+
+        return () => {
+            socket.off('presence:online', handler);
+            socket.off('connect', handleConnect);
+        };
+    }, [socket, isConnected]);
 
     return onlineUsers;
 }
