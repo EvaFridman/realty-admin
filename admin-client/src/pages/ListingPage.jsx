@@ -1,6 +1,7 @@
 import styles from './ListingPage.module.css';
 import { useParams, Link, useLocation } from 'react-router';
 import { useOptimistic, useState, startTransition, useEffect } from 'react';
+import { useSocket } from '../realtime/SocketProvider';
 import { listingsApi } from '../api/resources.js';
 import { useAlert } from '../components/common/AlertContext.jsx';
 import { useTitle } from '../components/common/TitleContext';
@@ -23,6 +24,7 @@ export default function ListingPage() {
     const { showAlert } = useAlert();
     const { setTitle } = useTitle();
     const [refreshKey, setRefreshKey] = useState(0);
+    const { socket, isConnected } = useSocket();
 
     const { data, isLoading, error, refetch } = useFetch(
         (signal) => listingsApi.getById(id, '', { signal }),
@@ -43,6 +45,11 @@ export default function ListingPage() {
         sourceListing,
         (current, newStatus) => ({ ...current, status: newStatus, _pending: true })
     );
+
+    useEffect(() => {
+        if (!isConnected || !socket || !id) return;
+        socket.emit('room:join', `listing:${id}`);
+    }, [socket, isConnected, id]);
 
     useEffect(() => {
         if (optimisticListing?.title) {
