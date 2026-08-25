@@ -20,9 +20,20 @@ module.exports = function registerRealtimeHandlers(io) {
         }
     });
 
+    const ALLOWED_ROOM = /^(queue|listing:\d+)$/;
+
     io.on('connection', (socket) => {
         socket.on('ping:check', () => {
             socket.emit('pong:check');
+        });
+
+        socket.on("room:join", (room) => {
+            if (!ALLOWED_ROOM.test(room)) return;
+            const currentRooms = Array.from(socket.rooms);
+            for (const current of currentRooms) {
+                if (current !== socket.id) socket.leave(current);
+            }
+            socket.join(room);
         });
     });
 };
