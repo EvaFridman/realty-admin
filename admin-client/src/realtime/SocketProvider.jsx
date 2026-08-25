@@ -1,14 +1,22 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { getAccessToken } from '../api/tokenStore.js';
+import { useAuth } from '../api/auth/useAuth.js';
 
 const SocketContext = createContext(null);
 
 export default function SocketProvider({ children }) {
+    const { user } = useAuth();
     const socketRef = useRef(null);
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
+        if (!user) {
+            socketRef.current = null;
+            setIsConnected(false);
+            return;
+        }
+
         const instance = io(import.meta.env.VITE_API_BASE_URL, {
             auth: (cb) => cb({ token: getAccessToken() }),
         });
@@ -26,8 +34,9 @@ export default function SocketProvider({ children }) {
             instance.off('disconnect', handleDisconnect);
             instance.disconnect();
             socketRef.current = null;
+            setIsConnected(false);
         };
-    }, []);
+    }, [user]);
 
     const value = { socket: socketRef.current, isConnected };
 
