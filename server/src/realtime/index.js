@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 const usersRepo = require('../repositories/usersRepository');
 const { UnauthorizedError, NotFoundError } = require('../errors/AppError');
+const { addConnection, removeConnection, getOnlineList, getRoomMembers } = require('./presenceStore');
 
 module.exports = function registerRealtimeHandlers(io) {
     io.use(async (socket, next) => {
@@ -22,18 +23,45 @@ module.exports = function registerRealtimeHandlers(io) {
 
     const ALLOWED_ROOM = /^(queue|listing:\d+)$/;
 
+    function leaveCurrentRooms(socket) {
+        const currentRooms = Array.from(socket.rooms);
+        for (const current of currentRooms) {
+            if (current === socket.id) continue;
+            socket.leave(current);
+            socket.to(current).emit('presence:left', { id: socket.data.user.id });
+        }
+    }
+
     io.on('connection', (socket) => {
+        const isFirstTab = addConnection(socket);
+        socket.emit('presence:online', getOnlineList());
+        if (isFirstTab) socket.broadcast.emit('presence:online', getOnlineList());
+
         socket.on('ping:check', () => {
             socket.emit('pong:check');
         });
 
         socket.on("room:join", (room) => {
             if (!ALLOWED_ROOM.test(room)) return;
-            const currentRooms = Array.from(socket.rooms);
-            for (const current of currentRooms) {
-                if (current !== socket.id) socket.leave(current);
-            }
+
+            leaveCurrentRooms(socket);
             socket.join(room);
+
+            socket.to(room).emit('presence:joined', socket.data.user);
+            socket.emit('presence:room', getRoomMembers(io, room, socket.id));
+        });
+
+        socket.on('room:leave', () => {
+            leaveCurrentRooms(socket);
+        });
+
+        socket.on('disconnecting', () => {
+            leaveCurrentRooms(socket);
+        });
+
+        socket.on('disconnect', () => {
+            const wasLastTab = removeConnection(socket);
+            if (wasLastTab) io.emit('presence:online', getOnlineList());
         });
     });
 };

@@ -5,7 +5,7 @@ import { useSocket } from '../realtime/SocketProvider';
 import { listingsApi } from '../api/resources.js';
 import { useAlert } from '../components/common/AlertContext.jsx';
 import { useTitle } from '../components/common/TitleContext';
-import PhotoGallery from '../features/listings/components/PhotoGallery'; 
+import PhotoGallery from '../features/listings/components/PhotoGallery';
 import StatusTransitionButtons from '../features/listings/components/StatusTransitionButtons';
 import RejectionForm from '../features/listings/components/RejectionForm';
 import PublishRequirementsList from '../features/listings/components/PublishRequirementsList';
@@ -13,6 +13,8 @@ import ListingViewingsList from '../features/listings/components/ListingViewings
 import StatusMessage from '../components/common/StatusMessage';
 import ErrorView from '../shared/ui/ErrorView.jsx';
 import useFetch from '../hooks/useFetch';
+import { useRoomPresence } from '../realtime/usePresence';
+import PresenceBar from '../widgets/PresenceBar';
 
 export default function ListingPage() {
     const location = useLocation();
@@ -25,6 +27,7 @@ export default function ListingPage() {
     const { setTitle } = useTitle();
     const [refreshKey, setRefreshKey] = useState(0);
     const { socket, isConnected } = useSocket();
+    const roomMembers = useRoomPresence();
 
     const { data, isLoading, error, refetch } = useFetch(
         (signal) => listingsApi.getById(id, '', { signal }),
@@ -49,6 +52,7 @@ export default function ListingPage() {
     useEffect(() => {
         if (!isConnected || !socket || !id) return;
         socket.emit('room:join', `listing:${id}`);
+        return () => socket.emit('room:leave');
     }, [socket, isConnected, id]);
 
     useEffect(() => {
@@ -116,6 +120,7 @@ export default function ListingPage() {
 
     return (
         <div className={optimisticListing._pending ? styles.listingDetailPending : styles.listingDetail}>
+            <PresenceBar members={roomMembers} />
             <p className={styles.listingTitle}>{optimisticListing.title}</p>
             <Link className={styles.backBtn} to={backLink}>к списку объявлений</Link>
             <p className={styles.listingMeta}>{optimisticListing.address}, {optimisticListing.district?.title}</p>
