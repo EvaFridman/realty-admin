@@ -6,7 +6,7 @@ const path = require("path");
 const { apiLimiter } = require('../middleware/rateLimiters')
 
 const MAX_AGE = 1000 * 60 * 60 * 24 * 365;
-const BASE_URL = process.env.VITE_API_BASE_URL;
+const BASE_URL = process.env.PUBLIC_URL;
 const CLIENT_URL = 'http://localhost:5173';
 
 function setupMiddleware(app) {
