@@ -9,7 +9,6 @@ export function useOnlineUsers() {
         if (!socket) return;
 
         const handler = (list) => {
-            console.log("КЛИЕНТ: Получен список онлайн:", list);
             setOnlineUsers(list);
         };
 

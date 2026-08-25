@@ -26,7 +26,7 @@ function getOnlineList() {
 
 function getRoomMembers(io, room, excludeSocketId = null) {
     const socketIds = io.sockets.adapter.rooms.get(room) ?? new Set();
-    const inRoomUsers = new Map(); // userId -> user, дедуп по пользователю
+    const inRoomUsers = new Map();
 
     for (const socketId of socketIds) {
         if (socketId === excludeSocketId) continue;

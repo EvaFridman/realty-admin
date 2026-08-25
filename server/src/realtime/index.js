@@ -3,6 +3,7 @@ const config = require('../config');
 const usersRepo = require('../repositories/usersRepository');
 const { UnauthorizedError, NotFoundError } = require('../errors/AppError');
 const { addConnection, removeConnection, getOnlineList, getRoomMembers } = require('./presenceStore');
+const socketRateLimiter = require('./socketRateLimiter');
 
 module.exports = function registerRealtimeHandlers(io) {
     io.use(async (socket, next) => {
@@ -36,6 +37,8 @@ module.exports = function registerRealtimeHandlers(io) {
         const isFirstTab = addConnection(socket);
         socket.emit('presence:online', getOnlineList());
         if (isFirstTab) socket.broadcast.emit('presence:online', getOnlineList());
+
+        socket.use((packet, next) => socketRateLimiter(socket, next));
 
         socket.on('ping:check', () => {
             socket.emit('pong:check');
