@@ -15,6 +15,8 @@ import ErrorView from '../shared/ui/ErrorView.jsx';
 import useFetch from '../hooks/useFetch';
 import { useRoomPresence } from '../realtime/usePresence';
 import PresenceBar from '../widgets/PresenceBar';
+import { useCursorBroadcast } from '../realtime/useCursorBroadcast';
+import CursorLayer from '../realtime/CursorLayer';
 
 export default function ListingPage() {
     const location = useLocation();
@@ -48,6 +50,8 @@ export default function ListingPage() {
         sourceListing,
         (current, newStatus) => ({ ...current, status: newStatus, _pending: true })
     );
+
+    useCursorBroadcast(`listing:${id}`);
 
     useEffect(() => {
         if (!isConnected || !socket || !id) return;
@@ -120,6 +124,7 @@ export default function ListingPage() {
 
     return (
         <div className={optimisticListing._pending ? styles.listingDetailPending : styles.listingDetail}>
+            <CursorLayer />
             <PresenceBar members={roomMembers} />
             <p className={styles.listingTitle}>{optimisticListing.title}</p>
             <Link className={styles.backBtn} to={backLink}>к списку объявлений</Link>

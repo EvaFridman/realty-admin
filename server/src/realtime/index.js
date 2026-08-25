@@ -63,5 +63,22 @@ module.exports = function registerRealtimeHandlers(io) {
             const wasLastTab = removeConnection(socket);
             if (wasLastTab) io.emit('presence:online', getOnlineList());
         });
+
+        socket.on("cursor:move", ({ room, x, y }) => {
+            if (!socket.rooms.has(room)) return;
+            if (typeof x !== "number" || x < 0 || x > 1) return;
+            if (typeof y !== "number" || y < 0 || y > 1) return;
+
+            socket.to(room).emit("cursor:moved", {
+                userId: socket.data.user.id,
+                email: socket.data.user.email,
+                x, y,
+            });
+        });
+
+        socket.on('presence:request', () => {
+            socket.emit('presence:online', getOnlineList());
+        });
+
     });
 };
