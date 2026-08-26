@@ -2,14 +2,12 @@ import styles from './Header.module.css';
 import SectionSwitcher from "../features/navigation/SectionSwitcher.jsx";
 import { useAuth } from '../api/auth/useAuth.js';
 import { getUrl } from '../shared/utils/safeUrl';
-import { useOnlineUsers } from '../realtime/usePresence.js';
 import OnlineIndicator from './OnlineIndicator.jsx';
 import ConnectionStatus from './ConnectionStatus.jsx';
 
 export default function Header() {
     const { user } = useAuth();
     const secureAvatarUrl = getUrl(user?.avatarUrl) || '/default-avatar.png';
-    const onlineUsers = useOnlineUsers();
 
     return (
         <header className={styles.header}>
@@ -23,7 +21,7 @@ export default function Header() {
                 )}
             </div>
             <ConnectionStatus />
-            <OnlineIndicator users={onlineUsers} />
+            <OnlineIndicator />
             <SectionSwitcher />
         </header>
     )

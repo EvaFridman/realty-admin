@@ -1,4 +1,5 @@
 import styles from './PhotoGallery.module.css';
+import { useEffect, useState } from 'react';
 import { useAuth } from "../../../api/auth/useAuth.js";
 import { ListingsTransport } from '../../../api/ListingsTransport';
 import { useAlert } from '../../../components/common/AlertContext.jsx';
@@ -35,6 +36,16 @@ export default function PhotoGallery({ listingId, listingAgentId, photos, onChan
             showAlert(`Не удалось установить обложку: ${err.response?.data?.error?.message || err.message}`);
         }
     };
+
+    const [imageReloadKey, setImageReloadKey] = useState(0);
+
+    useEffect(() => {
+        if (!('serviceWorker' in navigator)) return;
+        const handleControllerChange = () => { setImageReloadKey(prev => prev + 1) };
+        navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+    
+        return () => navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+    }, []);
     
     return (
         <div className={styles.galleryContainer}>
@@ -46,9 +57,10 @@ export default function PhotoGallery({ listingId, listingAgentId, photos, onChan
                         const figureClassName = `${styles.figure} ${photo.isCover ? styles.cover : ''}`;
                         const urlOrPath = photo.externalUrl || photo.url || (photo.fileName ? `/uploads/photos/${photo.fileName}` : null);
                         const secureUrl = getUrl(urlOrPath);
+                        const imageUrl = secureUrl ? `${secureUrl}${secureUrl.includes('?') ? '&' : '?'}sw=${imageReloadKey}` : null;
                         return (
                             <figure key={photo.id} className={figureClassName}>
-                                {secureUrl ? (<img src={secureUrl} alt="" loading="lazy" width={200} height={200} className={styles.image}/>
+                                {imageUrl ? (<img src={imageUrl} alt="" loading="lazy" width={200} height={200} className={styles.image}/>
                                 ) : (
                                     <div className={styles.imagePlaceholder}>
                                         <span>Фото недоступно</span>
