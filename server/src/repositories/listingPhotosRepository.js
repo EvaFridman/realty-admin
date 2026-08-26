@@ -29,4 +29,8 @@ async function setCoverPhoto(listingId, photoId) {
     });
 }
 
-module.exports = { findPhotosByListingId, findPhotoById, createPhoto, updatePhoto, deletePhoto, setCoverPhoto };
+async function findPhotoByFileName(fileName) {
+    return ListingPhoto.findOne({ where: { fileName } });
+}
+
+module.exports = { findPhotosByListingId, findPhotoById, createPhoto, updatePhoto, deletePhoto, setCoverPhoto, findPhotoByFileName };

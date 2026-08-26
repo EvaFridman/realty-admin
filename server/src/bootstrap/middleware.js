@@ -37,7 +37,6 @@ function setupMiddleware(app) {
         credentials: true,
     }));
     app.use(apiLimiter);
-    app.use("/uploads", express.static(path.join(__dirname, "..", "uploads"), { maxAge: MAX_AGE }));
 }
 
 module.exports = setupMiddleware;

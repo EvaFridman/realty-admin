@@ -3,7 +3,7 @@ const { NotFoundError, ForbiddenError } = require('../errors/AppError');
 
 const checkListingAccess = async (req, res, next) => {
     try {
-        const listing = await listingsRepo.findListingById(req.params.id);
+        const listing = req.listing ?? await listingsRepo.findListingById(req.params.id);
         if (!listing) return next(new NotFoundError('Listing not found'));
         
         const isOwner = listing.agentId === req.user.id;

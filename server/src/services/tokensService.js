@@ -1,6 +1,7 @@
 const ms = require('ms');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
+const imagesService = require('./imagesService');
 
 function signAccessToken(user) {
     return jwt.sign({ sub: user.id, role: user.role },
@@ -25,7 +26,7 @@ function setRefreshCookie(res, token) {
 function issuePair(res, user) {
     setRefreshCookie(res, signRefreshToken(user));
     return { accessToken: signAccessToken(user),
-        user: { id: user.id, email: user.email, role: user.role }};
+        user: { id: user.id, email: user.email, role: user.role, avatarUrl: user.avatarFileName ? imagesService.buildImageUrl('avatars', user.avatarFileName) : null }};
 }
 
 module.exports = { signAccessToken, signRefreshToken, setRefreshCookie, issuePair };

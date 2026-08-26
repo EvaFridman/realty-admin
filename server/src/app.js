@@ -11,6 +11,7 @@ const viewingsStatusRouter = require('./routes/viewingsStatusRouter');
 const pdfRouter = require('./routes/pdfRouter');
 const authRouter = require('./routes/authRouter');
 const cspReportRouter = require('./routes/cspReportRouter');
+const filesRouter = require('./routes/filesRouter');
 const setupMiddleware = require('./bootstrap/middleware');
 const errorHandler = require('./middleware/errorHandler');
 const loggerMiddleware = require('./middleware/loggerMiddleware');
@@ -23,6 +24,7 @@ app.use(cspReportRouter);
 
 setupMiddleware(app);
 
+app.use('/uploads', filesRouter);
 app.use('/auth', authRouter);
 app.use('/users', usersRouter);
 app.use('/users', userAvatarRouter);
