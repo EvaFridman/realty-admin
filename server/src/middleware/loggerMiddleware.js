@@ -9,6 +9,10 @@ const loggerMiddleware = pinoHttp({
         res.setHeader('X-Request-Id', id);
         return id;
     },
+    customAttributeKeys: {
+        reqId: 'reqId',
+        responseTime: 'responseTime'
+    },
     customLogLevel: (req, res, err) => {
         if (res.statusCode >= 500 || err) return 'error';
         if (res.statusCode >= 400) return 'warn';
@@ -16,7 +20,7 @@ const loggerMiddleware = pinoHttp({
     },
     serializers: {
         req(req) {
-            return { method: req.method, url: req.url, id: req.id };
+            return { method: req.method, url: req.url, reqId: req.id };
         },
         res(res) {
             return { statusCode: res.statusCode };

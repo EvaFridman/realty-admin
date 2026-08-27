@@ -26,6 +26,7 @@ setupMiddleware(app);
 
 app.use('/uploads', filesRouter);
 app.use('/auth', authRouter);
+app.use('/logs', logsRouter);
 app.use('/users', usersRouter);
 app.use('/users', userAvatarRouter);
 app.use('/districts', districtsRouter);
@@ -34,7 +35,6 @@ app.use('/listings/:id/photos', listingPhotosRouter);
 app.use('/listings', listingsRouter);
 app.use('/users/:id/favorites', favoritesRouter);
 app.use('/viewings', viewingsStatusRouter);
-app.use(logsRouter);
 app.use(pdfRouter);
 app.use(errorHandler);
 
