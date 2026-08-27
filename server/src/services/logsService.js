@@ -17,8 +17,7 @@ async function getLogs({ level, limit, reqId }) {
             .map(parseLine)
             .filter(Boolean)
             .filter((entry) => entry.level >= minLevelValue)
-            .filter((entry) => !reqId || entry.reqId === reqId);
-
+            .filter((entry) => !reqId || (entry.req && entry.req.reqId === reqId));
         windowSize *= 4;
     }
 
