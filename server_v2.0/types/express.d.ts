@@ -1,5 +1,5 @@
-import type { AuthUser } from "./domain/user";
-import type { Listing } from "./domain/listing";
+import type { AuthUser } from "./types";
+import type { Listing } from "../database/models/listing";
 
 declare global {
     namespace Express {
