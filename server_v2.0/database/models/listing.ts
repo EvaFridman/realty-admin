@@ -26,14 +26,14 @@ export class Listing extends Model<
     declare description: string | null;
     declare dealType: ListingDealType;
     declare propertyType: ListingPropertyType;
-    declare price: string;
-    declare area: string;
+    declare price: string | number;
+    declare area: string | number;
     declare rooms: number | null;
     declare floor: number | null;
     declare totalFloors: number | null;
     declare address: string;
-    declare lat: string;
-    declare lng: string;
+    declare lat: string | number;
+    declare lng: string | number;
     declare status: ListingStatus;
     declare rejectionReason: string | null;
     declare publishedAt: Date | null;

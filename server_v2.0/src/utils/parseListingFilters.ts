@@ -1,4 +1,4 @@
-import type { ListingsListQuery } from '../../schemas/listingsSchema'
+import type { ListingsListQuery } from '../schemas/listingsSchema'
 
 export type ListingFilters = ListingsListQuery & { agentId?: number };
 

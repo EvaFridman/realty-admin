@@ -1,4 +1,4 @@
-import type { ViewingStatus } from '../../../database/models/viewing'
+import type { ViewingStatus } from '../../database/models/viewing'
 
 export const ALLOWED_TRANSITIONS: Record<ViewingStatus, readonly ViewingStatus[]> = {
   created: ['pending approval'],
