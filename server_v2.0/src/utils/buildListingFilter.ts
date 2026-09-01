@@ -1,7 +1,7 @@
 import { Op, type WhereOptions } from 'sequelize';
 import type { ListingFilters } from './parseListingFilters';
 
-export function buildListingWhere(filters: ListingFilters): WhereOptions {
+export function buildListingFilter(filters: ListingFilters): WhereOptions {
     const where: WhereOptions = {};
 
     if (filters.dealType) where.dealType = filters.dealType;
