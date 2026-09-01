@@ -1,4 +1,4 @@
-import type { AuthUser } from "./types";
+import type { AuthUser } from ".";
 import type { Listing } from "../database/models/listing";
 
 declare global {
