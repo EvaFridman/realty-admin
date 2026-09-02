@@ -38,6 +38,7 @@ declare global {
           log: Logger;
           fileName?: string;
           currentUser?: User;
+          files?: Express.Multer.File[];
       }
   }
 }

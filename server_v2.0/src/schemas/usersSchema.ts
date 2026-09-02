@@ -5,7 +5,7 @@ export const createUserSchema = z.object({
   name: registerSchema.shape.name,
   email: loginSchema.shape.email,
   password: loginSchema.shape.password,
-  phone: z.string().min(5, 'Телефон слишком короткий'),
+  phone: z.string().min(5, 'Телефон слишком короткий').optional(),
   role: z.enum(['agent', 'moderator']).optional().default('agent'),
 });
 

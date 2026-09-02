@@ -4,7 +4,7 @@ import type { CreateUserBody, UpdateUserBody } from "../schemas/usersSchema";
 
 type CreateUserData = Omit<CreateUserBody, "password"> & { passwordHash: string };
 
-type UpdateUserData = Omit<UpdateUserBody, "password"> & { passwordHash?: string };
+type UpdateUserData = Omit<UpdateUserBody, "password"> & { passwordHash?: string; avatarFileName?: string | null };
 
 export async function findAllUsers(): Promise<User[]> {
     return db.User.findAll();
