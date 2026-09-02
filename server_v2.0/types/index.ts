@@ -1,5 +1,6 @@
 import type { Request } from 'express';
-import type { UserRole } from "../database/models/user.js";
+import type { Logger } from "pino";
+import type { User, UserRole } from "../database/models/user.js";
 import type { Listing } from "../database/models/listing.js";
 
 export type AuthUser = {
@@ -34,6 +35,9 @@ declare global {
           userId?: number;
           validatedQuery?: unknown;
           listing?: Listing;
+          log: Logger;
+          fileName?: string;
+          currentUser?: User;
       }
   }
 }
