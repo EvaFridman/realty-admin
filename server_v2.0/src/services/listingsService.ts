@@ -42,6 +42,21 @@ export async function getListingById(user: AuthUser, id: number): Promise<Listin
     return { ...listing.toJSON(), allowedTransitions: getAllowedTransitions(listing.status) };
 }
 
+export async function getListingForPdf(user: AuthUser, id: number): Promise<Listing> {
+    const listing = await listingsRepo.findListingById(id);
+
+    if (!listing) throw new NotFoundError('Listing not found');
+
+    const isOwner = listing.agentId === user.id;
+    const isModerator = user.role === 'moderator';
+
+    if (!isOwner && !isModerator) {
+        throw new ForbiddenError('Not enough rights to access this listing');
+    }
+
+    return listing;
+}
+
 export async function getListingsByIds(ids: number[]): Promise<Listing[]> {
     return listingsRepo.findListingsByIds(ids);
 }
