@@ -1,14 +1,14 @@
-const listingsRepo = require('../repositories/listingsRepository');
-const photosRepo = require('../repositories/listingPhotosRepository');
-const { NotFoundError } = require('../errors/AppError');
+import * as listingsRepo from "../repositories/listingsRepository";
+import * as listingsPhotoRepo from "../repositories/listingPhotosRepository";
+import { Listing } from "../../database/models/listing";
+import { ListingPhoto } from "../../database/models/listingphoto";
+import { NotFoundError } from "../errors/AppError";
 
-export async function getPhotoWithListing(fileName: string) {
-    const photo = await photosRepo.findPhotoByFileName(fileName);
+export async function getPhotoWithListing(fileName: string): Promise<{ photo: ListingPhoto; listing: Listing }> {
+    const photo = await listingsPhotoRepo.findPhotoByFileName(fileName);
     if (!photo) throw new NotFoundError('Photo not found');
     const listing = await listingsRepo.findListingById(photo.listingId);
     if (!listing) throw new NotFoundError('Photo not found');
 
     return { photo, listing };
 }
-
-module.exports = { getPhotoWithListing };
