@@ -15,6 +15,6 @@
   
       "types": ["node", "jest"]
     },
-    "include": ["src", "database/models", "types", "server.ts", "logger.ts"],
+    "include": ["src", "database/models", "types", "server.ts", "logger.ts", "__tests__"],
     "exclude": ["node_modules", "dist", "database/migrations", "database/seeders"]
 }

@@ -1,7 +1,9 @@
 import { Op, type WhereOptions } from 'sequelize';
 import type { ListingFilters } from './parseListingFilters';
 
-export function buildListingFilter(filters: ListingFilters): WhereOptions {
+type Filter = Omit<ListingFilters, "sortBy" | "sortOrder" | "page" | "limit">;
+
+export function buildListingFilter(filters: Filter): WhereOptions {
     const where: WhereOptions = {};
 
     if (filters.dealType) where.dealType = filters.dealType;
