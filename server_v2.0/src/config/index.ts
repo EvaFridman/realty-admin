@@ -9,6 +9,7 @@ function required(name: string): string {
 
 export const APP_CONFIG = {
     port: Number(process.env.PORT) || 3000,
+    uploadBaseUrl: process.env.BASE_UPLOAD_URL,
     logLevel: process.env.LOG_LEVEL ?? "info",
     mail: {
         transport: (process.env.MAIL_TRANSPORT ?? "stream") as "real" | "stream",

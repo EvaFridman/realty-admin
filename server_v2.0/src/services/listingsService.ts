@@ -1,4 +1,4 @@
-import type { AuthUser } from "../../types/index";
+import type { AuthUser } from "../../database/models/user";
 import type { Listing, ListingStatus } from "../../database/models/listing";
 import type { CreateListingBody, UpdateListingBody, ListingsListQuery } from "../schemas/listingsSchema";
 import * as listingsRepo from "../repositories/listingsRepository";

@@ -8,6 +8,16 @@ import type { Listing } from "./listing";
 
 export type UserRole = 'agent' | 'moderator';
 
+export const USER_ROLES = {
+    AGENT: 'agent',
+    MODERATOR: 'moderator',
+} as const;
+
+export type AuthUser = {
+    id: number;
+    role: UserRole;
+};
+
 export class User extends Model<
     InferAttributes<User>,
     InferCreationAttributes<User>

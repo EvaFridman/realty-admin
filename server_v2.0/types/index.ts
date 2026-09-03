@@ -1,12 +1,7 @@
 import type { Request } from 'express';
 import type { Logger } from "pino";
-import type { User, UserRole } from "../database/models/user.js";
+import type { User, AuthUser } from "../database/models/user.js";
 import type { Listing } from "../database/models/listing.js";
-
-export type AuthUser = {
-    id: number;
-    role: UserRole;
-};
 
 export type HTTPErrorType = {
   message: string;

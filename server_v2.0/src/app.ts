@@ -15,6 +15,7 @@ import filesRouter from "./routes/filesRouter";
 import { setupMiddleware } from "./bootstrap/middleware";
 import { errorHandler } from "./middleware/errorHandler";
 import { loggerMiddleware } from "./middleware/loggerMiddleware";
+import { APP_CONFIG } from "./config";
 
 const app = express();
 
@@ -24,7 +25,7 @@ app.use(cspReportRouter);
 
 setupMiddleware(app);
 
-app.use("/uploads", filesRouter);
+app.use(`${APP_CONFIG.uploadBaseUrl}`, filesRouter);
 
 app.use("/auth", authRouter);
 app.use("/logs", logsRouter);

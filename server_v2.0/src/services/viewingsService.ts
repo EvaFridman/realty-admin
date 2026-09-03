@@ -1,4 +1,4 @@
-import type { AuthUser } from "../../types/index";
+import type { AuthUser } from "../../database/models/user";
 import * as viewingsRepo from "../repositories/viewingsRepository";
 import * as listingsRepo from "../repositories/listingsRepository";
 import type { Viewing, ViewingStatus } from "../../database/models/viewing";
