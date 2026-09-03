@@ -4,21 +4,14 @@ import { validate } from "../middleware/validate";
 import { verifyAccessToken } from "../middleware/auth";
 import { pathIdSchema, listingPhotoParamsSchema } from "../schemas/pathSchema";
 import { updatePhotoSchema } from "../schemas/listingPhotosSchema";
-import { listingPhotosUpload } from "../middleware/uploadEntities/listingPhotos";
+import { createImageUpload } from "../middleware/upload";
 import { checkListingAccess } from "../middleware/checkListingAccess";
 import { uploadLimiter } from "../middleware/rateLimiters";
 
 const listingPhotosRouter = Router({ mergeParams: true });
 
 listingPhotosRouter.post('/', uploadLimiter, verifyAccessToken, validate(pathIdSchema, 'params'), checkListingAccess,
-    (req, res, next) => {
-        listingPhotosUpload(req, res, (err) => {
-            if (err) return next(err);
-            next();
-        });
-    },
-    photosController.create
-);
+    createImageUpload({ folder: "photos", maxFileSizeMb: 5, maxFiles: 5 }).array("photos"), photosController.create);
 
 listingPhotosRouter.use(verifyAccessToken);
 

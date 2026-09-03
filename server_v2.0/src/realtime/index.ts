@@ -7,6 +7,8 @@ import { socketRateLimiter } from './socketRateLimiter';
 import type { AppServer, AppSocket } from "./types";
 
 export function registerRealtimeHandlers(io: AppServer): void {
+    const ALLOWED_ROOM = /^(queue|listing:\d+)$/;
+
     io.use(async (socket, next) => {
         const token = socket.handshake.auth?.token;
         if (!token) return next(new UnauthorizedError("No access token"));
@@ -23,8 +25,6 @@ export function registerRealtimeHandlers(io: AppServer): void {
             next(new UnauthorizedError('Invalid access token'));
         }
     });
-
-    const ALLOWED_ROOM = /^(queue|listing:\d+)$/;
 
     function leaveCurrentRooms(socket: AppSocket): void {
         const currentRooms = Array.from(socket.rooms);

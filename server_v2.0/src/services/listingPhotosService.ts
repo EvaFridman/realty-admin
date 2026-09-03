@@ -1,4 +1,4 @@
-import type { AuthUser } from "../../types/index";
+import type { AuthUser } from "../../database/models/user";
 import * as listingsPhotoRepo from "../repositories/listingPhotosRepository";
 import { NotFoundError, ConflictError, ValidationError } from "../errors/AppError";
 import { sequelize } from "../../database/models";
@@ -15,37 +15,31 @@ export async function listPhotos(user: AuthUser, listingId: number): Promise<Lis
 }
 
 export async function addPhoto(user: AuthUser, listingId: number, files: Express.Multer.File[] = [], log: Logger = logger): Promise<PhotoDto[]> {
+    if (files.length === 0) throw new ValidationError("No files provided");
+
     const cleanUploadedFiles = async (): Promise<void> => {
         for (const file of files) {
-            await deletePhysicalFile(file.filename, 'photos', log);
+            await deletePhysicalFile(file.filename, "photos", log);
         }
     };
 
-    if (files.length === 0) throw new ValidationError('No files provided');
-
-    const t = await sequelize.transaction();
-
     try {
-        const currentPhotosCount = await ListingPhoto.count({
-            where: { listingId },
-            transaction: t
+        const photos = await sequelize.transaction(async (t) => {
+            const currentPhotosCount = await ListingPhoto.count({ where: { listingId }, transaction: t });
+            if (currentPhotosCount + files.length > 5) throw new ConflictError(`Limit exceeded. Already has ${currentPhotosCount} photos. Cannot add ${files.length} more (max 5).`);
+            const photos: ListingPhoto[] = [];
+            for (const file of files) {
+                const newPhoto = await ListingPhoto.create({ listingId, fileName: file.filename, sizeBytes: file.size, externalUrl: null }, { transaction: t });
+                photos.push(newPhoto);
+            }
+            return photos;
         });
 
-        if (currentPhotosCount + files.length > 5) {
-            await cleanUploadedFiles();
-            throw new ConflictError(`Limit exceeded. Already has ${currentPhotosCount} photos. Cannot add ${files.length} more (max 5).`);
-        }
-
-        const photos: ListingPhoto[] = [];
-        for (const file of files) {
-            const newPhoto = await ListingPhoto.create({ listingId, fileName: file.filename, sizeBytes: file.size, externalUrl: null }, { transaction: t });
-            photos.push(newPhoto);
-        }
-        await t.commit();
-        return photos.map(photo => toPhotoDto(photo)).filter((photo): photo is PhotoDto => photo !== null);
+        return photos
+            .map((photo) => toPhotoDto(photo))
+            .filter((photo): photo is PhotoDto => photo !== null);
 
     } catch (error) {
-        await t.rollback();
         await cleanUploadedFiles();
         throw error;
     }

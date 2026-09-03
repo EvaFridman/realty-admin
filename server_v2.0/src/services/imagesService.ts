@@ -3,9 +3,10 @@ import path from "path";
 import type { Logger } from "pino";
 import type { ListingPhoto } from "../../database/models/listingphoto";
 import { logger } from "../tools/logger";
+import { APP_CONFIG } from "../config";
 
 export const buildImageUrl = (folder: string, fileName: string): string => {
-    return `/uploads/${folder}/${fileName}`.replace('//', '/');
+    return `${APP_CONFIG.uploadBaseUrl}/${folder}/${fileName}`.replace('//', '/');
 };
 
 export const toPhotoDto = (photo: ListingPhoto | null): {id: number; url: string; sizeBytes: number | null} | null => {

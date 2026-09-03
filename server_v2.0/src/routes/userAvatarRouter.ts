@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as userAvatarController from "../controllers/userAvatarController";
 import { verifyAccessToken } from "../middleware/auth";
-import { avatarUpload } from "../middleware/uploadEntities/userAvatar";
+import { createImageUpload } from "../middleware/upload";
 import { checkAvatarAccess } from "../middleware/checkAvatarAccess";
 import { validate } from "../middleware/validate";
 import { pathIdSchema } from "../schemas/pathSchema";
@@ -11,7 +11,11 @@ const userAvatarRouter = Router();
 
 userAvatarRouter.post('/:id/avatar', uploadLimiter, verifyAccessToken, validate(pathIdSchema, 'params'), checkAvatarAccess,
 (req, res, next) => {
-    avatarUpload(req, res, (err) => {
+    createImageUpload({
+        folder: "avatars",
+        maxFileSizeMb: 5,
+        maxFiles: 1,
+    }).single("avatar")(req, res, (err) => {
         if (err) return next(err);
         next();
     });

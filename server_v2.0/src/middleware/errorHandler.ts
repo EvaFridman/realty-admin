@@ -1,5 +1,5 @@
 import type { ErrorRequestHandler } from "express";
-import multer from "multer";
+import { MulterError } from "multer";
 import { AppError } from "../errors/AppError";
 import { sendResponse } from "../utils/response";
 
@@ -15,7 +15,7 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
         return sendResponse(res, err.status, null, { message: err.message, details: detailsToShow, code: err.code ?? null }, null);
     }
 
-    if (err instanceof multer.MulterError) {
+    if (err instanceof MulterError) {
         const multerErrors: Record<string, [number, string]> =  {
             LIMIT_FILE_SIZE: [413, "File is too large, maximum is 5 MB"],
             LIMIT_FILE_COUNT: [400, "Too many files, maximum is 5"],
