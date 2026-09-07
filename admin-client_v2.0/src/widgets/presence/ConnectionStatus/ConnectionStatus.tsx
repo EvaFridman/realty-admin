@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { useSocket } from '@/app/presence/useSocket';
+import { useSocket } from '@/shared/hooks/useSocket';
 
 import styles from './ConnectionStatus.module.css';
 

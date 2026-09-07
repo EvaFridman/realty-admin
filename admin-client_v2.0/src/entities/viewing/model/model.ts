@@ -13,3 +13,9 @@ export type ViewingType = {
     createdAt: string;
     updatedAt: string;
 };
+
+export type ViewingListItemType = ViewingType & {
+    listing: { title: string; address: string } | null;
+    allowedTransitions: ViewingStatusType[];
+    _pending?: boolean;
+};

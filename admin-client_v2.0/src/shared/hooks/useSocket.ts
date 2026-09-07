@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import type { SocketContextValueType } from '@/features/presence';
 
-import { SocketContext } from './SocketContext';
+import { SocketContext } from '../../app/presence/SocketContext';
 
 export function useSocket(): SocketContextValueType {
     const value = useContext(SocketContext);
