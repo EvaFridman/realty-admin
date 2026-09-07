@@ -2,8 +2,8 @@ import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
 import { useAuth, getAccessToken } from '@/features/auth';
+import type { SocketContextValueType } from '@/features/presence';
 
-import type { SocketContextValueType } from './model/index';
 import { SocketContext } from './SocketContext';
 
 type Props = { children: ReactNode };

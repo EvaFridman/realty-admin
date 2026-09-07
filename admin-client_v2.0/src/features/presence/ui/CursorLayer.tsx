@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement, type CSSProperties } from 'react';
 
-import { useSocket } from '../hooks/useSocket';
+import { useSocket } from '@/app/presence/useSocket';
 
 import styles from './CursorLayer.module.css';
 

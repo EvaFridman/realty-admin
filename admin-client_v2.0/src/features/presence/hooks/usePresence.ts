@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 
+import { useSocket } from '@/app/presence/useSocket';
+
 import type { PresenceUserType } from '../model';
 
-import { useSocket } from './useSocket';
 
 type LeftUserType = { id: number };
 
