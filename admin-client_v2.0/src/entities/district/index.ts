@@ -1,0 +1,1 @@
+export type { DistrictType } from './model/model';

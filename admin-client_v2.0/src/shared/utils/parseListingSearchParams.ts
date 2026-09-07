@@ -1,4 +1,18 @@
-export function parseListingSearchParams(params: URLSearchParams) {
+type ListingSearchParamsType = {
+    dealType: string;
+    propertyType: string;
+    districtId: string;
+    priceMin: string;
+    priceMax: string;
+    rooms: number[];
+    search: string;
+    sortBy: string;
+    sortOrder: string;
+    page: number;
+    limit: number;
+};
+
+export function parseListingSearchParams(params: URLSearchParams): ListingSearchParamsType {
     return {
         dealType: params.get('dealType') ?? '',
         propertyType: params.get('propertyType') ?? '',
