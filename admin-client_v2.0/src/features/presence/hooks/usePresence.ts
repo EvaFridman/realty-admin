@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useSocket } from '@/app/presence/useSocket';
+import { useSocket } from '@/shared/hooks/useSocket';
 
 import type { PresenceUserType } from '../model';
 
