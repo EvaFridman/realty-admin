@@ -1,13 +1,15 @@
-import { useState, useEffect, type ReactNode } from 'react';
-import { useLocation, matchPath } from 'react-router';
+import { useEffect, useState, type ReactNode } from 'react';
+import { matchPath, useLocation } from 'react-router';
 
-import { TitleContext } from '@/shared/context/TitleContext';
+import { TitleContext } from '@/shared/context';
 
-type TitleProviderProps = { children: ReactNode };
+type Props = { children: ReactNode };
 
-type DynamicTitle = { path: string; title: (params: Record<string, string | undefined>) => string };
+type DynamicTitleType = { path: string; title: (params: Record<string, string | undefined>) => string };
 
-const staticTitles: Record<string, string> = {
+type CustomTitleType = { pathname: string; title: string };
+
+const STATIC_TITLES: Record<string, string> = {
     '/': 'Очередь модерации',
     '/listings': 'Все объявления',
     '/viewings': 'Заявки на просмотр',
@@ -18,37 +20,42 @@ const staticTitles: Record<string, string> = {
     '/profile': 'Личный профиль',
 };
 
-const dynamicTitles: DynamicTitle[] = [
-    { path: '/listings/:id', title: (params) => `Объявление #${params.id}` },
-    { path: '/users/:id', title: (params) => `Пользователь #${params.id}` },
+const dynamicTitles: DynamicTitleType[] = [
+    { path: '/listings/:id', title: (params) => `Объявление #${params.id ?? ''}` },
+    { path: '/users/:id', title: (params) => `Пользователь #${params.id ?? ''}` },
 ];
 
-export function TitleProvider({ children }: TitleProviderProps) {
+function getDefaultTitle(pathname: string): string {
+    const staticTitle = STATIC_TITLES[pathname];
+
+    if (staticTitle) return staticTitle;
+
+    for (const route of dynamicTitles) {
+        const match = matchPath(route.path, pathname);
+        if (match)  return route.title(match.params);
+    }
+
+    return 'Админ-панель';
+}
+
+export function TitleProvider({ children }: Props): ReactNode {
     const location = useLocation();
-    const [title, setTitle] = useState('Админ-панель');
+    const [customTitle, setCustomTitle] = useState<CustomTitleType | null>(null);
 
-    useEffect(() => {
-        const staticTitle = staticTitles[location.pathname];
+    const defaultTitle = getDefaultTitle(location.pathname);
 
-        if (staticTitle) {
-            setTitle(staticTitle);
-            return;
-        }
+    const title = customTitle?.pathname === location.pathname ? customTitle.title : defaultTitle;
 
-        for (const route of dynamicTitles) {
-            const match = matchPath(route.path, location.pathname);
-            if (match) {
-                setTitle(route.title(match.params));
-                return;
-            }
-        }
+    const setTitle = (value: string | ((previous: string) => string)) => {
+        setCustomTitle((current) => {
+            const currentTitle = current?.pathname === location.pathname ? current.title : defaultTitle;
+            const nextTitle = typeof value === 'function' ? value(currentTitle) : value;
 
-        setTitle('Админ-панель');
-    }, [location.pathname]);
+            return { pathname: location.pathname, title: nextTitle };
+        });
+    };
 
-    useEffect(() => {
-        document.title = title ? `${title} - Админ-панель` : 'Админ-панель';
-    }, [title]);
+    useEffect(() => { document.title = `${title} - Админ-панель` }, [title]);
 
     const value = { title, setTitle };
 

@@ -1,14 +1,15 @@
 import { useState, type ReactNode } from 'react';
 
+import { AlertContext } from '@/shared/context';
+
 import styles from './AlertProvider.module.css';
-import { AlertContext } from '@/shared/context/AlertContext';
 
-type AlertProviderProps = { children: ReactNode };
+type Props = { children: ReactNode };
 
-type Alert = { id: number; message: string };
+type AlertType = { id: number; message: string };
 
-export function AlertProvider({ children }: AlertProviderProps) {
-    const [alerts, setAlerts] = useState<Alert[]>([]);
+export function AlertProvider({ children }: Props): ReactNode {
+    const [alerts, setAlerts] = useState<AlertType[]>([]);
 
     function showAlert(message: string): void {
         const id = Date.now() + Math.random();

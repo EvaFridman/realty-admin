@@ -26,7 +26,6 @@ export default tseslint.config(
     },
     plugins: { 
       import: importPlugin,
-      "react-refresh": reactRefresh,
       "react-hooks": reactHooks,
     },
     settings: {
@@ -39,6 +38,7 @@ export default tseslint.config(
         {
           groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
           pathGroups: [
+            { pattern: "**/*.module.css", group: "sibling", position: "before" },
             { pattern: "@/app/**", group: "internal", position: "before" },
             { pattern: "@/pages/**", group: "internal", position: "before" },
             { pattern: "@/widgets/**", group: "internal", position: "before" },
@@ -54,6 +54,7 @@ export default tseslint.config(
       "import/no-duplicates": "error",
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/explicit-module-boundary-types": "error",
     },
   },
   {

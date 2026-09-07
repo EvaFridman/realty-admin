@@ -1,13 +1,19 @@
 import axios from 'axios';
 import { useEffect, useRef, useState, type DependencyList } from 'react';
 
-import type { ApiResponse } from '../api/types';
+import type { ApiResponseType } from '../api/types';
 
-type Request<TData> = (signal: AbortSignal) => Promise<ApiResponse<TData>>;
+type RequestType<T> = (signal: AbortSignal) => Promise<ApiResponseType<T>>;
 
-export default function useFetch<TData>(request: Request<TData>, dependencies: DependencyList = []) {
+type UseFetchResultType<T> = {
+    data: T | null;
+    isLoading: boolean;
+    error: string | null;
+};
+
+export default function useFetch<T>(request: RequestType<T>, dependencies: DependencyList = []): UseFetchResultType<T> {
     const requestRef = useRef(request);
-    const [data, setData] = useState<TData | null>(null);
+    const [data, seT] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -15,24 +21,26 @@ export default function useFetch<TData>(request: Request<TData>, dependencies: D
         requestRef.current = request;
     }, [request]);
 
+     
     useEffect(() => {
         const controller = new AbortController();
 
-        async function load() {
+        async function load(): Promise<void> {
             setIsLoading(true);
             setError(null);
-            setData(null);
+            seT(null);
 
             try {
                 const result = await requestRef.current(controller.signal);
-                setData(result.data);
+                seT(result.data);
             } catch (err: unknown) {
                 if (axios.isCancel(err)) {
                     return;
                 }
 
-                if (axios.isAxiosError(err)) {
-                    const errorMessage = err.response?.data?.error?.message ?? err.message ?? 'Unknown Error';
+                if (axios.isAxiosError<ApiResponseType>(err)) {
+                    const errorMessage = err.response?.data.error?.message ?? err.message;
+
                     setError(errorMessage);
                 } else if (err instanceof Error) {
                     setError(err.message);
@@ -46,8 +54,12 @@ export default function useFetch<TData>(request: Request<TData>, dependencies: D
             }
         }
 
-        load();
-        return () => controller.abort();
+        void load();
+
+        return () => { controller.abort() };
+
+        // dependencies intentionally come from the hook's public API
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, dependencies);
 
     return { data, isLoading, error };

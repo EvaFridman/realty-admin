@@ -1,4 +1,11 @@
-export function parseViewingSearchParams(params: URLSearchParams) {
+type ViewingSearchParamsType = {
+    status: string;
+    sortOrder: string;
+    page: number;
+    limit: number;
+};
+
+export function parseViewingSearchParams(params: URLSearchParams): ViewingSearchParamsType {
     return {
         status: params.get('status') ?? '',
         sortOrder: params.get('sortOrder') ?? 'desc',

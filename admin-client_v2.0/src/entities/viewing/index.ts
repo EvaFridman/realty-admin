@@ -1,0 +1,1 @@
+export type { ViewingStatusType, ViewingType } from './model/model'
