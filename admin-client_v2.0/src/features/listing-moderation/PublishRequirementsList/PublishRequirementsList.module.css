@@ -1,0 +1,18 @@
+.requirementsContainer {
+    background: var(--color-surface-muted);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.title {
+    margin: 0 0 var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.requirementsList {
+    margin: 0;
+    padding-left: 18px;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
