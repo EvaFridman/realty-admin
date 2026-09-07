@@ -1,4 +1,4 @@
-type ViewingSearchParamsType = {
+export type ViewingSearchParamsType = {
     status: string;
     sortOrder: string;
     page: number;

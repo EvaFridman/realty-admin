@@ -1,4 +1,4 @@
-type ListingSearchParamsType = {
+export type ListingSearchParamsType = {
     dealType: string;
     propertyType: string;
     districtId: string;
