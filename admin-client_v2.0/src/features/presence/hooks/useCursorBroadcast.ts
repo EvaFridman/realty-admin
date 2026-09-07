@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { useSocket } from './useSocket';
+import { useSocket } from '@/app/presence/useSocket';
 
 export function useCursorBroadcast(room: string): void {
     const { socket, isConnected } = useSocket();
