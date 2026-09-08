@@ -1,59 +1,59 @@
-// import { lazy, Suspense } from 'react';
-// import { Routes, Route } from 'react-router';
+import { lazy, Suspense, type ReactElement } from 'react';
+import { Route, Routes } from 'react-router';
 
-// import { AuthProvider } from '@/features/auth';
+import { TitleProvider } from '@/app/providers/TitleProvider';
+import Layout from '@/app/routes/Layout';
 
-// import { TitleProvider } from '@/app/providers/TitleProvider';
-// import Layout from './routes/Layout';
-// import PageLoader from '@/shared/ui/PageLoader';
-// import LoginPage from '@/pages/LoginPage';
-// import NotFoundPage from '@/pages/NotFoundPage';
-// import RequireAuthGuard from '@/app/guards/RequireAuthGuard';
-// import RequireRoleGuard from '@/app/guards/RequireRoleGuard';
+import PageLoader from '@/shared/ui/PageLoader/PageLoader';
 
-// const QueuePage = lazy(() => import('@/pages/QueuePage'));
-// const ListingsPage = lazy(() => import('@/pages/ListingsPage'));
-// const ListingPage = lazy(() => import('@/pages/ListingPage'));
-// const ViewingsPage = lazy(() => import('@/pages/ViewingsPage'));
-// const DistrictsPage = lazy(() => import('@/pages/DistrictsPage'));
-// const UsersListPage = lazy(() => import('@/pages/UsersListPage'));
-// const UserDetailPage = lazy(() => import('@/pages/UserDetailPage'));
-// const UserCreatePage = lazy(() => import('@/pages/UserCreatePage'));
-// const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+import { LoginPage, NotFoundPage, QueuePage } from '@/pages';
 
-// function App() {
-//     return (
-//         <TitleProvider>
-//             <Suspense fallback={<PageLoader />}>
-//                 <Routes>
-//                     <Route path="/login" element={<LoginPage />} />
 
-//                     <Route
-//                         path="/"
-//                         element={
-//                             <RequireAuthGuard>
-//                                 <RequireRoleGuard roles={['moderator']}>
-//                                     <Layout />
-//                                 </RequireRoleGuard>
-//                             </RequireAuthGuard>
-//                         }
-//                     >
-//                         <Route index element={<QueuePage />} />
-//                         <Route path="listings" element={<ListingsPage />} />
-//                         <Route path="listings/:id" element={<ListingPage />} />
-//                         <Route path="viewings" element={<ViewingsPage />} />
-//                         <Route path="districts" element={<DistrictsPage />} />
-//                         <Route path="users" element={<UsersListPage />} />
-//                         <Route path="users/new" element={<UserCreatePage />} />
-//                         <Route path="users/:id" element={<UserDetailPage />} />
-//                         <Route path="profile" element={<ProfilePage />} />
-//                     </Route>
+import { RequireAuthGuard, RequireRoleGuard } from '../guards';
 
-//                     <Route path="*" element={<NotFoundPage />} />
-//                 </Routes>
-//             </Suspense>
-//         </TitleProvider>
-//     );
-// }
+const ListingsPage = lazy(() => import('@/pages/listings/ListingsPage'));
+const ListingPage = lazy(() => import('@/pages/listing/ListingPage'));
+const ViewingsPage = lazy(() => import('@/pages/viewings/ViewingsPage'));
+const DistrictsPage = lazy(() => import('@/pages/districts/DistrictsPage'));
 
-// export default App;
+const UsersListPage = lazy(() => import('@/pages/users/UsersListPage'));
+const UserDetailPage = lazy(() => import('@/pages/userDetail/UserDetailPage'));
+const UserCreatePage = lazy(() => import('@/pages/userCreate/UserCreatePage'));
+const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
+
+function App(): ReactElement {
+    return (
+        <TitleProvider>
+            <Suspense fallback={<PageLoader />}>
+                <Routes>
+                    <Route path="/login" element={<LoginPage />} />
+
+                    <Route
+                        path="/"
+                        element={
+                            <RequireAuthGuard>
+                                <RequireRoleGuard roles={['moderator']}>
+                                    <Layout />
+                                </RequireRoleGuard>
+                            </RequireAuthGuard>
+                        }
+                    >
+                        <Route index element={<QueuePage />} />
+                        <Route path="listings" element={<ListingsPage statusFilter={null} />} />
+                        <Route path="listings/:id" element={<ListingPage />} />
+                        <Route path="viewings" element={<ViewingsPage />} />
+                        <Route path="districts" element={<DistrictsPage />} />
+                        <Route path="users" element={<UsersListPage />} />
+                        <Route path="users/new" element={<UserCreatePage />} />
+                        <Route path="users/:id" element={<UserDetailPage />} />
+                        <Route path="profile" element={<ProfilePage />} />
+                    </Route>
+
+                    <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+            </Suspense>
+        </TitleProvider>
+    );
+}
+
+export default App;

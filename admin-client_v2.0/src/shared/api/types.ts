@@ -17,3 +17,8 @@ export type ApiResponseType<TData = unknown, TMeta = unknown> = {
     error: ApiErrorType | null;
     meta: TMeta | null;
 };
+
+export type PaginationMetaType = {
+    page: number;
+    totalPages: number;
+};
