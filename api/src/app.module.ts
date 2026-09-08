@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DistrictsModule } from './districts/districts.module.js';
 import { UsersModule } from './users/users.module.js';
 import { HealthModule } from './health/health.module.js';
+import { ViewingsModule } from './viewings/viewings.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -22,6 +23,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     DistrictsModule,
     UsersModule,
     HealthModule,
+    ViewingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
