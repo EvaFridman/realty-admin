@@ -4,6 +4,7 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ConfigModule } from '@nestjs/config';
 import { DistrictsModule } from './districts/districts.module.js';
+import { UsersModule } from './users/users.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -18,6 +19,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     // }),
     ConfigModule.forRoot({ isGlobal: true }),
     DistrictsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -11,13 +11,11 @@ export class DistrictsService {
   // TODO: при появлении DB-слоя переделать
 
   create(data: CreateDistrictDto): District {
-    const newDistrict = this.repo.create(data);
-    return newDistrict;
+    return this.repo.create(data);
   }
 
   findAll(): District[] {
-    const districts = this.repo.findAll();
-    return districts;
+    return this.repo.findAll();
   }
 
   findOne(id: number): District {
@@ -27,9 +25,8 @@ export class DistrictsService {
   }
 
   count(): number {
-    const districtsLength = this.repo.count();
-    return districtsLength;
-}
+    return this.repo.count();
+  }
 
   update(id: number, data: UpdateDistrictDto): District {
     const district = this.repo.update(id, data);
