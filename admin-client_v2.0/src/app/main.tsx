@@ -1,62 +1,77 @@
-// import './styles/index.css';
+import './styles/index.css';
 
-// import { createRoot } from 'react-dom/client';
-// import { BrowserRouter } from 'react-router';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router';
 
-// // import App from './routes/App';
-// import { AlertProvider } from './providers/AlertProvider';
-// import AuthProvider from '@/features/auth/provider/AuthProvider';
-// // import SocketProvider from '@/realtime/SocketProvider';
+import { getAccessToken, setAccessToken, refreshTokens, AuthProvider } from '@/features/auth';
 
-// import { getAccessToken, setAccessToken } from '@/shared/api';
-// import { refreshTokens } from '@/shared/api';
+import SocketProvider from './presence/SocketProvider';
+import { AlertProvider } from './providers/AlertProvider';
+import App from './routes/App';
 
-// const root = document.getElementById('root');
+type ServiceWorkerMessageType = { type: 'GET_TOKEN' } | { type: 'REFRESH_TOKENS' };
 
-// if (!root) throw new Error('Root element not found');
+function isServiceWorkerMessage(data: unknown, ): data is ServiceWorkerMessageType {
+    if (typeof data !== 'object' || data === null) return false;
+    const value = data as { type?: unknown };
+    return value.type === 'GET_TOKEN' || value.type === 'REFRESH_TOKENS';
+}
 
-// if ('serviceWorker' in navigator) {
-//     const registerSW = (): void => {
-//         void navigator.serviceWorker.register(
-//             `/sw.js?apiBase=${encodeURIComponent(import.meta.env.VITE_API_BASE_URL)}`
-//         );
-//     };
+async function handleTokenRefresh(port: MessagePort): Promise<void> {
+    try {
+        const envelope = await refreshTokens();
+        const newToken = envelope.data?.accessToken ?? null;
+        setAccessToken(newToken);
+        port.postMessage(newToken);
+    } catch {
+        port.postMessage(null);
+    }
+}
 
-//     if (document.readyState === 'complete') {
-//         registerSW();
-//     } else {
-//         window.addEventListener('load', registerSW);
-//     }
+if ('serviceWorker' in navigator) {
+    const registerSW = (): void => {
+        void navigator.serviceWorker.register(
+            `/sw.js?apiBase=${encodeURIComponent(import.meta.env.VITE_API_BASE_URL)}`,
+        );
+    };
 
-//     navigator.serviceWorker.addEventListener('message', async (event: MessageEvent): Promise<void> => {
-//         if (!event.ports || !event.ports[0]) return;
+    if (document.readyState === 'complete') {
+        registerSW();
+    } else {
+        window.addEventListener('load', registerSW);
+    }
 
-//         if (event.data?.type === 'GET_TOKEN') {
-//             event.ports[0].postMessage(getAccessToken());
-//         }
+    navigator.serviceWorker.addEventListener(
+        'message',
+        (event: MessageEvent) => {
+            const port = event.ports[0];
 
-//         if (event.data?.type === 'REFRESH_TOKENS') {
-//             try {
-//                 const envelope = await refreshTokens();
-//                 const newToken = envelope?.data?.accessToken;
+            if (!port || !isServiceWorkerMessage(event.data)) return;
 
-//                 setAccessToken(newToken);
-//                 event.ports[0].postMessage(newToken);
-//             } catch {
-//                 event.ports[0].postMessage(null);
-//             }
-//         }
-//     });
-// }
+            if (event.data.type === 'GET_TOKEN') {
+                port.postMessage(getAccessToken());
+                return;
+            }
 
-// createRoot(root).render(
-//     <BrowserRouter>
-//         <AlertProvider>
-//             <AuthProvider>
-//                 {/* <SocketProvider>
-//                     <App />
-//                 </SocketProvider> */}
-//             </AuthProvider>
-//         </AlertProvider>
-//     </BrowserRouter>
-// );
+            void handleTokenRefresh(port);
+        },
+    );
+}
+
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+    throw new Error('Root element not found');
+}
+
+createRoot(rootElement).render(
+    <BrowserRouter>
+        <AlertProvider>
+            <AuthProvider>
+                <SocketProvider>
+                    <App />
+                </SocketProvider>
+            </AuthProvider>
+        </AlertProvider>
+    </BrowserRouter>,
+);

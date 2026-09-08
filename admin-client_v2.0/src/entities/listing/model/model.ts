@@ -25,6 +25,7 @@ export type ListingType = {
     lat: string | number;
     lng: string | number;
     status: ListingStatusType;
+    allowedTransitions: ListingStatusType[];
     rejectionReason: string | null;
     publishedAt: string | null;
     createdAt: string;
