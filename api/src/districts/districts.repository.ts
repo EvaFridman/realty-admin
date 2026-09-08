@@ -12,6 +12,18 @@ export class DistrictsRepository {
         return this.districts;
     }
 
+    findAllPaginated(page: number, limit: number, city?: string): { items: District[], total: number } {
+        const filteredDistricts = city ? this.districts.filter(d => d.city === city) : this.districts;
+        const total = filteredDistricts.length;
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+
+        const items = filteredDistricts.slice(startIndex, endIndex);
+
+        return { items, total };
+    }
+
     findDistrictById(id: number): District | null {
         const district = this.districts.find(d => d.id === id);
         return district ?? null;
@@ -29,7 +41,7 @@ export class DistrictsRepository {
     }
 
     update(id: number, data: UpdateDistrictDto): District | null {
-        const district = this.findDistrictById(id);
+        const district = this.districts.find(d => d.id === id);
         if (!district) return null;
         Object.assign(district, data);
         district.updatedAt = new Date();
