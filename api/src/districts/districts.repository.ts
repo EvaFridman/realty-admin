@@ -1,5 +1,7 @@
 import { Injectable, Inject } from "@nestjs/common";
 import type { District } from './districts.types.js'
+import { CreateDistrictDto } from './dto/create-district.dto.js'
+import { UpdateDistrictDto } from './dto/update-district.dto.js'
 
 @Injectable()
 export class DistrictsRepository {
@@ -17,5 +19,20 @@ export class DistrictsRepository {
 
     count(): number {
         return this.districts.length;
+    }
+
+    create(data: CreateDistrictDto): District {
+        const newDistrictId: number = this.districts.length > 0 ? Math.max(...this.districts.map(d => d.id)) + 1 : 1;
+        const newDistrict: District = { id: newDistrictId, ...data, createdAt: new Date(), updatedAt: new Date() };
+        this.districts.push(newDistrict);
+        return newDistrict;
+    }
+
+    update(id: number, data: UpdateDistrictDto): District | null {
+        const district = this.findDistrictById(id);
+        if (!district) return null;
+        Object.assign(district, data);
+        district.updatedAt = new Date();
+        return district;
     }
 };
