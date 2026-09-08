@@ -3,6 +3,7 @@ import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ConfigModule } from '@nestjs/config';
+import { DistrictsModule } from './districts/districts.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -16,6 +17,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     //   serviceId: 'api',
     // }),
     ConfigModule.forRoot({ isGlobal: true }),
+    DistrictsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
