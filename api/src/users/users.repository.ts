@@ -5,7 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto.js'
 
 @Injectable()
 export class UsersRepository {
-    constructor(@Inject("USERS_SEED") private readonly users: User[]) {}
+    constructor(@Inject("USERS_SEED") private readonly users: User[]) { }
 
     //TODO: при появлении DB-слоя переделать
     findAll(): PublicUser[] {
@@ -13,6 +13,21 @@ export class UsersRepository {
             const { passwordHash, ...publicUser } = user;
             return publicUser;
         });
+    }
+
+    findAllPaginated(page: number, limit: number): { items: PublicUser[], total: number } {
+        const users = this.users.map(user => {
+            const { passwordHash, ...publicUser } = user;
+            return publicUser;
+        });
+        const total = users.length;
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+
+        const items = users.slice(startIndex, endIndex);
+
+        return { items, total };
     }
 
     findUserById(id: number): PublicUser | null {

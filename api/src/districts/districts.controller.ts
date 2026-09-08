@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Query, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { DistrictsService } from './districts.service.js';
 import { CreateDistrictDto } from './dto/create-district.dto.js';
 import { UpdateDistrictDto } from './dto/update-district.dto.js';
@@ -13,8 +13,10 @@ export class DistrictsController {
   }
 
   @Get()
-  findAll() {
-    return this.districtsService.findAll();
+  findAll(@Query("page") page?: string, @Query("limit") limit?: string, @Query("city") city?: string) {
+    const pageNumber = page ? +page : undefined;
+    const limitNumber = limit ? +limit : undefined;
+    return this.districtsService.findAll(pageNumber, limitNumber, city);
   }
 
   @Get('count')
