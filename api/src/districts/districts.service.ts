@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-// import { CreateDistrictDto } from './dto/create-district.dto.js';
-// import { UpdateDistrictDto } from './dto/update-district.dto.js';
+import { CreateDistrictDto } from './dto/create-district.dto.js';
+import { UpdateDistrictDto } from './dto/update-district.dto.js';
 import { DistrictsRepository } from './districts.repository.js'
 import type { District } from './districts.types.js'
 
@@ -8,11 +8,13 @@ import type { District } from './districts.types.js'
 export class DistrictsService {
   constructor(private readonly repo: DistrictsRepository) {}
 
-  // create(createDistrictDto: CreateDistrictDto) {
-  //   return 'This action adds a new district';
-  // }
-
   // TODO: при появлении DB-слоя переделать
+
+  create(data: CreateDistrictDto): District {
+    const newDistrict = this.repo.create(data);
+    return newDistrict;
+  }
+
   findAll(): District[] {
     const districts = this.repo.findAll();
     return districts;
@@ -29,9 +31,11 @@ export class DistrictsService {
     return districtsLength;
 }
 
-  // update(id: number, updateDistrictDto: UpdateDistrictDto) {
-  //   return `This action updates a #${id} district`;
-  // }
+  update(id: number, data: UpdateDistrictDto): District {
+    const district = this.repo.update(id, data);
+    if (!district) throw new NotFoundException('District not found')
+    return district;
+  }
 
   // remove(id: number) {
   //   return `This action removes a #${id} district`;
