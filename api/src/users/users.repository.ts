@@ -39,6 +39,12 @@ export class UsersRepository {
         return publicUser;
     }
 
+    findUserByEmailWithPassword(email: string): User | null {
+        const user = this.users.find(u => u.email === email);
+        if (!user) return null;
+        return user;
+    }
+
     count(): number {
         return this.users.length;
     }

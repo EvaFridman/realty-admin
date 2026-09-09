@@ -7,6 +7,7 @@ import { DistrictsModule } from './districts/districts.module.js';
 import { UsersModule } from './users/users.module.js';
 import { HealthModule } from './health/health.module.js';
 import { ViewingsModule } from './viewings/viewings.module.js';
+import { AuthModule } from './auth/auth.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -24,6 +25,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     UsersModule,
     HealthModule,
     ViewingsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

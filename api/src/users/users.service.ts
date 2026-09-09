@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { UsersRepository } from './users.repository.js';
 import { NotFoundError } from '../errors/app.exception.js';
-import type { PublicUser } from './users.types.js';
+import type { User, PublicUser } from './users.types.js';
 
 @Injectable()
 export class UsersService {
@@ -33,6 +33,10 @@ export class UsersService {
     const user = this.repo.findUserById(id);
     if (!user) throw new NotFoundError('User not found')
     return user;
+  }
+
+  findByEmail(email: string): User | null {
+    return this.repo.findUserByEmailWithPassword(email);
   }
 
   count(): number {
