@@ -19,8 +19,8 @@ export class DistrictsService {
     const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
     const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
 
-    const finalPage = (!page || isNaN(page) || page < 1) ? 1 : page;
-    let finalLimit = (!limit || isNaN(limit) || limit < 1) ? pageSizeDefault : limit;
+    const finalPage = (!page || page < 1) ? 1 : page;
+    let finalLimit = (!limit || limit < 1) ? pageSizeDefault : limit;
     if (finalLimit > pageSizeMax) finalLimit = pageSizeMax;
 
     const finalCity = (city && city.trim() !== '') ? city.trim() : undefined;

@@ -1,7 +1,8 @@
-import { Controller, Query, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Query, ParseIntPipe, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { DistrictsService } from './districts.service.js';
 import { CreateDistrictDto } from './dto/create-district.dto.js';
 import { UpdateDistrictDto } from './dto/update-district.dto.js';
+import { ListDistrictsDto } from './dto/list-districts.dto.js';
 
 @Controller('districts')
 export class DistrictsController {
@@ -13,10 +14,9 @@ export class DistrictsController {
   }
 
   @Get()
-  findAll(@Query("page") page?: string, @Query("limit") limit?: string, @Query("city") city?: string) {
-    const pageNumber = page ? +page : undefined;
-    const limitNumber = limit ? +limit : undefined;
-    return this.districtsService.findAll(pageNumber, limitNumber, city);
+  findAll(@Query() query: ListDistrictsDto) {
+    const { page, limit, city } = query;
+    return this.districtsService.findAll(page, limit, city);
   }
 
   @Get('count')
@@ -25,17 +25,17 @@ export class DistrictsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.districtsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.districtsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateDistrictDto) {
-    return this.districtsService.update(+id, dto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDistrictDto) {
+    return this.districtsService.update(id, dto);
   }
 
   // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.districtsService.remove(+id);
+  // remove(@Param('id', ParseIntPipe) id: number) {
+  //   return this.districtsService.remove(id);
   // }
 }

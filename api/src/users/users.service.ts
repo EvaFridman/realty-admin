@@ -13,15 +13,15 @@ export class UsersService {
     return this.repo.create(data);
   }
 
-  findAll(page?: number, limit?: number) {
+  findAll(page?: number, limit?: number, role?: 'agent' | 'moderator') {
     const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
     const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
 
-    const finalPage = (!page || isNaN(page) || page < 1) ? 1 : page;
-    let finalLimit = (!limit || isNaN(limit) || limit < 1) ? pageSizeDefault : limit;
+    const finalPage = (!page || page < 1) ? 1 : page;
+    let finalLimit = (!limit || limit < 1) ? pageSizeDefault : limit;
     if (finalLimit > pageSizeMax) finalLimit = pageSizeMax;
 
-    const { items, total } = this.repo.findAllPaginated(finalPage, finalLimit);
+    const { items, total } = this.repo.findAllPaginated(finalPage, finalLimit, role);
 
     const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
 
