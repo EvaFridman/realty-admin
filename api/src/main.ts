@@ -5,6 +5,7 @@ import { AppModule } from './app.module.js';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
 import { AppExceptionFilter } from './common/filters/app-exception.filter.js';
+import { TrimPipe } from './common/pipes/trim.pipe.js'
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
@@ -13,6 +14,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enableCors({ origin: config.get<string>('CLIENT_URL'), credentials: true })
+  app.useGlobalPipes(new TrimPipe());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   app.useGlobalFilters(new AppExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
