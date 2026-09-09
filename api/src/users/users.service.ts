@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
-import { UsersRepository } from './users.repository.js'
-import type { PublicUser } from './users.types.js'
+import { UsersRepository } from './users.repository.js';
+import { NotFoundError } from '../errors/app.exception.js';
+import type { PublicUser } from './users.types.js';
 
 @Injectable()
 export class UsersService {
@@ -30,7 +31,7 @@ export class UsersService {
 
   findOne(id: number): PublicUser {
     const user = this.repo.findUserById(id);
-    if (!user) throw new NotFoundException('User not found')
+    if (!user) throw new NotFoundError('User not found')
     return user;
   }
 
@@ -40,7 +41,7 @@ export class UsersService {
 
   update(id: number, data: UpdateUserDto): PublicUser {
     const user = this.repo.update(id, data);
-    if (!user) throw new NotFoundException('User not found')
+    if (!user) throw new NotFoundError('User not found')
     return user;
   }
 
