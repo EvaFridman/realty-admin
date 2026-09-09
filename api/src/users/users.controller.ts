@@ -3,7 +3,9 @@ import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { ListUsersDto } from './dto/list-users.dto.js';
+import { Roles } from '../auth/decorators/roles.decorator.js'; 
 
+@Roles("moderator")
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

@@ -1,9 +1,11 @@
+export type UserRole = 'agent' | 'moderator';
+
 export type User = {
     id: number;
     name: string;
     email: string;
     phone: string | null;
-    role: 'agent' | 'moderator';
+    role: UserRole;
     passwordHash: string;
     avatarFileName: string | null;
 

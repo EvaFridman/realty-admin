@@ -10,7 +10,7 @@ import type { User, PublicUser } from './users.types.js';
 export class UsersService {
   constructor(private readonly repo: UsersRepository, private readonly configService: ConfigService) {}
 
-  create(data: CreateUserDto): PublicUser {
+  create(data: CreateUserDto & { passwordHash?: string }): PublicUser {
     return this.repo.create(data);
   }
 

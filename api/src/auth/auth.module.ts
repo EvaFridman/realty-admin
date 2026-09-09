@@ -9,6 +9,6 @@ import { UsersModule } from '../users/users.module.js';
   imports: [ConfigModule, UsersModule, JwtModule.register({})],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
