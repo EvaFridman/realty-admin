@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DistrictsService } from './districts.service.js';
 import { DistrictsRepository } from './districts.repository.js';
 import { ConfigService } from '@nestjs/config';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundError } from '../errors/app.exception.js';
 import { jest, describe, beforeEach, it, expect } from '@jest/globals';
 
 describe('DistrictsService', () => {
@@ -33,10 +33,10 @@ describe('DistrictsService', () => {
     expect(repository.findDistrictById).toHaveBeenCalledWith(1);
   });
 
-  it('should throw NotFoundException if district not found', () => {
+  it('should throw NotFoundError if district not found', () => {
     jest.spyOn(repository, 'findDistrictById').mockReturnValue(null);
 
-    expect(() => service.findOne(1)).toThrow(NotFoundException);
+    expect(() => service.findOne(1)).toThrow(NotFoundError);
     expect(repository.findDistrictById).toHaveBeenCalledWith(1);
   });
 
