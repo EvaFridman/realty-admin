@@ -3,7 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service.js';
-import { UnauthorizedError } from '../errors/app.exception.js';
+import { UnauthorizedError, ConflictError } from '../errors/app.exception.js';
+import { RegisterDto } from './dto/register.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,11 @@ export class AuthService {
         const user = await this.usersService.findByEmail(email);
         if (!user || !(await bcrypt.compare(password, user.passwordHash))) throw new UnauthorizedError("Invalid credentials");
 
-        return await this.issuePair(user);
+        const tokens = await this.issuePair(user);
+        
+        const { passwordHash, ...publicUser } = user;
+
+        return { ...tokens, user: publicUser };
     }
 
     async issuePair(user: { id: number; role: string }) {
@@ -48,9 +53,33 @@ export class AuthService {
           const user = await this.usersService.findOne(payload.sub);
           if (!user) throw new UnauthorizedError('User not found');
     
-          return this.issuePair(user);
+          const tokens = await this.issuePair(user);
+    
+          return { ...tokens, user };
         } catch (error) {
           throw new UnauthorizedError('Invalid or expired refresh token');
         }
+      }
+
+      async register(registerDto: RegisterDto) {
+        const { email, name, password } = registerDto;
+        const existingUser = await this.usersService.findByEmail(email);
+        if (existingUser) throw new ConflictError('User with such an email already exists');
+    
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(password, salt);
+    
+        const newUser = this.usersService.create({
+          email,
+          name,
+          passwordHash,
+          role: 'agent',
+          phone: null,
+          avatarFileName: null
+      });
+    
+        const tokens = await this.issuePair(newUser);
+    
+        return { ...tokens, user: newUser };
       }
 }

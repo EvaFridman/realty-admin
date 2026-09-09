@@ -3,11 +3,13 @@ import { DistrictsService } from './districts.service.js';
 import { CreateDistrictDto } from './dto/create-district.dto.js';
 import { UpdateDistrictDto } from './dto/update-district.dto.js';
 import { ListDistrictsDto } from './dto/list-districts.dto.js';
+import { Roles } from '../auth/decorators/roles.decorator.js'; 
 
 @Controller('districts')
 export class DistrictsController {
   constructor(private readonly districtsService: DistrictsService) {}
 
+  @Roles("moderator")
   @Post()
   create(@Body() dto: CreateDistrictDto) {
     return this.districtsService.create(dto);
@@ -29,6 +31,7 @@ export class DistrictsController {
     return this.districtsService.findOne(id);
   }
 
+  @Roles("moderator")
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDistrictDto) {
     return this.districtsService.update(id, dto);

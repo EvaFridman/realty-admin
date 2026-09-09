@@ -4,8 +4,9 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import ms, { StringValue } from 'ms';
+import { RegisterDto } from './dto/register.dto.js';
 
-@Controller('auth') // ПО ТЗ: метка @Controller("auth")
+@Controller('auth')
 export class AuthController {
     constructor(
         private readonly authService: AuthService, 
@@ -14,7 +15,7 @@ export class AuthController {
 
     @Post('login')
     async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
-        const { accessToken, refreshToken } = await this.authService.login(loginDto.email, loginDto.password);
+        const { accessToken, refreshToken, user } = await this.authService.login(loginDto.email, loginDto.password);
 
         const isProduction = (this.configService.get<string>('NODE_ENV') ?? process.env.NODE_ENV) === 'production';
         const refreshTtl = this.configService.get<StringValue>('REFRESH_TTL')  ?? '30d';
@@ -27,13 +28,13 @@ export class AuthController {
             maxAge: ms(refreshTtl) as number,
         });
       
-        return accessToken; 
+        return { accessToken, user }; 
     }
 
     @Post('refresh')
     async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
         const token = request.cookies?.['refreshToken'];
-        const { accessToken, refreshToken } = await this.authService.refresh(token);
+        const { accessToken, refreshToken, user } = await this.authService.refresh(token);
         
         const isProduction = (this.configService.get<string>('NODE_ENV') ?? process.env.NODE_ENV) === 'production';
         const refreshTtl = this.configService.get<StringValue>('REFRESH_TTL')  ?? '30d';
@@ -46,7 +47,7 @@ export class AuthController {
             maxAge: ms(refreshTtl) as number,
         });
     
-        return accessToken; 
+        return { accessToken, user };
     }
 
     @Post('logout')
@@ -57,6 +58,24 @@ export class AuthController {
 
     @Get('me')
     async me(@Req() request: Request) {
-        return (request as any).user;
-      }
+        return request.user;
+    }
+
+    @Post('register')
+    async register(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) response: Response) {
+        const { accessToken, refreshToken, user } = await this.authService.register(registerDto);
+
+        const isProduction = (this.configService.get<string>('NODE_ENV') ?? process.env.NODE_ENV) === 'production';
+        const refreshTtl = this.configService.get<StringValue>('REFRESH_TTL') ?? '30d';
+
+        response.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: isProduction,
+            path: '/auth',
+            maxAge: ms(refreshTtl) as number,
+        });
+
+        return { accessToken, user };
+    }
 }
