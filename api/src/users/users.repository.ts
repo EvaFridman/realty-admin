@@ -15,17 +15,19 @@ export class UsersRepository {
         });
     }
 
-    findAllPaginated(page: number, limit: number): { items: PublicUser[], total: number } {
-        const users = this.users.map(user => {
+    findAllPaginated(page: number, limit: number, role?: 'agent' | 'moderator'): { items: PublicUser[], total: number } {
+        const filteredUsers = role ? this.users.filter(u => u.role === role) : this.users;
+        
+        const publicUsers = filteredUsers.map(user => {
             const { passwordHash, ...publicUser } = user;
             return publicUser;
         });
-        const total = users.length;
+        const total = publicUsers.length;
 
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
 
-        const items = users.slice(startIndex, endIndex);
+        const items = publicUsers.slice(startIndex, endIndex);
 
         return { items, total };
     }

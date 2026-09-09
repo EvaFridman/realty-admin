@@ -1,16 +1,15 @@
 import { Controller, Query, Param, Get } from '@nestjs/common';
 import { ViewingsService } from './viewings.service.js';
-import type { ViewingStatus } from '../common/viewingStatusTransitions.service.js'
+import { ListViewingsDto } from './dto/list-viewings.dto.js';
 
 @Controller('viewings')
 export class ViewingsController {
     constructor(private readonly viewingsService: ViewingsService) {}
 
     @Get()
-    findAll(@Query("page") page?: string, @Query("limit") limit?: string, @Query("status") status?: ViewingStatus) {
-      const pageNumber = page ? +page : undefined;
-      const limitNumber = limit ? +limit : undefined;
-      return this.viewingsService.findAll(pageNumber, limitNumber, status);
+    findAll(@Query() query: ListViewingsDto) {
+      const { page, limit, status } = query;
+      return this.viewingsService.findAll(page, limit, status);
     }
 
     @Get(':id')

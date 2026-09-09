@@ -1,6 +1,12 @@
+import { IsString, Matches, MinLength } from "class-validator";
+
 export class CreateDistrictDto {
-    // TODO: позже должна появиться проверка значения полей
+    @IsString() @MinLength(3)
     title: string;
+
+    @IsString() @Matches(/^[a-z0-9-]+$/)
     slug: string;
+
+    @IsString() @MinLength(2)
     city: string;
 }

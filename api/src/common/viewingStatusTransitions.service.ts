@@ -9,6 +9,8 @@ export const ALLOWED_TRANSITIONS: Record<ViewingStatus, readonly ViewingStatus[]
   closed: [],
 };
 
+export const VIEWING_STATUSES = Object.keys(ALLOWED_TRANSITIONS) as ViewingStatus[];
+
 export function canTransition(from: ViewingStatus, to: ViewingStatus): boolean {
   return ALLOWED_TRANSITIONS[from]?.includes(to) ?? false;
 }
