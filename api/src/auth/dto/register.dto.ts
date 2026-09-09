@@ -1,12 +1,7 @@
 import { IsEmail, IsString, Length, Matches, MinLength } from 'class-validator';
+import { LoginDto } from './login.dto.js'
 
-export class RegisterDto {
-  @IsEmail()
-  email: string;
-
+export class RegisterDto extends LoginDto {
   @IsString() @MinLength(2)
   name: string;
-
-  @IsString() @Length(8, 72) @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,72}$/)
-  password: string;
 }
