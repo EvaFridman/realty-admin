@@ -1,7 +1,7 @@
 import { User } from './users.types.js';
 import bcrypt from 'bcryptjs'
 
-const defaultHash = await bcrypt.hash('Password123', 10);
+const defaultHash = await bcrypt.hash('Password123!', 10);
 
 export const USERS_SEED: User[] = [
     { id: 1, name: "Анна Волкова", email: "anna@realty.local", phone: "+79990000001", role: "agent", passwordHash: defaultHash, avatarFileName: null },

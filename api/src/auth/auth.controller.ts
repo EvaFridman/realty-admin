@@ -5,6 +5,7 @@ import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import ms, { StringValue } from 'ms';
 import { RegisterDto } from './dto/register.dto.js';
+import { Public } from './decorators/public.decorator.js'; 
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +15,7 @@ export class AuthController {
     ) {}
 
     @Post('login')
+    @Public()
     async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
         const { accessToken, refreshToken, user } = await this.authService.login(loginDto.email, loginDto.password);
 
@@ -32,6 +34,7 @@ export class AuthController {
     }
 
     @Post('refresh')
+    @Public()
     async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
         const token = request.cookies?.['refreshToken'];
         const { accessToken, refreshToken, user } = await this.authService.refresh(token);
@@ -62,6 +65,7 @@ export class AuthController {
     }
 
     @Post('register')
+    @Public()
     async register(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) response: Response) {
         const { accessToken, refreshToken, user } = await this.authService.register(registerDto);
 
