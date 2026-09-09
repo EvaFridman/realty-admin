@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ViewingsRepository } from './viewings.repository.js'
-import type { Viewing } from './viewings.types.js'
+import { NotFoundError } from '../errors/app.exception.js';
 import { getAllowedTransitions, type ViewingStatus } from '../common/viewingStatusTransitions.service.js'
 
 @Injectable()
@@ -25,7 +25,7 @@ export class ViewingsService {
 
     findOne(id: number) {
         const viewing = this.repo.findViewingById(id);
-        if (!viewing) throw new NotFoundException('Viewing not found')
+        if (!viewing) throw new NotFoundError('Viewing not found')
         return { ...viewing, allowedTransitions: getAllowedTransitions(viewing.status) };
     }
 }
