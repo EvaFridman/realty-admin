@@ -1,18 +1,19 @@
-//TODO: убрать при появлении DB-слоя
-type ListingStatus = "draft" | "moderation" | "published" | "rejected" | "unpublished";
+import { ListingStatus } from '../generated/prisma/index.js';
 
-const ALL_STATUSES = ['draft', 'moderation', 'published', 'rejected', 'unpublished'] as const satisfies readonly ListingStatus[];
+const ALL_STATUSES = Object.values(ListingStatus);
 
-const ALLOWED_TRANSITIONS: Record<ListingStatus, ListingStatus | readonly ListingStatus[]> = {
-    draft: 'moderation',
-    moderation: ['published', 'rejected'],
-    rejected: 'moderation',
-    published: 'unpublished',
-    unpublished: 'moderation',
+const ALLOWED_TRANSITIONS: Record<ListingStatus, readonly ListingStatus[]> = {
+    [ListingStatus.draft]: [ListingStatus.moderation],
+    [ListingStatus.moderation]: [ListingStatus.published, ListingStatus.rejected],
+    [ListingStatus.rejected]: [ListingStatus.moderation],
+    [ListingStatus.published]: [ListingStatus.unpublished],
+    [ListingStatus.unpublished]: [ListingStatus.moderation],
 };
 
 export function canTransition(from: ListingStatus, to: ListingStatus): boolean {
-    return ALLOWED_TRANSITIONS[from]?.includes(to) ?? false;
+    const transitions = ALLOWED_TRANSITIONS[from];
+    if (!transitions) return false;
+    return transitions.includes(to);
 }
 
 export function getAllowedTransitions(currentStatus: ListingStatus): ListingStatus[] {

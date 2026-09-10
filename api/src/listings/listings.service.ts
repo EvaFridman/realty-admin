@@ -2,15 +2,29 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ListListingsDto } from './dto/list-listings.dto.js';
+import { CreateListingDto } from './dto/create-listing.dto.js';
+import { UpdateListingDto } from './dto/update-listing.dto.js'
+import { UpdateStatusDto } from './dto/update-status.dto.js'
 import { buildListingsWhere } from './listings.where.js';
-import { UserRole } from '../generated/prisma/index.js';
+import { canTransition, getAllowedTransitions } from '../common/listingStatusTransitions.service.js';
+import { NotFoundError, ConflictError, ForbiddenError } from '../errors/app.exception.js';
+import { UserRole, ListingStatus, Prisma } from '../generated/prisma/index.js';
+import type { Listing } from './listings.types.js';
 
 @Injectable()
 export class ListingsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly configService: ConfigService
-  ) {}
+  constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService ) {}
+
+  private handlePrismaError(error: any) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') throw new NotFoundError('Listing not found');
+      if (error.code === 'P2002') {
+        const constraintName = (error.meta?.target as string[])?.join('_') || 'constraint';
+        throw new ConflictError(`Unique constraint failed on ${constraintName}`, constraintName as any);
+      }
+    }
+    throw error;
+  }
 
   async findAll(dto: ListListingsDto, user: { id: number; role: string }) {
     const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
@@ -45,5 +59,89 @@ export class ListingsService {
     const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
 
     return { items, meta: { page: finalPage, limit: finalLimit, total, totalPages } };
+  }
+
+  async create(dto: CreateListingDto, agentId: number): Promise<any> {
+    try {
+      return await this.prisma.listings.create({
+        data: {
+          title: dto.title,
+          description: dto.description ?? null,
+          dealType: dto.dealType,
+          propertyType: dto.propertyType,
+          price: dto.price,
+          area: dto.area,
+          rooms: dto.rooms ?? null,
+          floor: dto.floor ?? null,
+          totalFloors: dto.totalFloors ?? null,
+          address: dto.address,
+          lat: dto.lat,
+          lng: dto.lng,
+          status: ListingStatus.draft, 
+          agent: { connect: { id: agentId } }, 
+          district: { connect: { id: dto.districtId } }, 
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+      });
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async findOne(id: number, user: { id: number; role: string }) {
+    const listing = await this.prisma.listings.findUnique({
+      where: { id },
+      include: {
+        agent: { select: { id: true, name: true, email: true } },
+        district: true,
+        photos: { orderBy: { position: 'asc' } },
+        _count: { select: { viewings: true } }
+      }
+    });
+
+    if (!listing) throw new NotFoundError('Listing not found');
+    if (user.role === UserRole.agent && listing.agentId !== user.id) throw new ForbiddenError('You do not have access to this listing');
+
+    return { ...listing, allowedTransitions: getAllowedTransitions(listing.status) };
+  }
+
+  async update(id: number, dto: UpdateListingDto, user: { id: number; role: string }): Promise<any> {
+    await this.findOne(id, user);
+    try {
+      return await this.prisma.listings.update({ where: { id }, data: { ...dto, updatedAt: new Date() } });
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async updateStatus(id: number, dto: UpdateStatusDto): Promise<any> {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const listing = await tx.listings.findUnique({ where: { id } });
+        if (!listing) throw new NotFoundError('Listing not found');
+
+        if (!canTransition(listing.status, dto.status)) {
+          const allowed = getAllowedTransitions(listing.status).join(', ');
+          throw new ConflictError(`Transition from ${listing.status} to ${dto.status} is not allowed`, allowed as any);
+        }
+
+        const updateData: Prisma.ListingsUpdateInput = { status: dto.status, updatedAt: new Date() };
+
+        if (dto.status === ListingStatus.published) updateData.publishedAt = new Date();
+
+        return await tx.listings.update({
+          where: { id },
+          data: updateData,
+          include: {
+            agent: { select: { id: true, name: true, email: true } },
+            district: true,
+            photos: { orderBy: { position: 'asc' } }
+          }
+        });
+      });
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
   }
 }
