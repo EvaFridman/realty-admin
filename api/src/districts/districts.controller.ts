@@ -32,8 +32,7 @@ export class DistrictsController {
     return await this.districtsService.findOne(id);
   }
 
-  @Roles("moderator")
-  @Patch(':id')
+  @Patch(':id/status')
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDistrictDto): Promise<District> {
     return await this.districtsService.update(id, dto);
   }
