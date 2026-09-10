@@ -1,12 +1,11 @@
-//TODO: убрать при появлении DB-слоя
-export type ViewingStatus = 'created' | 'pending approval' | 'approved' | 'rejected' | 'closed';
+import { ViewingStatus } from '../generated/prisma/index.js';
 
 export const ALLOWED_TRANSITIONS: Record<ViewingStatus, readonly ViewingStatus[]> = {
-  created: ['pending approval'],
-  'pending approval': ['approved', 'rejected'],
-  approved: ['closed'],
-  rejected: ['closed'],
-  closed: [],
+  [ViewingStatus.created]: [ViewingStatus.pending_approval],
+  [ViewingStatus.pending_approval]: [ViewingStatus.approved, ViewingStatus.rejected],
+  [ViewingStatus.approved]: [ViewingStatus.closed],
+  [ViewingStatus.rejected]: [ViewingStatus.closed],
+  [ViewingStatus.closed]: [],
 };
 
 export const VIEWING_STATUSES = Object.keys(ALLOWED_TRANSITIONS) as ViewingStatus[];

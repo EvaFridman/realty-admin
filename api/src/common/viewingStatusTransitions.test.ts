@@ -2,9 +2,9 @@ import { canTransition } from "./viewingStatusTransitions.service.js";
 
 describe("viewingStatusTransitions", () => {
     const validTransitions = [
-        ["created", "pending approval"],
-        ["pending approval", "approved"],
-        ["pending approval", "rejected"],
+        ["created", "pending_approval"],
+        ["pending_approval", "approved"],
+        ["pending_approval", "rejected"],
         ["approved", "closed"],
         ["rejected", "closed"],
     ] as const;
@@ -20,13 +20,13 @@ describe("viewingStatusTransitions", () => {
         ["created", "approved"],
         ["created", "rejected"],
         ["created", "closed"],
-        ["pending approval", "created"],
-        ["pending approval", "pending approval"],
-        ["pending approval", "closed"],
-        ["approved", "pending approval"],
+        ["pending_approval", "created"],
+        ["pending_approval", "pending_approval"],
+        ["pending_approval", "closed"],
+        ["approved", "pending_approval"],
         ["approved", "rejected"],
         ["rejected", "approved"],
-        ["rejected", "pending approval"],
+        ["rejected", "pending_approval"],
         ["closed", "created"],
         ["closed", "approved"],
     ] as const;
