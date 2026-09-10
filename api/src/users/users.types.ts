@@ -1,16 +1,7 @@
-export type UserRole = 'agent' | 'moderator';
+import { Users, UserRole as PrismaUserRole } from '../generated/prisma/index.js';
 
-export type User = {
-    id: number;
-    name: string;
-    email: string;
-    phone: string | null;
-    role: UserRole;
-    passwordHash: string;
-    avatarFileName: string | null;
+export type UserRole = PrismaUserRole;
 
-    createdAt?: Date;
-    updatedAt?: Date;
-}
+export type User = Users;
 
 export type PublicUser = Omit<User, 'passwordHash'>;

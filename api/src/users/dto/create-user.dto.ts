@@ -1,4 +1,5 @@
 import { IsString, Matches, MinLength, MaxLength, IsIn, IsEmail, IsOptional } from "class-validator";
+import { UserRole } from '../../generated/prisma/index.js'
 
 export class CreateUserDto {
     @IsString() @MinLength(2) @MaxLength(50)
@@ -11,7 +12,7 @@ export class CreateUserDto {
     phone: string | null;
 
     @IsIn(['agent', 'moderator'])
-    role: 'agent' | 'moderator';
+    role: UserRole;
 
     @IsOptional() @IsString() @MinLength(3)
     avatarFileName: string | null;

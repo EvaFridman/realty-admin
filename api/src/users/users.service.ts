@@ -2,19 +2,37 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
-import { UsersRepository } from './users.repository.js';
+import { PrismaService } from "../prisma/prisma.service.js";
 import { NotFoundError } from '../errors/app.exception.js';
 import type { User, PublicUser } from './users.types.js';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly repo: UsersRepository, private readonly configService: ConfigService) {}
+  constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService) {}
 
-  create(data: CreateUserDto & { passwordHash?: string }): PublicUser {
-    return this.repo.create(data);
+  private formatPublicUser(user: any): PublicUser {
+    const { passwordHash, ...publicUser } = user;
+    return publicUser;
   }
 
-  findAll(page?: number, limit?: number, role?: 'agent' | 'moderator') {
+  async create(data: CreateUserDto & { passwordHash?: string }): Promise<PublicUser> {
+    const user = await this.prisma.users.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone ?? null,
+        role: data.role,
+        passwordHash: data.passwordHash ?? '',
+        avatarFileName: data.avatarFileName ?? null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    return this.formatPublicUser(user);
+  }
+
+  async findAll(page?: number, limit?: number, role?: 'agent' | 'moderator') {
     const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
     const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
 
@@ -22,31 +40,44 @@ export class UsersService {
     let finalLimit = (!limit || limit < 1) ? pageSizeDefault : limit;
     if (finalLimit > pageSizeMax) finalLimit = pageSizeMax;
 
-    const { items, total } = this.repo.findAllPaginated(finalPage, finalLimit, role);
+    const whereCondition = role ? { role } : {};
+
+    const [items, total] = await Promise.all([
+      this.prisma.users.findMany({
+        where: whereCondition,
+        skip: (finalPage - 1) * finalLimit,
+        take: finalLimit,
+      }),
+      this.prisma.users.count({ where: whereCondition })
+    ]);
 
     const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
+    const publicItems = items.map(user => this.formatPublicUser(user));
 
-    return { items, meta: { page: finalPage, limit: finalLimit, total, totalPages } };
+    return { items: publicItems, meta: { page: finalPage, limit: finalLimit, total, totalPages } };
   }
 
-  findOne(id: number): PublicUser {
-    const user = this.repo.findUserById(id);
-    if (!user) throw new NotFoundError('User not found')
-    return user;
+  async findOne(id: number): Promise<PublicUser> {
+    const user = await this.prisma.users.findUnique({ where: { id } });
+    if (!user) throw new NotFoundError('User not found');
+    return this.formatPublicUser(user);
   }
 
-  findByEmail(email: string): User | null {
-    return this.repo.findUserByEmailWithPassword(email);
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.prisma.users.findUnique({ where: { email } });
   }
 
-  count(): number {
-    return this.repo.count();
+  async count(): Promise<number> {
+    return this.prisma.users.count();
   }
 
-  update(id: number, data: UpdateUserDto): PublicUser {
-    const user = this.repo.update(id, data);
-    if (!user) throw new NotFoundError('User not found')
-    return user;
+  async update(id: number, data: UpdateUserDto): Promise<PublicUser> {
+    try {
+      const updatedUser = await this.prisma.users.update({ where: { id }, data: { ...data, updatedAt: new Date() } });
+      return this.formatPublicUser(updatedUser);
+    } catch (error) {
+      throw new NotFoundError('User not found');
+    }
   }
 
   // remove(id: number) {

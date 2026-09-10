@@ -1,9 +1,3 @@
-export type District = {
-    id: number;
-    title: string;
-    slug: string;
-    city: string;
+import { Districts } from '../generated/prisma/index.js';
 
-    createdAt?: Date;
-    updatedAt?: Date;
-};
+export type District = Districts;

@@ -5,6 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service.js';
 import { UnauthorizedError, ConflictError } from '../errors/app.exception.js';
 import { RegisterDto } from './dto/register.dto.js';
+import { UserRole } from '../generated/prisma/index.js';
 
 @Injectable()
 export class AuthService {
@@ -69,11 +70,11 @@ export class AuthService {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
     
-        const newUser = this.usersService.create({
+        const newUser = await this.usersService.create({
           email,
           name,
           passwordHash,
-          role: 'agent',
+          role: UserRole.agent,
           phone: null,
           avatarFileName: null
       });
