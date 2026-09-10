@@ -3,17 +3,17 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ListListingsDto } from './dto/list-listings.dto.js';
 import { CreateListingDto } from './dto/create-listing.dto.js';
-import { UpdateListingDto } from './dto/update-listing.dto.js'
-import { UpdateStatusDto } from './dto/update-status.dto.js'
+import { UpdateListingDto } from './dto/update-listing.dto.js';
+import { UpdateStatusDto } from './dto/update-status.dto.js';
+import { UpdatePhotoDto } from './dto/update-photo.dto.js';
 import { buildListingsWhere } from './listings.where.js';
 import { canTransition, getAllowedTransitions } from '../common/listingStatusTransitions.service.js';
 import { NotFoundError, ConflictError, ForbiddenError } from '../errors/app.exception.js';
 import { UserRole, ListingStatus, Prisma } from '../generated/prisma/index.js';
-import type { Listing } from './listings.types.js';
 
 @Injectable()
 export class ListingsService {
-  constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService ) {}
+  constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService) { }
 
   private handlePrismaError(error: any) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -77,9 +77,9 @@ export class ListingsService {
           address: dto.address,
           lat: dto.lat,
           lng: dto.lng,
-          status: ListingStatus.draft, 
-          agent: { connect: { id: agentId } }, 
-          district: { connect: { id: dto.districtId } }, 
+          status: ListingStatus.draft,
+          agent: { connect: { id: agentId } },
+          district: { connect: { id: dto.districtId } },
           createdAt: new Date(),
           updatedAt: new Date(),
         }
@@ -143,5 +143,28 @@ export class ListingsService {
     } catch (error) {
       this.handlePrismaError(error);
     }
+  }
+
+  async findPhotos(listingId: number) {
+    const listing = await this.prisma.listings.findUnique({ where: { id: listingId } });
+    if (!listing) throw new NotFoundError('Listing not found');
+    return await this.prisma.listingPhotos.findMany({ where: { listingId }, orderBy: { position: 'asc' } });
+  }
+
+  async updatePhoto(listingId: number, photoId: number, dto: UpdatePhotoDto) {
+    const photo = await this.prisma.listingPhotos.findFirst({ where: { id: photoId, listingId } });
+    if (!photo) throw new NotFoundError('Photo not found for this listing');
+
+    return await this.prisma.$transaction(async (tx) => {
+      if (dto.isCover === true) await tx.listingPhotos.updateMany({ where: { listingId, isCover: true }, data: { isCover: false } });
+      return await tx.listingPhotos.update({
+        where: { id: photoId },
+        data: {
+          ...(dto.position !== undefined && { position: dto.position }),
+          ...(dto.isCover !== undefined && { isCover: dto.isCover }),
+          updatedAt: new Date()
+        }
+      });
+    });
   }
 }
