@@ -139,7 +139,7 @@ CREATE INDEX "listings_filter_idx" ON "Listings"("dealType", "propertyType", "pr
 CREATE INDEX "listings_lat_lng_idx" ON "Listings"("lat", "lng");
 
 -- CreateIndex
-CREATE INDEX "listings_published_partial_idx" ON "Listings"("status") WHERE (status = 'published'::"enum_Listings_status");
+CREATE INDEX "listings_published_partial_idx" ON "Listings"("status") WHERE (status = 'published');
 
 -- CreateIndex
 CREATE INDEX "listingPhotos_listingId_idx" ON "ListingPhotos"("listingId");

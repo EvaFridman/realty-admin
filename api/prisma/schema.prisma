@@ -91,7 +91,7 @@ model Listings {
   @@index([districtId], map: "listings_district_id_idx")
   @@index([dealType, propertyType, price], map: "listings_filter_idx")
   @@index([lat, lng], map: "listings_lat_lng_idx")
-  @@index([status], map: "listings_published_partial_idx", where: raw("(status = 'published'::\"enum_Listings_status\")"))
+  @@index([status], map: "listings_published_partial_idx", where: raw("(status = 'published')"))
 }
 
 model ListingPhotos {
