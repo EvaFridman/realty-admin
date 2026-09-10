@@ -11,6 +11,8 @@ import { AuthModule } from './auth/auth.module.js';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from './auth/guards/roles.guard.js';
 import { APP_GUARD } from '@nestjs/core'; 
+import { PrismaModule } from './prisma/prisma.module.js';
+import { PrismaService } from './prisma/prisma.service.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -29,8 +31,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     HealthModule,
     ViewingsModule,
     AuthModule,
+    PrismaModule,
   ],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }],
+  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }, PrismaService],
 })
 export class AppModule {}

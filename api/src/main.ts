@@ -12,6 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
+  app.enableShutdownHooks();
   app.use(cookieParser());
   app.enableCors({ origin: config.get<string>('CLIENT_URL'), credentials: true })
   app.useGlobalPipes(new TrimPipe());
