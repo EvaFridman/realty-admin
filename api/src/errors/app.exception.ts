@@ -25,7 +25,7 @@ export class ValidationError extends AppException {
 }
 
 export class ExternalServiceError extends AppException {
-    constructor(message = "External service error", details = null, code = null) {
+    constructor(message = "External service error", details: string[] | null = null, code = null) {
         super(message, 502, details, code);
     }
 }

@@ -18,6 +18,8 @@ export type ServerToClientEvents = {
     "presence:room": (users: SocketUser[]) => void;
     "cursor:moved": (payload: { userId: number; x: number; y: number }) => void;
     "pong:check": () => void;
+    "listing:updated": (event: any) => void;
+    "queue:changed": (payload: { listingId: number }) => void;
 };
 
 export type SocketData = { user: SocketUser };
