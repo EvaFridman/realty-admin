@@ -1,11 +1,13 @@
-import { Controller, Post, Get, Body, Req, Res } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import ms, { StringValue } from 'ms';
 import { RegisterDto } from './dto/register.dto.js';
-import { Public } from './decorators/public.decorator.js'; 
+import { Public } from './decorators/public.decorator.js';
+import { Throttle } from "@nestjs/throttler";
+import { LoginThrottlerGuard } from './guards/login-throttler.guard.js';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +16,8 @@ export class AuthController {
         private readonly configService: ConfigService
     ) {}
 
+    @UseGuards(LoginThrottlerGuard)
+    @Throttle({ login: { ttl: 15 * 60_000, limit: 10 } })
     @Post('login')
     @Public()
     async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
@@ -64,6 +68,8 @@ export class AuthController {
         return request.user;
     }
 
+    @UseGuards(LoginThrottlerGuard)
+    @Throttle({ register: { ttl: 60 * 60_000, limit: 5 } })
     @Post('register')
     @Public()
     async register(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) response: Response) {

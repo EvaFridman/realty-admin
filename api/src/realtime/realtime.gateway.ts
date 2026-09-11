@@ -3,6 +3,8 @@ import {
   MessageBody, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 } from "@nestjs/websockets";
 import { UseGuards, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { WsThrottlerGuard } from './guards/ws-throttler.guard.js';
 import { WsException } from '@nestjs/websockets';
 import { JwtService } from "@nestjs/jwt";
 import { PresenceService } from "./presence.service.js";
@@ -21,6 +23,8 @@ const ALLOWED_ROOM = /^(queue|listing:\d+)$/;
 
 @WebSocketGateway({ cors: { origin: process.env.CLIENT_URL, credentials: true } })
 @UseFilters(WsExceptionFilter)
+@UseGuards(WsThrottlerGuard)
+@Throttle({ ws: { limit: 100, ttl: 1000 } })
 export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 

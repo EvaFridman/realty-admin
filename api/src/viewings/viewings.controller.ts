@@ -5,6 +5,7 @@ import { CreateViewingDto } from './dto/create-viewing.dto.js';
 import { UpdateStatusDto } from './dto/update-status.dto.js';
 import { Public } from '../auth/decorators/public.decorator.js';
 import type { Request } from 'express';
+import { Throttle } from "@nestjs/throttler";
 
 @Controller()
 export class ViewingsController {
@@ -20,6 +21,7 @@ export class ViewingsController {
         return await this.viewingsService.findOne(id, request.user as any);
     }
 
+    @Throttle({ viewing: { ttl: 60 * 60_000, limit: 20 } })
     @Public()
     @Post('listings/:id/viewings')
     async create(@Param('id', ParseIntPipe) listingId: number, @Body() dto: CreateViewingDto) {

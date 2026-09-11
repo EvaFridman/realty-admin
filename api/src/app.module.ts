@@ -10,15 +10,15 @@ import { ViewingsModule } from './viewings/viewings.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from './auth/guards/roles.guard.js';
-import { APP_GUARD } from '@nestjs/core'; 
+import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { PrismaService } from './prisma/prisma.service.js';
 import { ListingsModule } from './listings/listings.module.js';
-import { ListingsController } from './listings/listings.controller.js';
 import { FavoritesModule } from './favorites/favorites.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
 import { MailService } from './mail/mail.service.js';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -31,6 +31,17 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     //   appSecret: 'YOUR_APP_SECRET',
     //   serviceId: 'api',
     // }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        { name: "api", ttl: 15 * 60_000, limit: 300 },
+        { name: "login", ttl: 15 * 60_000, limit: 10 },
+        { name: "register", ttl: 60 * 60_000, limit: 5 },
+        { name: "upload", ttl: 15 * 60_000, limit: 30 },
+        { name: "viewing", ttl: 60 * 60_000, limit: 20 },
+        { name: "csp", ttl: 15 * 60_000, limit: 100 },
+        { name: "ws", ttl: 1000, limit: 100 },
+      ],
+    }),
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     DistrictsModule,
@@ -44,6 +55,12 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     RealtimeModule,
   ],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }, PrismaService, MailService],
+  providers: [AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+    PrismaService,
+    MailService
+  ],
 })
-export class AppModule {}
+export class AppModule { }
