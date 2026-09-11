@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller.js';
 import { UsersService } from './users.service.js';
-import { UsersRepository } from './users.repository.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { ConfigService } from '@nestjs/config';
 import { describe, beforeEach, it, expect } from '@jest/globals';
 
@@ -13,7 +13,7 @@ describe('UsersController', () => {
       controllers: [UsersController],
       providers: [
         UsersService,
-        { provide: UsersRepository, useValue: {} },
+        { provide: PrismaService, useValue: {} },
         { provide: ConfigService, useValue: {} },
       ],
     }).compile();

@@ -52,7 +52,7 @@ export class DistrictsService {
   async update(id: number, data: UpdateDistrictDto): Promise<District> {
     try {
       return await this.prisma.districts.update({ where: { id }, data: { ...data, updatedAt: new Date() } });
-    } catch (error) {
+    } catch {
       throw new NotFoundError('District not found');
     }
   }

@@ -2,11 +2,12 @@ import { canTransition } from "./viewingStatusTransitions.service.js";
 
 describe("viewingStatusTransitions", () => {
     const validTransitions = [
-        ["created", "pending_approval"],
-        ["pending_approval", "approved"],
-        ["pending_approval", "rejected"],
-        ["approved", "closed"],
-        ["rejected", "closed"],
+        ["CREATED", "PENDING_APPROVAL"],
+        ["PENDING_APPROVAL", "APPROVED"],
+        ["PENDING_APPROVAL", "REJECTED"],
+        ["APPROVED", "CLOSED"],
+        ["REJECTED", "CLOSED"],
+
     ] as const;
 
     test.each(validTransitions)(
@@ -17,18 +18,18 @@ describe("viewingStatusTransitions", () => {
     );
 
     const invalidTransitions = [
-        ["created", "approved"],
-        ["created", "rejected"],
-        ["created", "closed"],
-        ["pending_approval", "created"],
-        ["pending_approval", "pending_approval"],
-        ["pending_approval", "closed"],
-        ["approved", "pending_approval"],
-        ["approved", "rejected"],
-        ["rejected", "approved"],
-        ["rejected", "pending_approval"],
-        ["closed", "created"],
-        ["closed", "approved"],
+        ["CREATED", "APPROVED"],
+        ["CREATED", "REJECTED"],
+        ["CREATED", "CLOSED"],
+        ["PENDING_APPROVAL", "CREATED"],
+        ["PENDING_APPROVAL", "PENDING_APPROVAL"],
+        ["PENDING_APPROVAL", "CLOSED"],
+        ["APPROVED", "PENDING_APPROVAL"],
+        ["APPROVED", "REJECTED"],
+        ["REJECTED", "APPROVED"],
+        ["REJECTED", "PENDING_APPROVAL"],
+        ["CLOSED", "CREATED"],
+        ["CLOSED", "APPROVED"],
     ] as const;
 
     test.each(invalidTransitions)(

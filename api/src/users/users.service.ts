@@ -11,7 +11,7 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService) {}
 
   private formatPublicUser(user: any): PublicUser {
-    const { passwordHash, ...publicUser } = user;
+    const { _passwordHash, ...publicUser } = user;
     return publicUser;
   }
 
@@ -75,7 +75,7 @@ export class UsersService {
     try {
       const updatedUser = await this.prisma.users.update({ where: { id }, data: { ...data, updatedAt: new Date() } });
       return this.formatPublicUser(updatedUser);
-    } catch (error) {
+    } catch {
       throw new NotFoundError('User not found');
     }
   }

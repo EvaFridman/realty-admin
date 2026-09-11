@@ -17,6 +17,7 @@ import { ListingsModule } from './listings/listings.module.js';
 import { FavoritesModule } from './favorites/favorites.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
 import { MailService } from './mail/mail.service.js';
+import { PdfService } from './pdf/pdf.service.js';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 
@@ -60,7 +61,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     PrismaService,
-    MailService
+    MailService,
+    PdfService
   ],
 })
 export class AppModule { }

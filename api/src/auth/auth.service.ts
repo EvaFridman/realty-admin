@@ -17,7 +17,7 @@ export class AuthService {
 
         const tokens = await this.issuePair(user);
         
-        const { passwordHash, ...publicUser } = user;
+        const { passwordHash: _passwordHash, ...publicUser } = user;
 
         return { ...tokens, user: publicUser };
     }
@@ -57,7 +57,7 @@ export class AuthService {
           const tokens = await this.issuePair(user);
     
           return { ...tokens, user };
-        } catch (error) {
+        } catch {
           throw new UnauthorizedError('Invalid or expired refresh token');
         }
       }

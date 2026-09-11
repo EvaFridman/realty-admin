@@ -65,23 +65,13 @@ export class ListingsService {
 
   async create(dto: CreateListingDto, agentId: number): Promise<any> {
     try {
+      const { districtId, ...restDto } = dto;
       return await this.prisma.listings.create({
         data: {
-          title: dto.title,
-          description: dto.description ?? null,
-          dealType: dto.dealType,
-          propertyType: dto.propertyType,
-          price: dto.price,
-          area: dto.area,
-          rooms: dto.rooms ?? null,
-          floor: dto.floor ?? null,
-          totalFloors: dto.totalFloors ?? null,
-          address: dto.address,
-          lat: dto.lat,
-          lng: dto.lng,
-          status: ListingStatus.draft,
+          ...restDto,
+          status: ListingStatus.DRAFT,
           agent: { connect: { id: agentId } },
-          district: { connect: { id: dto.districtId } },
+          district: { connect: { id: districtId } },
           createdAt: new Date(),
           updatedAt: new Date(),
         }
@@ -130,7 +120,7 @@ export class ListingsService {
 
         const updateData: Prisma.ListingsUpdateInput = { status: dto.status, updatedAt: new Date() };
 
-        if (dto.status === ListingStatus.published) updateData.publishedAt = new Date();
+        if (dto.status === ListingStatus.PUBLISHED) updateData.publishedAt = new Date();
 
         return await tx.listings.update({
           where: { id },
@@ -143,7 +133,7 @@ export class ListingsService {
         });
       });
 
-      if (updatedListing.status === ListingStatus.published) {
+      if (updatedListing.status === ListingStatus.PUBLISHED) {
         this.events.emit(
           ListingPublishedEvent.eventName, 
           new ListingPublishedEvent(updatedListing.id, updatedListing.agentId, updatedListing.title)

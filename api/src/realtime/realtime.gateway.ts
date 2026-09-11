@@ -32,7 +32,7 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 
   afterInit(server: Server) {
     const io = server as unknown as AppServer;
-    server.use(async (socket: any, next) => {
+    io.use(async (socket: any, next) => {
       try {
         const token = socket.handshake.auth?.token || socket.handshake.query?.token;
 
@@ -52,7 +52,7 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGa
           email: payload.email ?? '',
         };
         next();
-      } catch (err) {
+      } catch {
         const errorInstance = new UnauthorizedError('Invalid access token');
         next(new Error(errorInstance.message));
       }

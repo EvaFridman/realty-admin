@@ -28,12 +28,8 @@ export class ViewingsService {
         return await this.prisma.viewings.create({
             data: {
                 listingId,
-                clientName: dto.clientName,
-                clientPhone: dto.clientPhone,
-                clientEmail: dto.clientEmail,
-                preferredAt: dto.preferredAt,
-                comment: dto.comment ?? null,
-                status: ViewingStatus.created,
+                ...dto,
+                status: ViewingStatus.CREATED,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             }
@@ -90,7 +86,7 @@ export class ViewingsService {
                 }
 
                 const updateData: any = { status: dto.status, updatedAt: new Date() };
-                const triggerStatuses: ViewingStatus[] = [ViewingStatus.approved, ViewingStatus.rejected, ViewingStatus.closed];
+                const triggerStatuses: ViewingStatus[] = [ViewingStatus.APPROVED, ViewingStatus.REJECTED, ViewingStatus.CLOSED];
                 if (triggerStatuses.includes(dto.status)) updateData.notifiedAt = new Date();
 
                 return await tx.viewings.update({ where: { id }, data: updateData, include: { listing: true } });
