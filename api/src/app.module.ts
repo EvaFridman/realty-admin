@@ -17,6 +17,8 @@ import { ListingsModule } from './listings/listings.module.js';
 import { ListingsController } from './listings/listings.controller.js';
 import { FavoritesModule } from './favorites/favorites.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
+import { MailService } from './mail/mail.service.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -29,6 +31,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     //   appSecret: 'YOUR_APP_SECRET',
     //   serviceId: 'api',
     // }),
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     DistrictsModule,
     UsersModule,
@@ -40,7 +43,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     FavoritesModule,
     RealtimeModule,
   ],
-  controllers: [AppController, ListingsController],
-  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }, PrismaService],
+  controllers: [AppController],
+  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }, PrismaService, MailService],
 })
 export class AppModule {}

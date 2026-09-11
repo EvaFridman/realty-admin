@@ -14,6 +14,8 @@ import { WsRolesGuard } from './guards/ws-roles.guard.js';
 import { WsExceptionFilter } from './filters/ws-exception.filter.js';
 import { CursorMoveDto } from './dto/cursor-move.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
+import { OnEvent } from "@nestjs/event-emitter";
+import { ListingPublishedEvent } from '../listings/events/listing-published.event.js';
 
 const ALLOWED_ROOM = /^(queue|listing:\d+)$/;
 
@@ -25,20 +27,20 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGa
   constructor(private readonly configService: ConfigService, private readonly jwtService: JwtService, private readonly presenceService: PresenceService) { }
 
   afterInit(server: Server) {
-    const io = server as unknown as AppServer; 
+    const io = server as unknown as AppServer;
     server.use(async (socket: any, next) => {
       try {
         const token = socket.handshake.auth?.token || socket.handshake.query?.token;
-        
+
         if (!token) {
           const errorInstance = new UnauthorizedError('No access token');
           return next(new Error(errorInstance.message));
         }
-  
+
         const cleanToken = token.startsWith('Bearer ') ? token.slice(7) : token;
         const secret = this.configService.get<string>('JWT_ACCESS_SECRET');
         const payload = await this.jwtService.verifyAsync(cleanToken, { secret });
-  
+
         socket.data.user = {
           id: payload.sub,
           name: payload.name ?? 'Unknown',
@@ -96,7 +98,7 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGa
     const typedServer = this.server as unknown as AppServer;
     socket.emit('presence:room', this.presenceService.getRoomMembers(typedServer, room, socket.data.user.id));
   }
-  
+
   @SubscribeMessage('room:leave')
   handleRoomLeave(@ConnectedSocket() rawSocket: Socket) {
     const socket = rawSocket as unknown as AppSocket;
@@ -124,5 +126,12 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGa
   handleQueueTake(@ConnectedSocket() rawSocket: Socket) {
     const socket = rawSocket as unknown as AppSocket;
     socket.emit('pong:check');
+  }
+
+  @OnEvent(ListingPublishedEvent.eventName)
+  handleListingPublishedEvent(event: ListingPublishedEvent) {
+    const io = this.server as unknown as AppServer;
+    io.to(`listing:${event.listingId}`).emit("listing:updated", event);
+    io.to("queue").emit("queue:changed", { listingId: event.listingId });
   }
 }

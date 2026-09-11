@@ -10,10 +10,12 @@ import { buildListingsWhere } from './listings.where.js';
 import { canTransition, getAllowedTransitions } from '../common/listingStatusTransitions.service.js';
 import { NotFoundError, ConflictError, ForbiddenError } from '../errors/app.exception.js';
 import { UserRole, ListingStatus, Prisma } from '../generated/prisma/index.js';
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { ListingPublishedEvent } from './events/listing-published.event.js';
 
 @Injectable()
 export class ListingsService {
-  constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService) { }
+  constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService, private readonly events: EventEmitter2) { }
 
   private handlePrismaError(error: any) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -117,7 +119,7 @@ export class ListingsService {
 
   async updateStatus(id: number, dto: UpdateStatusDto): Promise<any> {
     try {
-      return await this.prisma.$transaction(async (tx) => {
+      const updatedListing =  await this.prisma.$transaction(async (tx) => {
         const listing = await tx.listings.findUnique({ where: { id } });
         if (!listing) throw new NotFoundError('Listing not found');
 
@@ -140,6 +142,15 @@ export class ListingsService {
           }
         });
       });
+
+      if (updatedListing.status === ListingStatus.published) {
+        this.events.emit(
+          ListingPublishedEvent.eventName, 
+          new ListingPublishedEvent(updatedListing.id, updatedListing.agentId, updatedListing.title)
+        );
+      }
+
+      return updatedListing;
     } catch (error) {
       this.handlePrismaError(error);
     }
