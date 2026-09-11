@@ -2,16 +2,23 @@ import {
   WebSocketGateway, WebSocketServer, SubscribeMessage, ConnectedSocket,
   MessageBody, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 } from "@nestjs/websockets";
+import { UseGuards, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 import { JwtService } from "@nestjs/jwt";
 import { PresenceService } from "./presence.service.js";
 import { ConfigService } from "@nestjs/config";
 import { Server, Socket } from 'socket.io';
 import { AppServer, AppSocket } from './realtime.types.js';
 import { UnauthorizedError } from "../errors/app.exception.js";
+import { WsRolesGuard } from './guards/ws-roles.guard.js';
+import { WsExceptionFilter } from './filters/ws-exception.filter.js';
+import { CursorMoveDto } from './dto/cursor-move.dto.js';
+import { Roles } from '../auth/decorators/roles.decorator.js';
 
 const ALLOWED_ROOM = /^(queue|listing:\d+)$/;
 
 @WebSocketGateway({ cors: { origin: process.env.CLIENT_URL, credentials: true } })
+@UseFilters(WsExceptionFilter)
 export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
@@ -96,13 +103,12 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGa
     this.leaveCurrentRooms(socket);
   }
 
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, exceptionFactory: (errors) => new WsException({ message: 'Validation failed', details: errors }) }))
   @SubscribeMessage('cursor:move')
-  handleCursorMove(@MessageBody() payload: { room: string; x: number; y: number }, @ConnectedSocket() rawSocket: Socket) {
+  handleCursorMove(@MessageBody() payload: CursorMoveDto, @ConnectedSocket() rawSocket: Socket) {
     const socket = rawSocket as unknown as AppSocket;
     const { room, x, y } = payload;
     if (!socket.rooms.has(room)) return;
-    if (typeof x !== 'number' || x < 0 || x > 1) return;
-    if (typeof y !== 'number' || y < 0 || y > 1) return;
     socket.to(room).emit('cursor:moved', { userId: socket.data.user.id, x, y });
   }
 
@@ -110,5 +116,13 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGa
   handlePresenceRequest(@ConnectedSocket() rawSocket: Socket) {
     const socket = rawSocket as unknown as AppSocket;
     socket.emit('presence:online', this.presenceService.getOnlineList());
+  }
+
+  @Roles('moderator')
+  @UseGuards(WsRolesGuard)
+  @SubscribeMessage('queue:take')
+  handleQueueTake(@ConnectedSocket() rawSocket: Socket) {
+    const socket = rawSocket as unknown as AppSocket;
+    socket.emit('pong:check');
   }
 }
