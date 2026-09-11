@@ -16,6 +16,7 @@ import { PrismaService } from './prisma/prisma.service.js';
 import { ListingsModule } from './listings/listings.module.js';
 import { ListingsController } from './listings/listings.controller.js';
 import { FavoritesModule } from './favorites/favorites.module.js';
+import { RealtimeModule } from './realtime/realtime.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -37,6 +38,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PrismaModule,
     ListingsModule,
     FavoritesModule,
+    RealtimeModule,
   ],
   controllers: [AppController, ListingsController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }, PrismaService],
