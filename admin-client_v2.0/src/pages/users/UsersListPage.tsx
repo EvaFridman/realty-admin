@@ -85,7 +85,8 @@ export default function UsersListPage(): ReactNode {
                                 <td>{user.email}</td>
                                 <td>{user.phone || '—'}</td>
                                 <td><span className={[styles.badge, styles[user.role]].filter(Boolean).join(' ')}>{user.role}</span></td>
-                                <td><Link to={`/users/${String(user.id)}`} className={styles.actionLink}>Смотреть</Link></td>                            </tr>
+                                <td><Link to={`/users/${String(user.id)}`} className={styles.actionLink}>Смотреть</Link></td>
+                            </tr>
                         ))}
                     </tbody>
                 </table>

@@ -14,7 +14,7 @@ export default function AuthProvider({ children }: Props): ReactElement {
     useAuthFailureHandler(setUser);
 
     const login = useLogin(setUser);
-    const logout = useLogout();
+    const logout = useLogout(setUser);
 
     const value = useMemo(
         () => ({ user, setUser, isBootstrapping, login, logout }),

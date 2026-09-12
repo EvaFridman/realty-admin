@@ -144,7 +144,10 @@ export class ListingsService {
         );
       }
 
-      return updatedListing;
+      return {
+        ...updatedListing,
+        allowedTransitions: getAllowedTransitions(updatedListing.status),
+      };
     } catch (error) {
       this.handlePrismaError(error);
     }

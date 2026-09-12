@@ -5,6 +5,8 @@ import { tap, catchError } from 'rxjs/operators';
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+        if (context.getType() === 'ws') return next.handle();
+        
         const started = Date.now();
         const { method, url } = context.switchToHttp().getRequest();
         

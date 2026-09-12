@@ -4,4 +4,4 @@ export type UserRole = PrismaUserRole;
 
 export type User = Users;
 
-export type PublicUser = Omit<User, 'passwordHash'>;
+export type PublicUser = Omit<User, 'passwordHash'> & { avatarUrl?: string };

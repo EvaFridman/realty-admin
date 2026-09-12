@@ -16,12 +16,13 @@ import { PdfQueryDto } from './dto/pdf-query.dto.js';
 import { PdfBundleQueryDto } from './dto/pdf-bundle-query.dto.js';
 import type { Response as ExpressResponse } from 'express'; 
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ViewingsService } from '../viewings/viewings.service.js';
 
 @ApiTags('Объявления')
 @ApiBearerAuth('bearer')
 @Controller('listings')
 export class ListingsController {
-    constructor(private readonly listingsService: ListingsService) { }
+    constructor(private readonly listingsService: ListingsService, private readonly viewingsService: ViewingsService,) { }
 
     @ApiOperation({ summary: 'Получить список объявлений с фильтрацией и пагинацией' })
     @ApiResponse({ status: 200, description: 'Список объявлений и метаданные пагинации успешно получены' })
@@ -30,6 +31,23 @@ export class ListingsController {
     async findAll(@Query() query: ListListingsDto, @Req() request: Request) {
       const currentUser = request.user as { id: number; role: string };
       return await this.listingsService.findAll(query, currentUser);
+    }
+
+    @Roles('moderator')
+    @ApiOperation({ summary: 'Генерация и потоковая отдача сборника объявлений по списку ID (Доступно только модераторам)' })
+    @ApiResponse({ status: 200, description: 'Поток многостраничного PDF-документа', type: StreamableFile })
+    @ApiResponse({ status: 400, description: 'Некорректный формат списка ID объявлений' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
+    @ApiResponse({ status: 403, description: 'Выгрузка бандлов доступна только модераторам' })
+    @ApiResponse({ status: 404, description: 'Ни одного объявления из переданного списка ID не найдено' })
+    @Get('pdf/bundle')
+    async getListingsBundle(@Query() query: PdfBundleQueryDto, @Response({ passthrough: true }) res: ExpressResponse): Promise<StreamableFile> {
+      const pdfStream = await this.listingsService.getListingsBundleStream(query.ids);
+      const disposition = query.mode === 'download' ? 'attachment' : 'inline';
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `${disposition}; filename="listings-bundle.pdf"`);
+
+      return new StreamableFile(pdfStream);
     }
 
     @ApiOperation({ summary: 'Создать новое объявление' })
@@ -50,6 +68,16 @@ export class ListingsController {
     @Get(':id')
     async findOne(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
       return await this.listingsService.findOne(id, request.user as any);
+    }
+
+    @ApiOperation({ summary: 'Получить список всех заявок на показы для конкретного объявления' })
+    @ApiResponse({ status: 200, description: 'Список показов для указанного объявления успешно получен' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
+    @ApiResponse({ status: 404, description: 'Объявление не найдено' })
+    @Get(':id/viewings')
+    async findListingViewings(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
+      const currentUser = request.user as { id: number; role: string };
+      return await this.viewingsService.findAll({ listingId: id, page: 1, limit: 100 }, currentUser);
     }
   
     @ApiOperation({ summary: 'Обновить параметры существующего объявления' })
@@ -91,6 +119,15 @@ export class ListingsController {
     @Patch(':id/photos/:photoId')
     async updatePhoto(@Param('id', ParseIntPipe) id: number, @Param('photoId', ParseIntPipe) photoId: number, @Body() dto: UpdatePhotoDto) {
       return await this.listingsService.updatePhoto(id, photoId, dto);
+    }
+
+    @ApiOperation({ summary: 'Назначить фотографию обложкой объявления' })
+    @ApiResponse({ status: 200, description: 'Фотография успешно сделана обложкой объявления' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
+    @ApiResponse({ status: 404, description: 'Фотография или объявление не найдены' })
+    @Patch(':id/photos/:photoId/cover')
+    async makePhotoCover(@Param('id', ParseIntPipe) id: number, @Param('photoId', ParseIntPipe) photoId: number) {
+      return await this.listingsService.updatePhoto(id, photoId, { isCover: true });
     }
 
     @ApiOperation({ summary: 'Загрузка фотографий для объявления' })
@@ -145,23 +182,6 @@ export class ListingsController {
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `${disposition}; filename="listing-${id}.pdf"`);
   
-      return new StreamableFile(pdfStream);
-    }
-
-    @ApiOperation({ summary: 'Генерация и потоковая отдача сборника объявлений по списку ID (Доступно только модераторам)' })
-    @ApiResponse({ status: 200, description: 'Поток многостраничного PDF-документа', type: StreamableFile })
-    @ApiResponse({ status: 400, description: 'Некорректный формат списка ID объявлений' })
-    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
-    @ApiResponse({ status: 403, description: 'Выгрузка бандлов доступна только модераторам' })
-    @ApiResponse({ status: 404, description: 'Ни одного объявления из переданного списка ID не найдено' })
-    @Roles('moderator')
-    @Get('pdf/bundle')
-    async getListingsBundle(@Query() query: PdfBundleQueryDto, @Response({ passthrough: true }) res: ExpressResponse): Promise<StreamableFile> {
-      const pdfStream = await this.listingsService.getListingsBundleStream(query.ids);
-      const disposition = query.mode === 'download' ? 'attachment' : 'inline';
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `${disposition}; filename="listings-bundle.pdf"`);
-
       return new StreamableFile(pdfStream);
     }
 }

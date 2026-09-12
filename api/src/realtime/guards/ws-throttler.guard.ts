@@ -5,14 +5,16 @@ import { Socket } from 'socket.io';
 
 @Injectable()
 export class WsThrottlerGuard extends ThrottlerGuard {
-  protected getRequestResponse(context: ExecutionContext): { req: Record<string, any>; res: Record<string, any> } {
-    const wsCtx = context.switchToWs();
-    const socket = wsCtx.getClient<Socket>();
-    return { req: socket, res: {} };
-  }
-
-  protected async getTracker(req: Record<string, any>): Promise<string> {
-    return req.id;
+  protected async handleRequest(options: { context: ExecutionContext; limit: number; ttl: number; throttler: any; blockDuration: number }): Promise<boolean> {
+    const { context, limit, ttl, throttler, blockDuration } = options;
+    const socket = context.switchToWs().getClient<Socket>();
+    
+    const tracker = socket.id;
+    const key = this.generateKey(context, tracker, throttler.name);
+    
+    const { totalHits } = await this.storageService.increment(key, ttl, limit, blockDuration, throttler.name);
+    if (totalHits > limit) await this.throwThrottlerException(context);
+    return true;
   }
 
   protected async throwThrottlerException(context: ExecutionContext): Promise<void> {

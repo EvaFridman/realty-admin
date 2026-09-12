@@ -18,17 +18,18 @@ import { CursorMoveDto } from './dto/cursor-move.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { OnEvent } from "@nestjs/event-emitter";
 import { ListingPublishedEvent } from '../listings/events/listing-published.event.js';
+import { PrismaService } from "../prisma/prisma.service.js";
 
 const ALLOWED_ROOM = /^(queue|listing:\d+)$/;
 
-@WebSocketGateway({ cors: { origin: process.env.CLIENT_URL, credentials: true } })
+@WebSocketGateway({ cors: { origin: (requestOrigin, callback) => { callback(null, process.env.CLIENT_URL) }, credentials: true } })
 @UseFilters(WsExceptionFilter)
 @UseGuards(WsThrottlerGuard)
 @Throttle({ ws: { limit: 100, ttl: 1000 } })
 export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
-  constructor(private readonly configService: ConfigService, private readonly jwtService: JwtService, private readonly presenceService: PresenceService) { }
+  constructor(private readonly configService: ConfigService, private readonly jwtService: JwtService, private readonly presenceService: PresenceService, private readonly prismaService: PrismaService) { }
 
   afterInit(server: Server) {
     const io = server as unknown as AppServer;
@@ -45,9 +46,14 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGa
         const secret = this.configService.get<string>('JWT_ACCESS_SECRET');
         const payload = await this.jwtService.verifyAsync(cleanToken, { secret });
 
+        const dbUser = await this.prismaService.users.findUnique({
+          where: { id: Number(payload.sub) },
+          select: { name: true }
+        });
+
         socket.data.user = {
           id: payload.sub,
-          name: payload.name ?? 'Unknown',
+          name: dbUser?.name ?? 'Unknown',
           role: payload.role,
           email: payload.email ?? '',
         };

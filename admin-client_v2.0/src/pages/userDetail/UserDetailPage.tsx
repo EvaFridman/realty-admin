@@ -24,6 +24,7 @@ export default function UserDetailPage(): ReactNode {
     const { user: currentUser, setUser } = useAuth();
     const { showAlert } = useAlert();
     const [refreshKey, setRefreshKey] = useState(0);
+    const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
 
     const userId = Number(id);
 
@@ -41,13 +42,18 @@ export default function UserDetailPage(): ReactNode {
     );
 
     const handleAvatarUploadDone = (result: UserType): void => {
+        if (result.avatarUrl) {
+            setUploadedAvatarUrl(`${result.avatarUrl}?cb=${String(Date.now())}`);
+        }
+        
         setRefreshKey((prev) => prev + 1);
         showAlert('Фотография профиля успешно обновлена');
 
-        if (currentUser && currentUser.id === userId) {
+        if (currentUser && currentUser.id === userId && result.avatarUrl) {
             setUser({ ...currentUser, avatarUrl: result.avatarUrl });
         }
     };
+
 
     if (isUserLoading || isListingsLoading) return <StatusMessage><PageLoader /></StatusMessage>;
     if (userError || !profile) return <StatusMessage>{userError || 'Пользователь не найден'}</StatusMessage>;
@@ -57,7 +63,7 @@ export default function UserDetailPage(): ReactNode {
             <div className={styles.profileCard}>
                 <div className={styles.avatarBlock}>
                     <img 
-                        src={profile.avatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${profile.avatarUrl}` : '/default-avatar.png'} 
+                        src={uploadedAvatarUrl || (profile.avatarUrl ? `${profile.avatarUrl}?t=${String(refreshKey)}` : '/static/default-avatar.webp')} 
                         alt="Аватар пользователя" 
                         className={styles.profileAvatar} 
                     />

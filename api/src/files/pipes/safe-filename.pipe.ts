@@ -1,5 +1,5 @@
 import { PipeTransform, Injectable } from '@nestjs/common';
-import { AppException } from '../../errors/app.exception.js'; // 💡 Импортируем базовый класс
+import { AppException } from '../../errors/app.exception.js';
 
 @Injectable()
 export class SafeFilenamePipe implements PipeTransform<string, string> {
