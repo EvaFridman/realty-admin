@@ -1,4 +1,4 @@
-import { Controller, ParseIntPipe, Query, Body, Param, Req, Get, Post, Patch, UseGuards, UseInterceptors, UploadedFiles, Delete } from '@nestjs/common';
+import { Controller, ParseIntPipe, Query, StreamableFile, Response, Body, Param, Req, Get, Post, Patch, UseGuards, UseInterceptors, UploadedFiles, Delete } from '@nestjs/common';
 import { ListingsService } from './listings.service.js';
 import { ListListingsDto } from './dto/list-listings.dto.js';
 import { CreateListingDto } from './dto/create-listing.dto.js';
@@ -11,7 +11,10 @@ import { photoStorage } from '../files/storage/photo.storage.js';
 import { PhotoValidationPipe } from '../common/pipes/photo-validation.pipe.js';
 import { ListingOwnerGuard } from './guards/listing-owner.guard.js';
 import { Throttle } from '@nestjs/throttler';
-import { FilesInterceptor } from '@nestjs/platform-express'; 
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { PdfQueryDto } from './dto/pdf-query.dto.js';
+import { PdfBundleQueryDto } from './dto/pdf-bundle-query.dto.js';
+import type { Response as ExpressResponse } from 'express'; 
 
 @Controller('listings')
 export class ListingsController {
@@ -67,5 +70,27 @@ export class ListingsController {
     @UseGuards(ListingOwnerGuard)
     async deletePhoto(@Param('id', ParseIntPipe) id: number, @Param('photoId', ParseIntPipe) photoId: number) {
       return await this.listingsService.deletePhoto(id, photoId);
+    }
+
+    @Roles('moderator')
+    @Get(':id/pdf')
+    async getListingPdf(@Param('id', ParseIntPipe) id: number, @Query() query: PdfQueryDto, @Req() request: any, @Response({ passthrough: true }) res: ExpressResponse): Promise<StreamableFile> {
+      const pdfStream = await this.listingsService.getListingPdfStream(id, request.user);
+      const disposition = query.mode === 'download' ? 'attachment' : 'inline';
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `${disposition}; filename="listing-${id}.pdf"`);
+  
+      return new StreamableFile(pdfStream);
+    }
+
+    @Roles('moderator')
+    @Get('pdf/bundle')
+    async getListingsBundle(@Query() query: PdfBundleQueryDto, @Response({ passthrough: true }) res: ExpressResponse): Promise<StreamableFile> {
+      const pdfStream = await this.listingsService.getListingsBundleStream(query.ids);
+      const disposition = query.mode === 'download' ? 'attachment' : 'inline';
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `${disposition}; filename="listings-bundle.pdf"`);
+
+      return new StreamableFile(pdfStream);
     }
 }
