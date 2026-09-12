@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module.js';
+import { setupSwagger } from './swagger.js';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
 import { AppExceptionFilter } from './common/filters/app-exception.filter.js';
@@ -20,6 +21,8 @@ async function bootstrap() {
   app.useGlobalFilters(new AppExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalInterceptors(new TransformInterceptor());
+
+  setupSwagger(app);
 
   await app.listen(config.get<number>("PORT") ?? 3000);
 }
