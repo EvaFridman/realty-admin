@@ -19,7 +19,7 @@ export class UsersTransport extends Transport {
             form.append('avatar', file);
         }
 
-        return api({
+        return api<ApiResponseType<UserType>>({
             url: `/users/${String(id)}/avatar`,
             method: "POST",
             data: form,
@@ -27,7 +27,10 @@ export class UsersTransport extends Transport {
                 onProgress?.(Math.round((event.progress ?? 0) * 100));
             },
             ...(signal !== undefined && { signal }),
-        });
+        }).then((res: ApiResponseType<UserType>) => {
+            if (typeof res === 'object' && 'data' in res && res.data) return res.data;
+            return res as unknown as UserType;
+        });;
     }
 
     removeAvatar(id: number): Promise<ApiResponseType<UserType | undefined>> {

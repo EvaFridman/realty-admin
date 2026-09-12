@@ -2,10 +2,7 @@ import { useNavigate } from 'react-router';
 
 import { handleLogout } from '../tools/handle-logout';
 
-import { useAuth } from './useAuth';
-
-export function useLogout(): () => Promise<void> {
-    const { setUser } = useAuth();
+export function useLogout(setUser: (user: unknown) => void): () => Promise<void> {
     const navigate = useNavigate();
 
     return async function logoutUser(): Promise<void> {

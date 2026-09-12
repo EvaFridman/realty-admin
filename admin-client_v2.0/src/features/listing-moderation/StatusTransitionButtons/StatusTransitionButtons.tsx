@@ -16,6 +16,6 @@ export default function StatusTransitionButtons({ allowedTransitions, onTransiti
 
   return (
     <div className={styles.btns}>
-      {allowedTransitions.map((status) => (<button key={status} type="button" onClick={() => { onTransition(status); }}>{listingStatusLabels[status]}</button>))}</div>
+      {allowedTransitions.map((status) => (<button key={status} type="button" onClick={() => { onTransition(status); }}>{listingStatusLabels[status.toLowerCase() as keyof typeof listingStatusLabels] || status}</button>))}</div>
   );
 }

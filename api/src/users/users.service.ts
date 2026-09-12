@@ -14,7 +14,12 @@ export class UsersService {
 
   private formatPublicUser(user: any): PublicUser {
     const { passwordHash: _passwordHash, ...publicUser } = user;
-    return publicUser;
+    
+    const baseUrl = this.configService.get<string>('PUBLIC_URL');
+
+    const avatarUrl = user.avatarFileName ? `${baseUrl}/files/avatars/${user.avatarFileName}` : `${baseUrl}/static/default-avatar.webp`;
+
+    return { ...publicUser, avatarUrl } as PublicUser;
   }
 
   async create(data: CreateUserDto & { passwordHash?: string }): Promise<PublicUser> {

@@ -1,7 +1,10 @@
-import { IsIn, IsString } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
 import { ListingStatus } from '../../generated/prisma/index.js';
 
 export class UpdateStatusDto {
-    @IsString() @IsIn(['draft', 'moderation', 'published', 'rejected', 'unpublished'])
+    @IsNotEmpty() @IsString() @IsEnum(ListingStatus, { message: 'status must be one of the following values: DRAFT, MODERATION, PUBLISHED, REJECTED, UNPUBLISHED'})
     status: ListingStatus;
+
+    @IsOptional() @IsString()
+    rejectionReason?: string;
 }

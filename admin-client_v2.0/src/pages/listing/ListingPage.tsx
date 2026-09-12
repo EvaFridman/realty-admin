@@ -7,7 +7,7 @@ import { PublishRequirementsList , RejectionForm , StatusTransitionButtons } fro
 import { ListingPhotoManagement } from '@/features/listing-photo-management';
 import { CursorLayer, useCursorBroadcast, useRoomPresence } from '@/features/presence';
 
-import { ListingsTransport, type ListingType } from '@/entities/listing';
+import { ListingsTransport, listingStatusLabels, type ListingType } from '@/entities/listing';
 
 import { useAlert, useTitle } from '@/shared/context';
 import useFetch from '@/shared/hooks/useFetch';
@@ -16,7 +16,6 @@ import ErrorView from '@/shared/ui/ErrorView/ErrorView';
 import StatusMessage from '@/shared/ui/StatusMessage/StatusMessage';
 
 import { ListingViewingsContainer } from '@/widgets';
-
 
 import styles from './ListingPage.module.css';
 
@@ -60,9 +59,8 @@ export default function ListingPage(): ReactNode {
         [id, refreshKey],
     );
 
-    const [prevId, setPrevId] = useState(id);
     const [confirmedListing, setConfirmedListing] = useState<ListingWithPendingType | null>(null);
-
+    const [prevId, setPrevId] = useState(id);
     if (id !== prevId) {
         setPrevId(id);
         setConfirmedListing(null);
@@ -104,10 +102,11 @@ export default function ListingPage(): ReactNode {
     }, [socket, isConnected, id]);
 
     useEffect(() => {
-        if (optimisticListing?.title) {
-            setTitle(optimisticListing.title);
+        if (listing?.title) {
+            document.title = listing.title;
+            setTitle(listing.title); 
         }
-    }, [optimisticListing, setTitle]);
+    }, [listing?.title, setTitle]); 
 
     async function applyTransition(
         newStatus: ListingType['status'],
@@ -260,6 +259,10 @@ export default function ListingPage(): ReactNode {
 
             <p className={styles.listingMeta}>
                 агент: {optimisticListing.agent?.name}
+            </p>
+
+            <p className={styles.listingMeta}>
+                Статус: <strong>{listingStatusLabels[optimisticListing.status.toLowerCase() as keyof typeof listingStatusLabels] || optimisticListing.status}</strong>
             </p>
 
             <ListingPhotoManagement

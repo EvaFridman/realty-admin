@@ -5,6 +5,8 @@ import type { ViewingListItemType, ViewingStatusType } from '../model/model';
 
 import styles from './ViewingListItem.module.css';
 
+const getFormatKey = (status: string) => status.toLowerCase().replace('_', ' ');
+
 type Props = {
     viewing: ViewingListItemType;
     onTransition: (viewingId: number, status: ViewingStatusType) => void;
@@ -24,7 +26,7 @@ export default function ViewingListItem({ viewing, onTransition }: Props): React
                 <div className={styles.viewingCardActions}>
                     {viewing.allowedTransitions.map((status) => (
                         <button key={status} type="button" disabled={viewing._pending} onClick={() => { onTransition(viewing.id, status); }}>
-                            {viewingStatusLabels[status]}
+                            {viewingStatusLabels[getFormatKey(status) as keyof typeof viewingStatusLabels] || status}
                         </button>
                     ))}
                 </div>

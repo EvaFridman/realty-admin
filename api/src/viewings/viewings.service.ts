@@ -45,7 +45,7 @@ export class ViewingsService {
         if (finalLimit > pageSizeMax) finalLimit = pageSizeMax;
 
         const whereCondition: any = {};
-        if (dto.status) whereCondition.status = dto.status;
+        if (dto.status) whereCondition.status = dto.status.toUpperCase();
         if (dto.listingId) whereCondition.listingId = dto.listingId;
 
         if (user.role === UserRole.agent) whereCondition.listing = { agentId: user.id };
@@ -63,7 +63,9 @@ export class ViewingsService {
 
         const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
 
-        return { items, meta: { page: finalPage, limit: finalLimit, total, totalPages } };
+        const itemsWithTransitions = items.map((viewing) => ({ ...viewing, allowedTransitions: getAllowedTransitions(viewing.status) }));
+
+        return { items: itemsWithTransitions, meta: { page: finalPage, limit: finalLimit, total, totalPages } };
     }
 
     async findOne(id: number, user: { id: number; role: string }) {
@@ -76,7 +78,7 @@ export class ViewingsService {
 
     async updateStatus(id: number, dto: UpdateStatusDto, user: { id: number; role: string }) {
         try {
-            return await this.prisma.$transaction(async (tx) => {
+            const updatedViewing = await this.prisma.$transaction(async (tx) => {
                 const viewing = await tx.viewings.findUnique({ where: { id }, include: { listing: true } });
                 if (!viewing) throw new NotFoundError('Viewing not found');
                 if (user.role === UserRole.agent && viewing.listing?.agentId !== user.id) throw new ForbiddenError('You do not have access to this viewing');
@@ -91,6 +93,11 @@ export class ViewingsService {
 
                 return await tx.viewings.update({ where: { id }, data: updateData, include: { listing: true } });
             });
+
+            return {
+                ...updatedViewing,
+                allowedTransitions: getAllowedTransitions(updatedViewing.status),
+            };
         } catch (error) {
             this.handlePrismaError(error);
         }

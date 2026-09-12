@@ -44,4 +44,7 @@ export class ListListingsDto {
 
     @IsOptional() @IsString() @IsIn(['asc', 'desc'])
     sortOrder?: string = 'desc';
+
+    @IsOptional() @Type(() => Number) @IsInt() @IsPositive()
+    agentId?: number;
 }

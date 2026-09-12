@@ -57,3 +57,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 .DS_Store
 /src/generated/prisma
+
+uploads/**/*
+uploads/photos/.gitkeep
+uploads/avatars/.gitkeep

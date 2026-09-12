@@ -7,6 +7,7 @@ import path from 'path';
 import mime from 'mime-types';
 import type { Response as ExpressResponse } from 'express'; 
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Public } from '../auth/decorators/public.decorator.js';
 
 @ApiTags('Фотографии')
 @Controller('files')
@@ -41,6 +42,7 @@ export class FilesController {
     return new StreamableFile(fs.createReadStream(filePath));
   }
 
+  @Public()
   @ApiOperation({ summary: 'Публичное потоковое получение аватарки пользователя' })
   @ApiResponse({ status: 200, description: 'Поток файла изображения', type: StreamableFile })
   @ApiResponse({ status: 400, description: 'Некорректный формат имени файла' })

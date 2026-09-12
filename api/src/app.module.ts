@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Injectable, ExecutionContext } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -19,22 +19,59 @@ import { RealtimeModule } from './realtime/realtime.module.js';
 import { MailService } from './mail/mail.service.js';
 import { PdfService } from './pdf/pdf.service.js';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
+import { ThrottlerModule, ThrottlerGuard, ThrottlerException } from "@nestjs/throttler";
 import { FilesModule } from './files/files.module.js';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import path from 'path';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
+@Injectable()
+export class GlobalThrottlerGuard extends ThrottlerGuard {
+  protected async handleRequest(
+    options: {
+      context: ExecutionContext;
+      limit: number;
+      ttl: number;
+      throttler: any;
+      blockDuration: number;
+    }
+  ): Promise<boolean> {
+    const { context, limit, ttl, throttler, blockDuration } = options;
+    
+    if (context.getType() === 'ws') return true;
+
+    const req = context.switchToHttp().getRequest();
+    const url = req.url || '';
+
+    if (url.includes('/socket.io')) return true;
+
+    if (throttler.name === 'login' && !url.includes('/auth/login')) return true;
+    if (throttler.name === 'register' && !url.includes('/auth/register')) return true;
+    if (throttler.name === 'viewing' && !url.includes('/viewings')) return true;
+    if (throttler.name === 'upload' && !url.includes('/photos') && !url.includes('/avatar')) return true;
+
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    const key = `throttler:${throttler.name}:${ip}`;
+    
+    const { totalHits } = await this.storageService.increment(
+      key,
+      ttl,
+      limit,
+      blockDuration,
+      throttler.name
+    );
+
+    if (totalHits > limit) {
+      throw new ThrottlerException();
+    }
+
+    return true;
+  }
+}
+
 @Module({
   imports: [
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
-    // ObserveModule.forRoot({
-    //   appKey: 'YOUR_APP_KEY',
-    //   appSecret: 'YOUR_APP_SECRET',
-    //   serviceId: 'api',
-    // }),
     ServeStaticModule.forRoot({
       rootPath: path.resolve('./public'),
       serveRoot: '/static',
@@ -65,7 +102,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
   ],
   controllers: [AppController],
   providers: [AppService,
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: GlobalThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     PrismaService,

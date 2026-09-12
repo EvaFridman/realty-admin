@@ -12,7 +12,7 @@ export function buildListingsWhere( dto: ListListingsDto, currentUserId?: number
 
     if (dto.dealType) where.dealType = dto.dealType;
     if (dto.propertyType) where.propertyType = dto.propertyType;
-    if (dto.status) where.status = dto.status;
+    if (dto.status) where.status = dto.status.toUpperCase() as any;
 
     if (dto.rooms && dto.rooms.length > 0) where.rooms = { in: dto.rooms };
 
@@ -35,5 +35,10 @@ export function buildListingsWhere( dto: ListListingsDto, currentUserId?: number
             { address: { contains: searchString, mode: 'insensitive' } },
         ];
     }
+
+    if (dto.agentId) {
+        where.agentId = dto.agentId;
+    }
+    
     return where;
 }

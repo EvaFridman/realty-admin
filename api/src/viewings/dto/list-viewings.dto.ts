@@ -15,4 +15,7 @@ export class ListViewingsDto {
 
     @IsOptional() @Type(() => Number) @IsInt() @IsPositive()
     listingId?: number;
+
+    @IsOptional() @IsString() @IsIn(['asc', 'desc'])
+    sortOrder?: 'asc' | 'desc';
 }
