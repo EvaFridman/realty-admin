@@ -6,11 +6,20 @@ import fs from 'fs';
 import path from 'path';
 import mime from 'mime-types';
 import type { Response as ExpressResponse } from 'express'; 
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('Фотографии')
 @Controller('files')
 export class FilesController {
   constructor(private readonly prisma: PrismaService) {}
 
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Защищенное потоковое получение фотографии объявления' })
+  @ApiResponse({ status: 200, description: 'Поток файла изображения', type: StreamableFile })
+  @ApiResponse({ status: 400, description: 'Некорректный формат имени файла или попытка Path Traversal атак' })
+  @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
+  @ApiResponse({ status: 403, description: 'Доступ запрещен, агент не является владельцем объявления)' })
+  @ApiResponse({ status: 404, description: 'Фотография или файл на диске не найдены' })
   @Get('photos/:fileName')
   async getPhoto(@Param('fileName', SafeFilenamePipe) fileName: string, @Response({ passthrough: true }) res: ExpressResponse): Promise<StreamableFile> {
     const photo = await this.prisma.listingPhotos.findFirst({ where: { fileName: fileName } });
@@ -32,6 +41,10 @@ export class FilesController {
     return new StreamableFile(fs.createReadStream(filePath));
   }
 
+  @ApiOperation({ summary: 'Публичное потоковое получение аватарки пользователя' })
+  @ApiResponse({ status: 200, description: 'Поток файла изображения', type: StreamableFile })
+  @ApiResponse({ status: 400, description: 'Некорректный формат имени файла' })
+  @ApiResponse({ status: 404, description: 'Файл аватарки не найден на диске' })
   @Get('avatars/:fileName')
   async getAvatar(  @Param('fileName', SafeFilenamePipe) fileName: string, @Response({ passthrough: true }) res: ExpressResponse): Promise<StreamableFile> {
     const filePath = path.resolve(`./uploads/avatars/${fileName}`);

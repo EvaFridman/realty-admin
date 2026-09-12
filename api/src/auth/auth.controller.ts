@@ -8,7 +8,9 @@ import { RegisterDto } from './dto/register.dto.js';
 import { Public } from './decorators/public.decorator.js';
 import { Throttle } from "@nestjs/throttler";
 import { LoginThrottlerGuard } from './guards/login-throttler.guard.js';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('Аутентификация')
 @Controller('auth')
 export class AuthController {
     constructor(
@@ -16,6 +18,11 @@ export class AuthController {
         private readonly configService: ConfigService
     ) {}
 
+    @ApiOperation({ summary: 'Аутентификация пользователя' })
+    @ApiResponse({ status: 200, description: 'Успешный вход' })
+    @ApiResponse({ status: 400, description: 'Некорректный формат входных данных' })
+    @ApiResponse({ status: 401, description: 'Неверные учетные данные (Неверный email или пароль)' })
+    @ApiResponse({ status: 429, description: 'Превышен лимит попыток входа (максимум 10 запросов за 15 минут)' })
     @UseGuards(LoginThrottlerGuard)
     @Throttle({ login: { ttl: 15 * 60_000, limit: 10 } })
     @Post('login')
@@ -37,6 +44,9 @@ export class AuthController {
         return { accessToken, user }; 
     }
 
+    @ApiOperation({ summary: 'Обновление сессии' })
+    @ApiResponse({ status: 200, description: 'Пара токенов успешно обновлена' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
     @Post('refresh')
     @Public()
     async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
@@ -57,17 +67,30 @@ export class AuthController {
         return { accessToken, user };
     }
 
+    @ApiBearerAuth('bearer')
+    @ApiOperation({ summary: 'Выход из системы' })
+    @ApiResponse({ status: 200, description: 'Сессия успешно завершена' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
     @Post('logout')
     async logout(@Res({ passthrough: true }) response: Response) {
         response.clearCookie('refreshToken', { path: '/auth' });
         return { message: 'Logged out' };
     }
 
+    @ApiBearerAuth('bearer')
+    @ApiOperation({ summary: 'Получение профиля текущего аутентифицированного пользователя' })
+    @ApiResponse({ status: 200, description: 'Данные профиля успешно получены' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
     @Get('me')
     async me(@Req() request: Request) {
         return request.user;
     }
 
+    @ApiOperation({ summary: 'Регистрация нового агента' })
+    @ApiResponse({ status: 201, description: 'Новый аккаунт успешно зарегистрирован' })
+    @ApiResponse({ status: 400, description: 'Некорректные параметры регистрации' })
+    @ApiResponse({ status: 409, description: 'Конфликт (пользователь с таким email уже существует в системе)' })
+    @ApiResponse({ status: 429, description: 'Превышен лимит регистраций (максимум 5 запросов в час)' })
     @UseGuards(LoginThrottlerGuard)
     @Throttle({ register: { ttl: 60 * 60_000, limit: 5 } })
     @Post('register')
