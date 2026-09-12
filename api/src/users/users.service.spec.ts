@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service.js';
-import { UsersRepository } from './users.repository.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { ConfigService } from '@nestjs/config';
 import { describe, beforeEach, it, expect } from '@jest/globals';
 
@@ -11,7 +11,7 @@ describe('UsersService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
-        { provide: UsersRepository, useValue: {} },
+        { provide: PrismaService, useValue: {} },
         { provide: ConfigService, useValue: {} },
       ],
     }).compile();

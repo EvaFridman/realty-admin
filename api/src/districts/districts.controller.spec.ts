@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DistrictsController } from './districts.controller.js';
 import { DistrictsService } from './districts.service.js';
-import { DistrictsRepository } from './districts.repository.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { ConfigService } from '@nestjs/config';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect } from '@jest/globals';
 
 describe('DistrictsController', () => {
   let controller: DistrictsController;
@@ -13,7 +13,7 @@ describe('DistrictsController', () => {
       controllers: [DistrictsController],
       providers: [
         DistrictsService,
-        { provide: DistrictsRepository, useValue: {} },
+        { provide: PrismaService, useValue: {} },
         { provide: ConfigService, useValue: {} },
       ],
     }).compile();

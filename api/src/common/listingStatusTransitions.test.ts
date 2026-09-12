@@ -2,12 +2,12 @@ import { canTransition, getAllowedTransitions } from "./listingStatusTransitions
 
 describe("listingStatusTransitions", () => {
     const validTransitions = [
-        ["draft", "moderation"],
-        ["moderation", "published"],
-        ["moderation", "rejected"],
-        ["rejected", "moderation"],
-        ["published", "unpublished"],
-        ["unpublished", "moderation"],
+        ["DRAFT", "MODERATION"],
+        ["MODERATION", "PUBLISHED"],
+        ["MODERATION", "REJECTED"],
+        ["REJECTED", "MODERATION"],
+        ["PUBLISHED", "UNPUBLISHED"],
+        ["UNPUBLISHED", "MODERATION"],
     ] as const;
 
     test.each(validTransitions)(
@@ -18,14 +18,14 @@ describe("listingStatusTransitions", () => {
     );
 
     const invalidTransitions = [
-        ["draft", "rejected"],
-        ["draft", "published"],
-        ["published", "draft"],
-        ["moderation", "moderation"],
-        ["rejected", "draft"],
-        ["rejected", "published"],
-        ["unpublished", "published"],
-        ["unpublished", "draft"],
+        ["DRAFT", "REJECTED"],
+        ["DRAFT", "PUBLISHED"],
+        ["PUBLISHED", "DRAFT"],
+        ["MODERATION", "MODERATION"],
+        ["REJECTED", "DRAFT"],
+        ["REJECTED", "PUBLISHED"],
+        ["UNPUBLISHED", "PUBLISHED"],
+        ["UNPUBLISHED", "DRAFT"],
     ] as const;
 
     test.each(invalidTransitions)(
@@ -38,11 +38,11 @@ describe("listingStatusTransitions", () => {
 
 describe("getAllowedTransitions", () => {
     const expectedAllowedTransitions = [
-        ["draft", ["moderation"]],
-        ["moderation", ["published", "rejected"]],
-        ["rejected", ["moderation"]],
-        ["published", ["unpublished"]],
-        ["unpublished", ["moderation"]],
+        ["DRAFT", ["MODERATION"]],
+        ["MODERATION", ["PUBLISHED", "REJECTED"]],
+        ["REJECTED", ["MODERATION"]],
+        ["PUBLISHED", ["UNPUBLISHED"]],
+        ["UNPUBLISHED", ["MODERATION"]],
     ] as const;
 
     test.each(expectedAllowedTransitions)(

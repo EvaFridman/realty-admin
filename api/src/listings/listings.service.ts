@@ -12,6 +12,8 @@ import { NotFoundError, ConflictError, ForbiddenError } from '../errors/app.exce
 import { UserRole, ListingStatus, Prisma } from '../generated/prisma/index.js';
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { ListingPublishedEvent } from './events/listing-published.event.js';
+import path from 'path';
+import fs from 'fs';
 
 @Injectable()
 export class ListingsService {
@@ -65,23 +67,13 @@ export class ListingsService {
 
   async create(dto: CreateListingDto, agentId: number): Promise<any> {
     try {
+      const { districtId, ...restDto } = dto;
       return await this.prisma.listings.create({
         data: {
-          title: dto.title,
-          description: dto.description ?? null,
-          dealType: dto.dealType,
-          propertyType: dto.propertyType,
-          price: dto.price,
-          area: dto.area,
-          rooms: dto.rooms ?? null,
-          floor: dto.floor ?? null,
-          totalFloors: dto.totalFloors ?? null,
-          address: dto.address,
-          lat: dto.lat,
-          lng: dto.lng,
-          status: ListingStatus.draft,
+          ...restDto,
+          status: ListingStatus.DRAFT,
           agent: { connect: { id: agentId } },
-          district: { connect: { id: dto.districtId } },
+          district: { connect: { id: districtId } },
           createdAt: new Date(),
           updatedAt: new Date(),
         }
@@ -130,7 +122,7 @@ export class ListingsService {
 
         const updateData: Prisma.ListingsUpdateInput = { status: dto.status, updatedAt: new Date() };
 
-        if (dto.status === ListingStatus.published) updateData.publishedAt = new Date();
+        if (dto.status === ListingStatus.PUBLISHED) updateData.publishedAt = new Date();
 
         return await tx.listings.update({
           where: { id },
@@ -143,7 +135,7 @@ export class ListingsService {
         });
       });
 
-      if (updatedListing.status === ListingStatus.published) {
+      if (updatedListing.status === ListingStatus.PUBLISHED) {
         this.events.emit(
           ListingPublishedEvent.eventName, 
           new ListingPublishedEvent(updatedListing.id, updatedListing.agentId, updatedListing.title)
@@ -176,6 +168,72 @@ export class ListingsService {
           updatedAt: new Date()
         }
       });
+    });
+  }
+
+  async uploadPhotos(listingId: number, files: Express.Multer.File[]): Promise<any> {
+    if (!files || files.length === 0) return [];
+
+    const cleanUploadedFiles = () => {
+      for (const file of files) {
+        const filePath = path.resolve(`./uploads/photos/${file.filename}`);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      }
+    };
+
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const existingPhotos = await tx.listingPhotos.findMany({ where: { listingId }, orderBy: { position: 'asc' } });
+
+        if (existingPhotos.length + files.length > 5) throw new ConflictError(`Limit exceeded. Already has ${existingPhotos.length} photos. Cannot add ${files.length} more (max 5).`);
+
+        let currentMaxPosition = existingPhotos.reduce((max, p) => ((p.position ?? 0) > max ? (p.position ?? 0) : max), 0);
+        const hasCover = existingPhotos.some((p) => p.isCover);
+
+        const createData = files.map((file, index) => {
+          currentMaxPosition++;
+          return {
+            listingId,
+            fileName: file.filename,
+            externalUrl: null,
+            position: currentMaxPosition,
+            sizeBytes: file.size, 
+            isCover: !hasCover && index === 0, 
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+        });
+
+        await tx.listingPhotos.createMany({ data: createData });
+
+        return await tx.listingPhotos.findMany({
+          where: { listingId },
+          orderBy: { position: 'asc' },
+        });
+      });
+    } catch (error) {
+      cleanUploadedFiles();
+      throw error;
+    }
+  }
+
+  async deletePhoto(listingId: number, photoId: number): Promise<any> {
+    return await this.prisma.$transaction(async (tx) => {
+      const photo = await tx.listingPhotos.findFirst({ where: { id: photoId, listingId } });
+      if (!photo) throw new NotFoundError('Photo not found');
+      await tx.listingPhotos.delete({ where: { id: photoId } });
+
+      if (photo.isCover) {
+        const nextPhoto = await tx.listingPhotos.findFirst({ where: { listingId }, orderBy: { position: 'asc' } });
+        if (nextPhoto) await tx.listingPhotos.update({ where: { id: nextPhoto.id }, data: { isCover: true } })
+      }
+
+      if (photo.fileName) {
+        const filePath = path.resolve(`./uploads/photos/${photo.fileName}`);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      }
+
+      return { success: true };
     });
   }
 }

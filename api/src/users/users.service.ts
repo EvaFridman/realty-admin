@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { PrismaService } from "../prisma/prisma.service.js";
-import { NotFoundError } from '../errors/app.exception.js';
+import fs from 'fs';
+import path from 'path';
+import { NotFoundError, ValidationError } from '../errors/app.exception.js';
 import type { User, PublicUser } from './users.types.js';
 
 @Injectable()
@@ -11,7 +13,7 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService) {}
 
   private formatPublicUser(user: any): PublicUser {
-    const { passwordHash, ...publicUser } = user;
+    const { passwordHash: _passwordHash, ...publicUser } = user;
     return publicUser;
   }
 
@@ -75,12 +77,46 @@ export class UsersService {
     try {
       const updatedUser = await this.prisma.users.update({ where: { id }, data: { ...data, updatedAt: new Date() } });
       return this.formatPublicUser(updatedUser);
-    } catch (error) {
+    } catch {
       throw new NotFoundError('User not found');
     }
   }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} user`;
-  // }
+  async updateAvatar(userId: number, file: Express.Multer.File): Promise<PublicUser> {
+    if (!file) throw new ValidationError('File is required');
+    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundError('User not found');
+    const oldFileName = user.avatarFileName;
+
+    const updatedUser = await this.prisma.users.update({
+      where: { id: userId },
+      data: { avatarFileName: file.filename, updatedAt: new Date() },
+    });
+
+    if (oldFileName) {
+      const oldFilePath = path.resolve(`./uploads/avatars/${oldFileName}`);
+      if (fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath);
+    }
+
+    return this.formatPublicUser(updatedUser);
+  }
+
+  async removeAvatar(userId: number): Promise<PublicUser> {
+    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundError('User not found');
+    const oldFileName = user.avatarFileName;
+    if (!oldFileName) return this.formatPublicUser(user);
+
+    const updatedUser = await this.prisma.users.update({
+      where: { id: userId },
+      data: { avatarFileName: null, updatedAt: new Date() },
+    });
+
+    const filePath = path.resolve(`./uploads/avatars/${oldFileName}`);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    return this.formatPublicUser(updatedUser);
+  }
 }

@@ -53,11 +53,11 @@ enum PropertyType {
 }
 
 enum ListingStatus { 
-  draft
-  moderation
-  published
-  rejected
-  unpublished
+  DRAFT       @map("draft")
+  MODERATION  @map("moderation")
+  PUBLISHED   @map("published")
+  REJECTED    @map("rejected")
+  UNPUBLISHED @map("unpublished")
 }
 
 model Listings {
@@ -110,11 +110,11 @@ model ListingPhotos {
 }
 
 enum ViewingStatus { 
-  created
-  pending_approval @map("pending approval")
-  approved
-  rejected
-  closed
+  CREATED          @map("created")
+  PENDING_APPROVAL @map("pending approval")
+  APPROVED         @map("approved")
+  REJECTED         @map("rejected")
+  CLOSED           @map("closed")
 }
 
 model Viewings {

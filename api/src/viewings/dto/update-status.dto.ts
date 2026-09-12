@@ -1,4 +1,4 @@
-import { IsIn, IsString } from 'class-validator';
+import { IsIn } from 'class-validator';
 import { ViewingStatus } from '../../generated/prisma/index.js';
 
 export class UpdateStatusDto {
