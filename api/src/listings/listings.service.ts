@@ -14,10 +14,12 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 import { ListingPublishedEvent } from './events/listing-published.event.js';
 import path from 'path';
 import fs from 'fs';
+import { PassThrough } from 'stream';
+import { PdfService } from '../pdf/pdf.service.js';
 
 @Injectable()
 export class ListingsService {
-  constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService, private readonly events: EventEmitter2) { }
+  constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService, private readonly events: EventEmitter2, private readonly pdfService: PdfService) { }
 
   private handlePrismaError(error: any) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -235,5 +237,33 @@ export class ListingsService {
 
       return { success: true };
     });
+  }
+
+  async getListingPdfStream(id: number, user: { id: number; role: string }): Promise<PassThrough> {
+    const listing = await this.prisma.listings.findUnique({
+      where: { id },
+      include: {
+        district: true,
+        agent: true,
+        photos: { orderBy: { position: 'asc' } }
+      }
+    });
+
+    if (!listing) throw new NotFoundError('Listing not found');
+    if (user.role !== UserRole.moderator && listing.agentId !== user.id) throw new ForbiddenError('You do not have access to this listing');
+    const pdfStream = new PassThrough();
+    this.pdfService.streamListingCard(pdfStream, listing as any);
+
+    return pdfStream;
+  }
+
+
+  async getListingsBundleStream(ids: number[]): Promise<PassThrough> {
+    const listings = await this.prisma.listings.findMany({where: { id: { in: ids } },include: { district: true, agent: { select: { id: true, name: true, email: true }}}});
+    if (!listings.length) throw new NotFoundError('No listings found for given ids');
+    const pdfStream = new PassThrough();
+    this.pdfService.streamListingsBundle(pdfStream, listings as any);
+
+    return pdfStream;
   }
 }

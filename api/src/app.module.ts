@@ -20,6 +20,9 @@ import { MailService } from './mail/mail.service.js';
 import { PdfService } from './pdf/pdf.service.js';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
+import { FilesModule } from './files/files.module.js';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import path from 'path';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -32,6 +35,10 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     //   appSecret: 'YOUR_APP_SECRET',
     //   serviceId: 'api',
     // }),
+    ServeStaticModule.forRoot({
+      rootPath: path.resolve('./public'),
+      serveRoot: '/static',
+    }),
     ThrottlerModule.forRoot({
       throttlers: [
         { name: "api", ttl: 15 * 60_000, limit: 300 },
@@ -54,6 +61,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ListingsModule,
     FavoritesModule,
     RealtimeModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService,
