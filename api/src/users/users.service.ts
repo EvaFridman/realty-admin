@@ -39,7 +39,7 @@ export class UsersService {
     return this.formatPublicUser(user);
   }
 
-  async findAll(page?: number, limit?: number, role?: 'agent' | 'moderator') {
+  async findAll(page?: number, limit?: number, role?: 'agent' | 'moderator' | 'guest') {
     const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
     const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
 

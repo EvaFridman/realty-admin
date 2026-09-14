@@ -11,7 +11,7 @@ export class CreateUserDto {
     @IsOptional() @IsString() @Matches(/^\+[1-9]\d{1,14}$/)
     phone: string | null;
 
-    @IsIn(['agent', 'moderator'])
+    @IsIn(['agent', 'moderator', 'guest'])
     role: UserRole;
 
     @IsOptional() @IsString() @MinLength(3)
