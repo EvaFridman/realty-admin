@@ -74,7 +74,7 @@ export class AuthService {
           email,
           name,
           passwordHash,
-          role: UserRole.agent,
+          role: UserRole.guest,
           phone: null,
           avatarFileName: null
       });

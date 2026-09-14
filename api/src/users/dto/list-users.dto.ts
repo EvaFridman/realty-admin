@@ -10,6 +10,6 @@ export class ListUsersDto {
     @IsOptional() @Type(() => Number) @IsInt() @IsPositive()
     limit: number;
 
-    @IsOptional() @IsString() @IsIn(['agent', 'moderator'])
+    @IsOptional() @IsString() @IsIn(['agent', 'moderator', 'guest'])
     role?: UserRole;
 }

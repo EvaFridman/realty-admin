@@ -22,6 +22,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard, ThrottlerException } from "@nestjs/throttler";
 import { FilesModule } from './files/files.module.js';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { PublicModule } from './public/public.module.js';
 import path from 'path';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -99,6 +100,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     FavoritesModule,
     RealtimeModule,
     FilesModule,
+    PublicModule,
   ],
   controllers: [AppController],
   providers: [AppService,
