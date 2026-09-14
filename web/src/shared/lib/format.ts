@@ -1,0 +1,59 @@
+export function formatPrice(price: number, isRent = false): string {
+    const formattedPrice = Math.round(price).toLocaleString("ru-RU", {
+        useGrouping: true,
+        maximumFractionDigits: 0,
+    });
+
+    return `${formattedPrice} ₽${isRent ? " / мес." : ""}`;
+}
+
+export function formatArea(area: number): string {
+    return `${area.toFixed(1).replace(".", ",")} м²`;
+}
+
+export function formatDate(date: string | Date, withYear = true): string {
+    return new Date(date).toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      ...(withYear ? { year: "numeric" } : {}),
+    });
+}
+
+export function formatDateFull(date: string | Date): string {
+    return formatDate(date, true);
+}
+
+export function formatDateShort(date: string | Date): string {
+    return formatDate(date, false);
+}
+
+export function pluralize(count: number, one: string, few: string, many: string): string {
+    const lastTwoDigits = count % 100;
+    const lastDigit = count % 10;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return many;
+    if (lastDigit === 1) return one;
+    if (lastDigit >= 2 && lastDigit <= 4) return few;
+
+    return many;
+}
+
+export function formatListingsCount(count: number): string {
+    return `${count} ${pluralize(count, "объявление", "объявления", "объявлений")}`;
+}
+
+export function formatListingFeatures(rooms?: number | null, floor?: number | null, totalFloors?: number | null): string[] {
+    const features: string[] = [];
+
+    if (rooms != null) features.push(`${rooms} ${pluralize(rooms, "комната", "комнаты", "комнат")}`);
+
+    if (floor != null && totalFloors != null) {
+        features.push(`${floor}/${totalFloors} этаж`);
+    } else if (floor != null) {
+        features.push(`${floor} этаж`);
+    } else if (totalFloors != null) {
+        features.push(`${totalFloors} этажей`);
+    }
+
+    return features;
+}
