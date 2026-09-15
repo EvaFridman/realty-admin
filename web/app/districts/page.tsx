@@ -4,10 +4,7 @@ import { districtApi } from "@/entities/district/api";
 import { DistrictList } from "@/entities/district/ui/DistrictList";
 
 export default async function DistrictsPage() {
-    const districts = await districtApi.getDistricts({
-        page: 1,
-        limit: 100,
-    });
+    const districts = await districtApi.getCachedDistricts();
 
     return (
         <section className="container">

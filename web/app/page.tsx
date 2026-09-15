@@ -15,10 +15,7 @@ export default async function HomePage() {
             sortBy: "publishedAt",
             sortOrder: "desc",
         }),
-        districtApi.getDistricts({
-            page: 1,
-            limit: 10,
-        }),
+        districtApi.getCachedDistricts(),
     ]);
 
     return (
