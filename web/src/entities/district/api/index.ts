@@ -1,3 +1,5 @@
+import { cacheLife, cacheTag } from "next/cache";
+
 import { apiFetch } from "@/shared/api/api-fetch";
 import type { PublicDistrictType } from "../types";
 
@@ -10,7 +12,11 @@ export const districtApi = {
         return apiFetch<PublicDistrictType>(`/public/districts/${slug}`);
     },
 
-    getCachedDistricts() {
-        return apiFetch<PublicDistrictType[]>("/public/districts", { cache: "force-cache", next: { tags: ["districts"] }, skipAuth: true });
+    async getCachedDistricts() {
+        "use cache";
+        cacheLife("hours");
+        cacheTag("districts");
+    
+        return apiFetch<PublicDistrictType[]>("/public/districts", { skipAuth: true });
     },
 };

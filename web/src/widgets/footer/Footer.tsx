@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import styles from "./Footer.module.css";
 
 import { SectionSwitcher } from "../index";
@@ -11,7 +13,9 @@ export function Footer() {
                     <h2>Витрина</h2>
                     <p>Объявления о продаже и аренде жилья</p>
                 </div>
-                <SectionSwitcher variant="footer" />
+                <Suspense fallback={null}>
+                    <SectionSwitcher variant="header" />
+                </Suspense>
                 <ThemeSwitcher variant="footer" />
             </div>
         </footer>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { listingApi } from "@/entities/listing/api";
 import type { PublicListingType } from "@/entities/listing/types";
@@ -6,6 +7,8 @@ import { AgentPhone } from "@/entities/listing/ui/AgentPhone";
 import { FavoriteButton } from "@/entities/listing/ui/FavoriteButton";
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { ListingGallery } from "@/entities/listing/ui/ListingGallery";
+import { BusyViewingTimes } from "@/entities/listing/ui/BusyViewingTimes";
+import { BusyViewingTimesSkeleton } from "@/entities/listing/ui/BusyViewingTimesSkeleton";
 import { ViewingRequestForm } from "@/features/viewing-request/ViewingRequestForm";
 import { formatArea, formatDateFull, formatPrice, formatPricePerMeter } from "@/shared/lib/format";
 
@@ -121,6 +124,10 @@ export async function ListingPage({ listing }: Props) {
                     <AgentPhone agentId={listing.agent.id} />
                 </div>
             </section>
+
+            <Suspense fallback={<BusyViewingTimesSkeleton />}>
+                <BusyViewingTimes listingId={listing.id} />
+            </Suspense>
 
             <section id="viewing" className={styles.section}>
                 <h2>Записаться на просмотр</h2>

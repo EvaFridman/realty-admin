@@ -9,13 +9,12 @@ import Link from "next/link";
 
 export default async function HomePage() {
     const [listings, districts] = await Promise.all([
-        listingApi.getListings({
+        listingApi.getCachedListings({
             page: 1,
             limit: 6,
             sortBy: "publishedAt",
             sortOrder: "desc",
-        }),
-        districtApi.getCachedDistricts(),
+        }), districtApi.getCachedDistricts(),
     ]);
 
     return (
