@@ -1,3 +1,5 @@
+import { cacheLife, cacheTag } from "next/cache";
+
 import { apiFetch, apiFetchWithMeta } from "@/shared/api/api-fetch";
 import type { PublicListingType, ListingsApiResponseType } from "../types";
 
@@ -8,8 +10,20 @@ export const listingApi = {
         return apiFetch<PublicListingType[]>("/public/listings", { query, skipAuth: true });
     },
 
+    async getCachedListings(query?: ListingQueryType) {
+        "use cache";
+        cacheLife("hours");
+        cacheTag("listings");
+    
+        return apiFetch<PublicListingType[]>("/public/listings", { query, skipAuth: true });
+    },
+
     async getListingsWithMeta(query?: ListingQueryType) {
-        const result = await apiFetchWithMeta<ListingsApiResponseType>("/public/listings", { query, next: { revalidate: 3600, tags: ["listings"] }, skipAuth: true });
+        "use cache";
+        cacheLife("hours");
+        cacheTag("listings");
+
+        const result = await apiFetchWithMeta<ListingsApiResponseType>("/public/listings", { query, skipAuth: true });
         return { items: result.data, meta: result.meta };
     },
 
@@ -19,5 +33,9 @@ export const listingApi = {
 
     getAgentPhone(id: number | string) {
         return apiFetch<{ phone: string | null }>(`/public/agents/${String(id)}/phone`);
+    },
+
+    getBusyViewingTimes(id: number | string) {
+        return apiFetch<string[]>(`/public/listings/${String(id)}/busy-viewing-times`, { cache: "no-store", skipAuth: true });
     },
 };

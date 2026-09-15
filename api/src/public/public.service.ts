@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { PublicListingsDto } from './dto/public-listings.dto.js';
 import { buildPublicListingsWhere } from './public.where.js';
-import { ListingStatus, UserRole } from '../generated/prisma/index.js';
+import { ListingStatus, UserRole, ViewingStatus } from '../generated/prisma/index.js';
 import { NotFoundError } from '../errors/app.exception.js';
 
 @Injectable()
@@ -170,5 +170,19 @@ export class PublicService {
       });
       if (!agent) throw new NotFoundError('Agent not found');
       return { phone: agent.phone }
+    }
+
+    async findBusyViewingTimes(id: number) {
+      const viewings = await this.prisma.viewings.findMany({
+          where: {
+              listingId: id,
+              preferredAt: { gte: new Date() },
+              status: { in: [ViewingStatus.CREATED, ViewingStatus.PENDING_APPROVAL,  ViewingStatus.APPROVED] },
+          },
+          select: { preferredAt: true },
+          orderBy: { preferredAt: 'asc' },
+      });
+  
+      return viewings.map((viewing) => viewing.preferredAt);
     }
 }

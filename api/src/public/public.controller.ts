@@ -26,6 +26,14 @@ export class PublicController {
         return await this.publicService.findAgentPhone(id);
     }
 
+    @ApiOperation({ summary: 'Информация занятом времени для просмотра по объявлению' })
+    @ApiResponse({ status: 200, description: 'Информация об занятом времени для просмотра по объявлению успешно получена' })
+    @ApiResponse({ status: 404, description: 'Информация об занятом времени для просмотра по объявлению не найдена' })
+    @Get('listings/:id/busy-viewing-times')
+    async findBusyViewingTimes(@Param('id', ParseIntPipe) id: number) {
+        return await this.publicService.findBusyViewingTimes(id);
+    }
+
     @ApiOperation({ summary: 'Информация об объявлении по ID' })
     @ApiResponse({ status: 200, description: 'Информация об объявлении успешно получена' })
     @ApiResponse({ status: 404, description: 'Объявление не найдено' })

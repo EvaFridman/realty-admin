@@ -12,8 +12,12 @@ export function Header() {
             <div className={`container ${styles.content}`}>
                 <Logo />
                 <Link href="/" className={styles.headerTitle}>Витрина</Link>
-                <SectionSwitcher variant="header" />
-                <Suspense fallback={null}><HeaderSearch /></Suspense>
+                <Suspense fallback={null}>
+                    <SectionSwitcher variant="header" />
+                </Suspense>
+                <Suspense fallback={null}>
+                    <HeaderSearch />
+                </Suspense>
                 <div className={styles.actions}>
                     {/* TODO: поменять, когда появится функционал по подтягиванию пользователя из БД */}
                     <Link href="/login" className={styles.login}>Войти</Link>
