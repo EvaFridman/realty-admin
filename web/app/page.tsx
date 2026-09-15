@@ -1,7 +1,7 @@
 import { districtApi } from "@/entities/district/api";
 import { listingApi } from "@/entities/listing/api";
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
-import { HomeListingFilter } from "@/features/listing-filter/HomeListingFilter";
+import { HomeListingFilter } from "@/features/listing-filter/home/HomeListingFilter";
 import { DistrictList } from "@/entities/district/ui/DistrictList";
 import { DealSteps } from "@/shared/ui/DealSteps/DealSteps";
 import styles from "./page.module.css";
