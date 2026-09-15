@@ -41,4 +41,12 @@ export class PublicController {
         const { page, limit, city } = query;
         return await this.publicService.findAllDistricts(page, limit, city);
     }
+
+    @ApiOperation({ summary: 'Информация о районе по slug' })
+    @ApiResponse({ status: 200, description: 'Информация о районе успешно получена' })
+    @ApiResponse({ status: 404, description: 'Район не найден' })
+    @Get('districts/:slug')
+    async findDistrictBySlug(@Param('slug') slug: string) {
+        return await this.publicService.findDistrictBySlug(slug);
+    }
 }

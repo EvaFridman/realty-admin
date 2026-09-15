@@ -1,5 +1,5 @@
 import type { InputHTMLAttributes } from "react";
-import { Input } from "../Input/Input";
+
 import styles from "./RangeInput.module.css";
 
 export type Props = {
@@ -15,7 +15,7 @@ export type Props = {
   disabled?: boolean;
   error?: boolean;
   className?: string;
-}
+};
 
 export function RangeInput({
   from,
@@ -33,7 +33,8 @@ export function RangeInput({
 }: Props) {
   return (
     <div className={`${styles.range} ${className}`}>
-      <Input
+      <input
+        className={`${styles.input} ${error ? styles.error : ""}`}
         type="number"
         value={from ?? ""}
         onChange={onFromChange}
@@ -42,7 +43,6 @@ export function RangeInput({
         max={max}
         step={step}
         disabled={disabled}
-        error={error}
         aria-label={fromPlaceholder}
       />
 
@@ -50,7 +50,8 @@ export function RangeInput({
         —
       </span>
 
-      <Input
+      <input
+        className={`${styles.input} ${error ? styles.error : ""}`}
         type="number"
         value={to ?? ""}
         onChange={onToChange}
@@ -59,7 +60,6 @@ export function RangeInput({
         max={max}
         step={step}
         disabled={disabled}
-        error={error}
         aria-label={toPlaceholder}
       />
     </div>

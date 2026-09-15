@@ -110,6 +110,7 @@ export class PublicService {
               select: {
                 id: true,
                 title: true,
+                slug: true,
                 city: true,
                 _count: {
                   select: {
@@ -127,11 +128,39 @@ export class PublicService {
         const formattedItems = items.map((d) => ({
             id: d.id,
             title: d.title,
+            slug: d.slug,
             city: d.city,
             publishedListingsCount: d._count.listings,
         }));
     
         return { items: formattedItems, meta: { page: finalPage, limit: finalLimit, total, totalPages } };
+    }
+
+    async findDistrictBySlug(slug: string) {
+      const district = await this.prisma.districts.findUnique({
+          where: { slug },
+          select: {
+              id: true,
+              title: true,
+              slug: true,
+              city: true,
+              _count: {
+                  select: {
+                      listings: { where: { status: ListingStatus.PUBLISHED } },
+                  },
+              },
+          },
+      });
+  
+      if (!district) throw new NotFoundError('District not found');
+  
+      return {
+          id: district.id,
+          title: district.title,
+          slug: district.slug,
+          city: district.city,
+          publishedListingsCount: district._count.listings,
+      };
     }
 
     async findAgentPhone(id: number) {

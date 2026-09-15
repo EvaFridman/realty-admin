@@ -13,6 +13,11 @@ type SearchParams = Record<string, string | string[] | undefined>;
 
 type Props = {
     searchParams: SearchParams;
+    lockedDistrictId?: number;
+    lockedDistrict?: {
+        title: string;
+        city: string;
+    };
 };
 
 function getStringParam(value: string | string[] | undefined): string | undefined {
@@ -24,18 +29,18 @@ function getArrayParam(value: string | string[] | undefined): string[] {
     return value ? [value] : [];
 }
 
-export async function ListingsPage({ searchParams }: Props) {
+export async function ListingsPage({ searchParams, lockedDistrictId, lockedDistrict }: Props) {
     const page = Number(getStringParam(searchParams.page)) || 1;
     const view = getStringParam(searchParams.view) === "list" ? "list" : "grid";
-
     const rooms = getArrayParam(searchParams.rooms);
+    const districtId = lockedDistrictId ?? getStringParam(searchParams.districtId);
 
     const query = {
         page,
         limit: 20,
         dealType: getStringParam(searchParams.dealType),
         propertyType: getStringParam(searchParams.propertyType),
-        districtId: getStringParam(searchParams.districtId),
+        districtId,
         rooms,
         priceMin: getStringParam(searchParams.priceMin),
         priceMax: getStringParam(searchParams.priceMax),
@@ -48,7 +53,7 @@ export async function ListingsPage({ searchParams }: Props) {
 
     const [result, districts] = await Promise.all([
         listingApi.getListingsWithMeta(query),
-        districtApi.getDistricts({ page: 1, limit: 20}),
+        districtApi.getDistricts({ page: 1, limit: 20 }),
     ]);
 
     return (
@@ -56,16 +61,22 @@ export async function ListingsPage({ searchParams }: Props) {
             <nav className={styles.breadcrumbs} aria-label="Хлебные крошки">
                 <Link href="/">Главная</Link>
                 <span>→</span>
-                <span>Каталог</span>
+                <Link href="/listings">Каталог</Link>
+                {lockedDistrict && (
+                    <>
+                        <span>→</span>
+                        <span>{lockedDistrict.title}</span>
+                    </>
+                )}
             </nav>
 
             <header className={styles.header}>
-                <h1>Продажа и аренда жилья</h1>
+                <h1>{lockedDistrict ? `${lockedDistrict.title}, ${lockedDistrict.city}` : "Продажа и аренда жилья"}</h1>
                 <p>Квартиры, дома и комнаты от собственников и агентств.</p>
             </header>
 
             <div className={styles.content}>
-                <ListingFilterPanel districts={districts} />
+                <ListingFilterPanel districts={districts} lockedDistrictId={lockedDistrictId} />
 
                 <div className={styles.results}>
                     <div className={styles.resultsHeader}>
@@ -80,8 +91,8 @@ export async function ListingsPage({ searchParams }: Props) {
                     </div>
 
                     {result.items.length > 0 ? (
-                        <div className={ view === "list" ? styles.listingsList : styles.listings }>
-                            {result.items.map((listing) => (<ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"}/>))}
+                        <div className={view === "list" ? styles.listingsList : styles.listings}>
+                            {result.items.map((listing) => (<ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"} />))}
                         </div>
                     ) : (
                         <div className={styles.empty}>
@@ -90,7 +101,7 @@ export async function ListingsPage({ searchParams }: Props) {
                         </div>
                     )}
 
-                    <Pagination currentPage={result.meta.page} totalPages={result.meta.totalPages} searchParams={searchParams}/>
+                    <Pagination currentPage={result.meta.page} totalPages={result.meta.totalPages} searchParams={searchParams} />
                 </div>
             </div>
         </section>
