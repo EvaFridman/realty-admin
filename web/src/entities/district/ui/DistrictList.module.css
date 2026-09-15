@@ -12,6 +12,14 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     background-color: var(--color-surface);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.item:hover {
+    border-color: var(--color-border-strong);
+    background-color: var(--color-surface-secondary);
 }
 
 .item h3 {

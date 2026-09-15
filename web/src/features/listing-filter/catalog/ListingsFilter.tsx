@@ -14,6 +14,7 @@ type District = {
 
 type Props = {
     districts: District[];
+    lockedDistrictId?: number;
 };
 
 const PROPERTY_TYPES = [
@@ -30,14 +31,14 @@ const ROOMS = [
     { value: "4", label: "4+" },
 ];
 
-export function ListingFilterPanel({ districts }: Props) {
+export function ListingFilterPanel({ districts, lockedDistrictId }: Props) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
     const [dealType, setDealType] = useState(searchParams.get("dealType") ?? "sale");
     const [propertyType, setPropertyType] = useState(searchParams.get("propertyType") ?? "");
-    const [districtId, setDistrictId] = useState(searchParams.get("districtId") ?? "");
+    const [districtId, setDistrictId] = useState(lockedDistrictId ? String(lockedDistrictId) : searchParams.get("districtId") ?? "");
     const [selectedRooms, setSelectedRooms] = useState(searchParams.getAll("rooms"));
     const [priceMin, setPriceMin] = useState(searchParams.get("priceMin") ?? "");
     const [priceMax, setPriceMax] = useState(searchParams.get("priceMax") ?? "");
@@ -58,7 +59,7 @@ export function ListingFilterPanel({ districts }: Props) {
 
         params.delete("dealType");
         params.delete("propertyType");
-        params.delete("districtId");
+        if (lockedDistrictId === undefined) params.delete("districtId");
         params.delete("rooms");
         params.delete("priceMin");
         params.delete("priceMax");
@@ -85,7 +86,7 @@ export function ListingFilterPanel({ districts }: Props) {
     function resetFilters() {
         setDealType("sale");
         setPropertyType("");
-        setDistrictId("");
+        setDistrictId(lockedDistrictId !== undefined ? String(lockedDistrictId) : "");
         setSelectedRooms([]);
         setPriceMin("");
         setPriceMax("");
@@ -93,13 +94,12 @@ export function ListingFilterPanel({ districts }: Props) {
         setAreaMax("");
         setSearch("");
         setDistrictSearch("");
-
+    
         const params = new URLSearchParams(searchParams.toString());
-
+    
         [
             "dealType",
             "propertyType",
-            "districtId",
             "rooms",
             "priceMin",
             "priceMax",
@@ -107,9 +107,12 @@ export function ListingFilterPanel({ districts }: Props) {
             "areaMax",
             "search",
         ].forEach((name) => params.delete(name));
-
+    
+        if (lockedDistrictId === undefined) params.delete("districtId");
+        else params.set("districtId", String(lockedDistrictId));
+    
         params.set("page", "1");
-
+    
         router.replace(`${pathname}?${params.toString()}`);
     }
 
@@ -124,10 +127,10 @@ export function ListingFilterPanel({ districts }: Props) {
                 <legend>Тип сделки</legend>
 
                 <div className={styles.dealTypes}>
-                    <button type="button" className={ dealType === "sale" ? styles.dealActive : styles.dealButton } onClick={() => setDealType("sale")}>
+                    <button type="button" className={dealType === "sale" ? styles.dealActive : styles.dealButton} onClick={() => setDealType("sale")}>
                         Купить
                     </button>
-                    <button type="button" className={ dealType === "rent" ? styles.dealActive : styles.dealButton } onClick={() => setDealType("rent")}>
+                    <button type="button" className={dealType === "rent" ? styles.dealActive : styles.dealButton} onClick={() => setDealType("rent")}>
                         Снять
                     </button>
                 </div>
@@ -143,7 +146,7 @@ export function ListingFilterPanel({ districts }: Props) {
                                 type="radio"
                                 name="propertyType"
                                 value={type.value}
-                                checked={propertyType === type.value} onChange={(event) => setPropertyType(event.target.value) }
+                                checked={propertyType === type.value} onChange={(event) => setPropertyType(event.target.value)}
                             />
                             <span>{type.label}</span>
                         </label>
@@ -159,7 +162,7 @@ export function ListingFilterPanel({ districts }: Props) {
                     className={styles.searchInput}
                     placeholder="Поиск района"
                     value={districtSearch}
-                    onChange={(event) => setDistrictSearch(event.target.value) }
+                    onChange={(event) => setDistrictSearch(event.target.value)}
                 />
 
                 <div className={styles.districts}>
@@ -170,9 +173,8 @@ export function ListingFilterPanel({ districts }: Props) {
                                 name="district"
                                 value={district.id}
                                 checked={districtId === String(district.id)}
-                                onChange={(event) =>
-                                    setDistrictId(event.target.value)
-                                }
+                                disabled={lockedDistrictId !== undefined}
+                                onChange={(event) => setDistrictId(event.target.value)}
                             />
 
                             <span className={styles.districtTitle}>{district.title}</span>
@@ -192,7 +194,7 @@ export function ListingFilterPanel({ districts }: Props) {
                         min="0"
                         placeholder="От"
                         value={priceMin}
-                        onChange={(event) => setPriceMin(event.target.value) }
+                        onChange={(event) => setPriceMin(event.target.value)}
                     />
 
                     <input
@@ -200,7 +202,7 @@ export function ListingFilterPanel({ districts }: Props) {
                         min="0"
                         placeholder="До"
                         value={priceMax}
-                        onChange={(event) => setPriceMax(event.target.value) }
+                        onChange={(event) => setPriceMax(event.target.value)}
                     />
                 </div>
             </fieldset>
@@ -214,7 +216,7 @@ export function ListingFilterPanel({ districts }: Props) {
                         min="0"
                         placeholder="От"
                         value={areaMin}
-                        onChange={(event) => setAreaMin(event.target.value) }
+                        onChange={(event) => setAreaMin(event.target.value)}
                     />
 
                     <input
@@ -222,7 +224,7 @@ export function ListingFilterPanel({ districts }: Props) {
                         min="0"
                         placeholder="До"
                         value={areaMax}
-                        onChange={(event) => setAreaMax(event.target.value) }
+                        onChange={(event) => setAreaMax(event.target.value)}
                     />
                 </div>
             </fieldset>
@@ -232,7 +234,7 @@ export function ListingFilterPanel({ districts }: Props) {
 
                 <div className={styles.rooms}>
                     {ROOMS.map((room) => (
-                        <label key={room.value} className={ selectedRooms.includes(room.value) ? styles.roomActive : styles.room }>
+                        <label key={room.value} className={selectedRooms.includes(room.value) ? styles.roomActive : styles.room}>
                             <input type="checkbox" checked={selectedRooms.includes(room.value)} onChange={() => toggleRoom(room.value)} />
                             <span>{room.label}</span>
                         </label>
