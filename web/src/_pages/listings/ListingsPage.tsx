@@ -7,6 +7,7 @@ import { Pagination } from "@/shared/ui";
 import { ListingFilterPanel } from "@/features/listing-filter/catalog/ListingsFilter";
 import { ListingSort } from "@/features/listing-filter/catalog/ListingSort";
 import { ListingViewSwitcher } from "@/entities/listing/ui/ListingViewSwitcher";
+import { CatalogFreshness } from "@/entities/listing/ui/CatalogFreshness";
 import styles from "./ListingsPage.module.css";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -83,7 +84,6 @@ export async function ListingsPage({ searchParams, lockedDistrictId, lockedDistr
                         <div className={styles.count}>
                             Найдено: <strong>{result.meta.total}</strong>
                         </div>
-
                         <div className={styles.controls}>
                             <ListingSort />
                             <ListingViewSwitcher view={view} />
@@ -102,6 +102,7 @@ export async function ListingsPage({ searchParams, lockedDistrictId, lockedDistr
                     )}
 
                     <Pagination currentPage={result.meta.page} totalPages={result.meta.totalPages} searchParams={searchParams} />
+                    <CatalogFreshness />
                 </div>
             </div>
         </section>
