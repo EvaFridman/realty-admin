@@ -26,7 +26,7 @@ export function ListingCard({ listing, variant = "tile" }: Props) {
         <Link href={`/listings/${listing.id}`} className={styles[variant]}>
             <div className={styles.image}>
                 {photoUrl ? (
-                    <Image src={photoUrl} alt={listing.title} />
+                    <Image src={photoUrl} alt={listing.title} fill/>
                 ) : (
                     <div className={styles.placeholder}>
                         <span className={styles.house}>⌂</span>

@@ -26,3 +26,20 @@ export type PublicListingType = {
     district: { id: number; title: string };
     photos: PublicPhotoType[];
 };
+
+export type PublicListingsMetaType = {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+};
+
+export type PublicListingsResponseType = {
+    items: PublicListingType[];
+    meta: PublicListingsMetaType;
+};
+
+export type ListingsApiResponseType = {
+    data: PublicListingType[];
+    meta: PublicListingsMetaType;
+};
