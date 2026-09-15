@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { PublicListingsDto } from './dto/public-listings.dto.js';
 import { buildPublicListingsWhere } from './public.where.js';
-import { ListingStatus } from '../generated/prisma/index.js';
+import { ListingStatus, UserRole } from '../generated/prisma/index.js';
 import { NotFoundError } from '../errors/app.exception.js';
 
 @Injectable()
@@ -61,6 +61,9 @@ export class PublicService {
         const listing = await this.prisma.listings.findUnique({
             where: { id },
             select: {
+                title: true,
+                description: true,
+                agent: { select: { id: true, name: true, avatarFileName: true } },
                 id: true,
                 price: true,
                 area: true,
@@ -74,8 +77,8 @@ export class PublicService {
                 status: true,
                 district: { select: { id: true, title: true } },
                 photos: {
-                select: { id: true, fileName: true, externalUrl: true, position: true, isCover: true },
-                orderBy: { position: 'asc' },
+                  select: { id: true, fileName: true, externalUrl: true, position: true, isCover: true },
+                  orderBy: { position: 'asc' },
                 },
             },
         });
@@ -129,5 +132,14 @@ export class PublicService {
         }));
     
         return { items: formattedItems, meta: { page: finalPage, limit: finalLimit, total, totalPages } };
+    }
+
+    async findAgentPhone(id: number) {
+      const agent = await this.prisma.users.findFirst({
+          where: { id, role: UserRole.agent },
+          select: { phone: true },
+      });
+      if (!agent) throw new NotFoundError('Agent not found');
+      return { phone: agent.phone }
     }
 }

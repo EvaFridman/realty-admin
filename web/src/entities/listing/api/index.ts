@@ -16,4 +16,8 @@ export const listingApi = {
     getListingById(id: string | number) {
         return apiFetch<PublicListingType>(`/public/listings/${String(id)}`);
     },
+
+    getAgentPhone(id: number | string) {
+        return apiFetch<{ phone: string | null }>(`/public/agents/${String(id)}/phone`);
+    },
 };
