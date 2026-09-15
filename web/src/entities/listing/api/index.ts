@@ -9,7 +9,7 @@ export const listingApi = {
     },
 
     async getListingsWithMeta(query?: ListingQueryType) {
-        const result = await apiFetchWithMeta<ListingsApiResponseType>("/public/listings", { query });
+        const result = await apiFetchWithMeta<ListingsApiResponseType>("/public/listings", { query, next: { revalidate: 3600, tags: ["listings"] } });
         return { items: result.data, meta: result.meta };
     },
 
