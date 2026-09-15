@@ -5,16 +5,16 @@ type ListingQueryType = Record<string, string | number | boolean | string[] | nu
 
 export const listingApi = {
     getListings(query?: ListingQueryType) {
-        return apiFetch<PublicListingType[]>("/public/listings", { query });
+        return apiFetch<PublicListingType[]>("/public/listings", { query, skipAuth: true });
     },
 
     async getListingsWithMeta(query?: ListingQueryType) {
-        const result = await apiFetchWithMeta<ListingsApiResponseType>("/public/listings", { query, next: { revalidate: 3600, tags: ["listings"] } });
+        const result = await apiFetchWithMeta<ListingsApiResponseType>("/public/listings", { query, next: { revalidate: 3600, tags: ["listings"] }, skipAuth: true });
         return { items: result.data, meta: result.meta };
     },
 
     getListingById(id: string | number) {
-        return apiFetch<PublicListingType>(`/public/listings/${String(id)}`);
+        return apiFetch<PublicListingType>(`/public/listings/${String(id)}`, { skipAuth: true });
     },
 
     getAgentPhone(id: number | string) {

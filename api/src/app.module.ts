@@ -46,6 +46,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     const url = req.url || '';
 
     if (url.includes('/socket.io')) return true;
+    // if (req.method === 'GET' && url.startsWith('/public/')) return true;
 
     if (throttler.name === 'login' && !url.includes('/auth/login')) return true;
     if (throttler.name === 'register' && !url.includes('/auth/register')) return true;
@@ -84,7 +85,6 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
         { name: "register", ttl: 60 * 60_000, limit: 5 },
         { name: "upload", ttl: 15 * 60_000, limit: 30 },
         { name: "viewing", ttl: 60 * 60_000, limit: 20 },
-        { name: "csp", ttl: 15 * 60_000, limit: 100 },
         { name: "ws", ttl: 1000, limit: 100 },
       ],
     }),
