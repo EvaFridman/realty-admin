@@ -1,0 +1,45 @@
+"use client";
+
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import styles from "./Header.module.css";
+
+export function HeaderSearch() {
+    const pathname = usePathname();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const [searchInput, setSearchInput] = useState(
+        () => searchParams.get("search") ?? "",
+    );
+    const debouncedSearch = useDebouncedValue(searchInput, 350);
+
+    useEffect(() => {
+        if (pathname !== "/listings") return;
+
+        const params = new URLSearchParams(searchParams.toString());
+        const currentSearch = params.get("search") ?? "";
+        const nextSearch = debouncedSearch.trim();
+
+        if (currentSearch === nextSearch) return;
+
+        if (nextSearch) params.set("search", nextSearch);
+        else params.delete("search");
+
+        params.set("page", "1");
+
+        router.replace(`/listings?${params.toString()}`);
+    }, [debouncedSearch, pathname, router, searchParams]);
+
+    return (
+        <input
+            className={styles.search}
+            type="search"
+            value={searchInput}
+            placeholder="Поиск"
+            onChange={(event) => setSearchInput(event.target.value)}
+            aria-label="Поиск объявлений"
+        />
+    );
+}

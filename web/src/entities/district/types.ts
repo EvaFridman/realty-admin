@@ -4,13 +4,3 @@ export type PublicDistrictType = {
     city: string;
     publishedListingsCount: number;
 };
-
-export type PublicDistrictsResponse = {
-    items: PublicDistrictType[];
-    meta: {
-        page: number;
-        limit: number;
-        total: number;
-        totalPages: number;
-    };
-};
