@@ -1,14 +1,13 @@
-export function formatPrice(price: number, isRent = false): string {
-    const formattedPrice = Math.round(price).toLocaleString("ru-RU", {
+export function formatPrice(price: number | string, isRent = false): string {
+    const formattedPrice = Math.round(Number(price)).toLocaleString("ru-RU", {
         useGrouping: true,
         maximumFractionDigits: 0,
     });
-
     return `${formattedPrice} ₽${isRent ? " / мес." : ""}`;
 }
 
-export function formatArea(area: number): string {
-    return `${area.toFixed(1).replace(".", ",")} м²`;
+export function formatArea(area: number | string): string {
+    return `${Number(area).toFixed(1).replace(".", ",")} м²`;
 }
 
 export function formatDate(date: string | Date, withYear = true): string {

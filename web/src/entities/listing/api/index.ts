@@ -1,10 +1,9 @@
-import { apiFetch } from '@/shared/api/api-fetch';
-import { PublicListingType, PublicListingsResponse } from '../types';
-
+import { apiFetch } from "@/shared/api/api-fetch";
+import type { PublicListingType } from "../types";
 
 export const listingApi = {
     getListings(query?: Record<string, string | number | boolean | undefined>) {
-        return apiFetch<PublicListingsResponse>('/public/listings', { query });
+        return apiFetch<PublicListingType[]>("/public/listings", { query });
     },
 
     getListingById(id: string | number) {

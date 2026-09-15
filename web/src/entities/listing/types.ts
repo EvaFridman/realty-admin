@@ -13,8 +13,9 @@ export type PublicPhotoType = {
 
 export type PublicListingType = {
     id: number;
-    price: number;
-    area: number;
+    title: string,
+    price: string;
+    area: string;
     rooms: number | null;
     floor: number | null;
     totalFloors: number | null;
@@ -24,14 +25,4 @@ export type PublicListingType = {
     publishedAt: string;
     district: { id: number; title: string };
     photos: PublicPhotoType[];
-};
-
-export type PublicListingsResponse = {
-    items: PublicListingType[];
-    meta: {
-        page: number;
-        limit: number;
-        total: number;
-        totalPages: number;
-    };
 };

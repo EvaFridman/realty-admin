@@ -32,6 +32,7 @@ export class PublicService {
             take: finalLimit,
             select: {
                 id: true,
+                title: true,
                 price: true,
                 area: true,
                 rooms: true,
