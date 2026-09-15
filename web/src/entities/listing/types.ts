@@ -14,6 +14,8 @@ export type PublicPhotoType = {
 export type PublicListingType = {
     id: number;
     title: string,
+    description: string | null,
+    agent: { id: number; name: string; avatarFileName: string | null },
     price: string;
     area: string;
     rooms: number | null;

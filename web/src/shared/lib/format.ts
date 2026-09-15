@@ -6,6 +6,11 @@ export function formatPrice(price: number | string, isRent = false): string {
     return `${formattedPrice} ₽${isRent ? " / мес." : ""}`;
 }
 
+export function formatPricePerMeter(price: string, area: string): string {
+    const pricePerMeter = Number(price) / Number(area);
+    return `${Math.round(pricePerMeter).toLocaleString("ru-RU")} ₽/м²`;
+}
+
 export function formatArea(area: number | string): string {
     return `${Number(area).toFixed(1).replace(".", ",")} м²`;
 }

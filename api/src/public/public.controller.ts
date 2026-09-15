@@ -18,6 +18,14 @@ export class PublicController {
         return await this.publicService.findAllListings(query);
     }
 
+    @ApiOperation({ summary: 'Номер телефона агента по ID' })
+    @ApiResponse({ status: 200, description: 'Номер телефона агента успешно получен' })
+    @ApiResponse({ status: 404, description: 'Номер телефона агента не найден' })
+    @Get('agents/:id/phone')
+    async findAgentPhone(@Param('id', ParseIntPipe) id: number) {
+        return await this.publicService.findAgentPhone(id);
+    }
+
     @ApiOperation({ summary: 'Информация об объявлении по ID' })
     @ApiResponse({ status: 200, description: 'Информация об объявлении успешно получена' })
     @ApiResponse({ status: 404, description: 'Объявление не найдено' })

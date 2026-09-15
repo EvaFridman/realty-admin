@@ -16,7 +16,7 @@ export default function Error({ error, reset }: Props) {
 
     return (
         <section className={`container ${styles.error}`}>
-            <h1>Не удалось загрузить каталог</h1>
+            <h1>Не удалось загрузить страницу</h1>
             <p>Произошла ошибка при загрузке объявлений. Попробуйте повторить запрос.</p>
             <button type="button" onClick={reset}>Повторить</button>
         </section>
