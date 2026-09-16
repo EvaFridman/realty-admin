@@ -3,7 +3,8 @@ import Link from "next/link";
 
 import styles from "./Header.module.css";
 import { SectionSwitcher } from "../index";
-import { ThemeSwitcher, Logo } from "@/shared/ui";
+import { Logo } from "@/shared/ui";
+import { ThemeSwitcher } from "@/features/theme/ThemeSwitcher";
 import { HeaderSearch } from "../../features/header-search/HeaderSearch";
 import { RecentlyViewed } from "./RecentlyViewed";
 

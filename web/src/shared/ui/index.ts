@@ -7,5 +7,4 @@ export { EmptyState } from "./EmptyState/EmptyState";
 export { ErrorState } from "./ErrorState/ErrorState";
 export { Skeleton } from "./Skeleton/Skeleton";
 export { Logo } from "./Logo/Logo"
-export { ThemeSwitcher } from "./Theme/ThemeSwitcher"
 export { Pagination } from "./Pagination/Pagination";
