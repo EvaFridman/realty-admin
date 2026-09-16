@@ -46,8 +46,12 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     const url = req.url || '';
 
     if (url.includes('/socket.io')) return true;
-    // if (req.method === 'GET' && url.startsWith('/public/')) return true;
-
+    
+    const buildSecret = process.env.NEXT_BUILD_SECRET;
+    const buildRequest = req.headers["x-build-request"];
+    
+    if (req.method === "GET" && buildSecret && buildRequest === buildSecret) return true;
+    
     if (throttler.name === 'login' && !url.includes('/auth/login')) return true;
     if (throttler.name === 'register' && !url.includes('/auth/register')) return true;
     if (throttler.name === 'viewing' && !url.includes('/viewings')) return true;
@@ -80,7 +84,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     }),
     ThrottlerModule.forRoot({
       throttlers: [
-        { name: "api", ttl: 15 * 60_000, limit: 300 },
+        { name: "api", ttl: 15 * 60_000, limit: 500 },
         { name: "login", ttl: 15 * 60_000, limit: 10 },
         { name: "register", ttl: 60 * 60_000, limit: 5 },
         { name: "upload", ttl: 15 * 60_000, limit: 30 },

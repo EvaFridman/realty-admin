@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./ListingCard.module.css";
+import styles from "../listing/ui/ListingCard.module.css";
 
 {/* TODO: добавить реальную логику добавления в избранное, когда появится функционал подтягивания данных пользователя */}
 export function FavoriteButton() {

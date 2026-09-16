@@ -1,25 +1,41 @@
 export function formatPrice(price: number | string, isRent = false): string {
-    const formattedPrice = Math.round(Number(price)).toLocaleString("ru-RU", {
+    const value = Number(price);
+    if (!Number.isFinite(value)) return "—";
+
+    const formattedPrice = Math.round(value).toLocaleString("ru-RU", {
         useGrouping: true,
         maximumFractionDigits: 0,
     });
+
     return `${formattedPrice} ₽${isRent ? " / мес." : ""}`;
 }
 
 export function formatPricePerMeter(price: string, area: string): string {
-    const pricePerMeter = Number(price) / Number(area);
+    const priceValue = Number(price);
+    const areaValue = Number(area);
+
+    if (!Number.isFinite(priceValue) || !Number.isFinite(areaValue) || areaValue === 0) return "—";
+
+    const pricePerMeter = priceValue / areaValue;
+
     return `${Math.round(pricePerMeter).toLocaleString("ru-RU")} ₽/м²`;
 }
 
 export function formatArea(area: number | string): string {
-    return `${Number(area).toFixed(1).replace(".", ",")} м²`;
+    const value = Number(area);
+    if (!Number.isFinite(value)) return "—";
+
+    return `${value.toFixed(1).replace(".", ",")} м²`;
 }
 
 export function formatDate(date: string | Date, withYear = true): string {
-    return new Date(date).toLocaleDateString("ru-RU", {
-      day: "numeric",
-      month: "long",
-      ...(withYear ? { year: "numeric" } : {}),
+    const value = new Date(date);
+    if (Number.isNaN(value.getTime())) return "—";
+
+    return value.toLocaleDateString("ru-RU", {
+        day: "numeric",
+        month: "long",
+        ...(withYear ? { year: "numeric" } : {}),
     });
 }
 
@@ -46,7 +62,11 @@ export function formatListingsCount(count: number): string {
     return `${count} ${pluralize(count, "объявление", "объявления", "объявлений")}`;
 }
 
-export function formatListingFeatures(rooms?: number | null, floor?: number | null, totalFloors?: number | null): string[] {
+export function formatListingFeatures(
+    rooms?: number | null,
+    floor?: number | null,
+    totalFloors?: number | null,
+): string[] {
     const features: string[] = [];
 
     if (rooms != null) features.push(`${rooms} ${pluralize(rooms, "комната", "комнаты", "комнат")}`);

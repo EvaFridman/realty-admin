@@ -36,7 +36,12 @@ async function request<T>(path: string, options: RequestOptionsType = {}): Promi
         if (queryString) url += `?${queryString}`;
     }
 
-    const headers: Record<string, string> = { "Content-Type": "application/json", ...options.headers };
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...options.headers,
+    };
+
+    if (process.env.NEXT_BUILD_SECRET) headers["X-Build-Request"] = process.env.NEXT_BUILD_SECRET;
 
     if (!options.skipAuth) {
         try {
@@ -47,14 +52,29 @@ async function request<T>(path: string, options: RequestOptionsType = {}): Promi
     }
 
     try {
-        const config: RequestInit = { method: options.method ?? "GET", headers, cache: options.cache, next: options.next };
+        const config: RequestInit = {
+            method: options.method ?? "GET",
+            headers,
+            cache: options.cache,
+            next: options.next,
+        };
+
         if (options.body !== undefined) config.body = JSON.stringify(options.body);
 
         const response = await fetch(url, config);
+
         if (!response.ok) {
             try {
                 const errorResult = await response.json();
-                if (errorResult?.error) throw new ApiError(response.status, errorResult.error.message, errorResult.error.details || null, errorResult.error.code || null);
+
+                if (errorResult?.error) {
+                    throw new ApiError(
+                        response.status,
+                        errorResult.error.message,
+                        errorResult.error.details || null,
+                        errorResult.error.code || null
+                    );
+                }
             } catch (error) {
                 if (error instanceof ApiError) throw error;
             }
@@ -63,7 +83,16 @@ async function request<T>(path: string, options: RequestOptionsType = {}): Promi
         }
 
         const result = await response.json();
-        if (result && typeof result === "object" && "error" in result && result.error) throw new ApiError(400, result.error.message, result.error.details || null, result.error.code || null);
+
+        if (result && typeof result === "object" && "error" in result && result.error) {
+            throw new ApiError(
+                400,
+                result.error.message,
+                result.error.details || null,
+                result.error.code || null
+            );
+        }
+
         return result as T;
     } catch (error) {
         if (error instanceof ApiError) throw error;

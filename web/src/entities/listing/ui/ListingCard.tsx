@@ -6,7 +6,7 @@ import styles from "./ListingCard.module.css";
 import type { PublicListingType } from "../types";
 import { formatArea, formatDateShort, formatListingFeatures, formatPrice } from "@/shared/lib/format";
 import { getUrl } from "@/shared/utils/safeUrl";
-import { FavoriteButton } from "./FavoriteButton";
+import { FavoriteButton } from "../../favorites/FavoriteButton";
 
 type Props = {
     listing: PublicListingType;

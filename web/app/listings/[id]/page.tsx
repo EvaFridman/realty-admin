@@ -10,7 +10,7 @@ type Props = {
     params: Promise<{ id: string }>;
 };
 
-const getListing = cache((id: string) => listingApi.getListingById(id));
+const getListing = cache((id: string) => listingApi.getCachedListingById(id));
 
 export async function generateStaticParams() {
     const listings = await listingApi.getListings({ page: 1, limit: 100, sortBy: "publishedAt", sortOrder: "desc" });

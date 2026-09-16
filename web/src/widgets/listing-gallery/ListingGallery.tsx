@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import type { PublicPhotoType } from "../types";
+import type { PublicPhotoType } from "../../entities/listing/types";
 import { EmptyState } from "@/shared/ui";
 
 import styles from "./ListingGallery.module.css";

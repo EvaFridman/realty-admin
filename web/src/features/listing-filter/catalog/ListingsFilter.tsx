@@ -5,6 +5,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import styles from "./ListingsFilter.module.css";
 
+import { ListingAreaRangeFilter } from "./ListingAreaRangeFilter";
+import { ListingDealTypeFilter } from "./ListingDealTypeFilter";
+import { ListingDistrictFilter } from "./ListingDistrictFilter";
+import { ListingPriceRangeFilter } from "./ListingPriceRangeFilter";
+import { ListingPropertyTypeFilter } from "./ListingPropertyTypeFilter";
+import { ListingRoomsFilter } from "./ListingRoomsFilter";
+import { ListingSearchFilter } from "./ListingSearchFilter";
+
 type District = {
     id: number;
     title: string;
@@ -16,20 +24,6 @@ type Props = {
     districts: District[];
     lockedDistrictId?: number;
 };
-
-const PROPERTY_TYPES = [
-    { value: "flat", label: "Квартира" },
-    { value: "house", label: "Дом" },
-    { value: "room", label: "Комната" },
-    { value: "commercial", label: "Коммерческая" },
-];
-
-const ROOMS = [
-    { value: "1", label: "1" },
-    { value: "2", label: "2" },
-    { value: "3", label: "3" },
-    { value: "4", label: "4+" },
-];
 
 export function ListingFilterPanel({ districts, lockedDistrictId }: Props) {
     const router = useRouter();
@@ -46,7 +40,6 @@ export function ListingFilterPanel({ districts, lockedDistrictId }: Props) {
     const [areaMax, setAreaMax] = useState(searchParams.get("areaMax") ?? "");
     const [search, setSearch] = useState(searchParams.get("search") ?? "");
     const [districtSearch, setDistrictSearch] = useState("");
-    const filteredDistricts = districts.filter((district) => district.title.toLowerCase().includes(districtSearch.toLowerCase()));
 
     function toggleRoom(value: string) {
         setSelectedRooms((current) => current.includes(value) ? current.filter((room) => room !== value) : [...current, value]);
@@ -94,9 +87,9 @@ export function ListingFilterPanel({ districts, lockedDistrictId }: Props) {
         setAreaMax("");
         setSearch("");
         setDistrictSearch("");
-    
+
         const params = new URLSearchParams(searchParams.toString());
-    
+
         [
             "dealType",
             "propertyType",
@@ -107,12 +100,12 @@ export function ListingFilterPanel({ districts, lockedDistrictId }: Props) {
             "areaMax",
             "search",
         ].forEach((name) => params.delete(name));
-    
+
         if (lockedDistrictId === undefined) params.delete("districtId");
         else params.set("districtId", String(lockedDistrictId));
-    
+
         params.set("page", "1");
-    
+
         router.replace(`${pathname}?${params.toString()}`);
     }
 
@@ -123,136 +116,13 @@ export function ListingFilterPanel({ districts, lockedDistrictId }: Props) {
                 <button type="button" className={styles.reset} onClick={resetFilters}>Сбросить</button>
             </div>
 
-            <fieldset className={styles.fieldset}>
-                <legend>Тип сделки</legend>
-
-                <div className={styles.dealTypes}>
-                    <button type="button" className={dealType === "sale" ? styles.dealActive : styles.dealButton} onClick={() => setDealType("sale")}>
-                        Купить
-                    </button>
-                    <button type="button" className={dealType === "rent" ? styles.dealActive : styles.dealButton} onClick={() => setDealType("rent")}>
-                        Снять
-                    </button>
-                </div>
-            </fieldset>
-
-            <fieldset className={styles.fieldset}>
-                <legend>Тип недвижимости</legend>
-
-                <div className={styles.options}>
-                    {PROPERTY_TYPES.map((type) => (
-                        <label key={type.value} className={styles.option}>
-                            <input
-                                type="radio"
-                                name="propertyType"
-                                value={type.value}
-                                checked={propertyType === type.value} onChange={(event) => setPropertyType(event.target.value)}
-                            />
-                            <span>{type.label}</span>
-                        </label>
-                    ))}
-                </div>
-            </fieldset>
-
-            <fieldset className={styles.fieldset}>
-                <legend>Район</legend>
-
-                <input
-                    type="search"
-                    className={styles.searchInput}
-                    placeholder="Поиск района"
-                    value={districtSearch}
-                    onChange={(event) => setDistrictSearch(event.target.value)}
-                />
-
-                <div className={styles.districts}>
-                    {filteredDistricts.map((district) => (
-                        <label key={district.id} className={styles.district}>
-                            <input
-                                type="radio"
-                                name="district"
-                                value={district.id}
-                                checked={districtId === String(district.id)}
-                                disabled={lockedDistrictId !== undefined}
-                                onChange={(event) => setDistrictId(event.target.value)}
-                            />
-
-                            <span className={styles.districtTitle}>{district.title}</span>
-
-                            <span className={styles.districtCount}>{district.publishedListingsCount}</span>
-                        </label>
-                    ))}
-                </div>
-            </fieldset>
-
-            <fieldset className={styles.fieldset}>
-                <legend>Цена, ₽</legend>
-
-                <div className={styles.range}>
-                    <input
-                        type="number"
-                        min="0"
-                        placeholder="От"
-                        value={priceMin}
-                        onChange={(event) => setPriceMin(event.target.value)}
-                    />
-
-                    <input
-                        type="number"
-                        min="0"
-                        placeholder="До"
-                        value={priceMax}
-                        onChange={(event) => setPriceMax(event.target.value)}
-                    />
-                </div>
-            </fieldset>
-
-            <fieldset className={styles.fieldset}>
-                <legend>Площадь, м²</legend>
-
-                <div className={styles.range}>
-                    <input
-                        type="number"
-                        min="0"
-                        placeholder="От"
-                        value={areaMin}
-                        onChange={(event) => setAreaMin(event.target.value)}
-                    />
-
-                    <input
-                        type="number"
-                        min="0"
-                        placeholder="До"
-                        value={areaMax}
-                        onChange={(event) => setAreaMax(event.target.value)}
-                    />
-                </div>
-            </fieldset>
-
-            <fieldset className={styles.fieldset}>
-                <legend>Комнат</legend>
-
-                <div className={styles.rooms}>
-                    {ROOMS.map((room) => (
-                        <label key={room.value} className={selectedRooms.includes(room.value) ? styles.roomActive : styles.room}>
-                            <input type="checkbox" checked={selectedRooms.includes(room.value)} onChange={() => toggleRoom(room.value)} />
-                            <span>{room.label}</span>
-                        </label>
-                    ))}
-                </div>
-            </fieldset>
-
-            <fieldset className={styles.fieldset}>
-                <legend>Название или адрес</legend>
-
-                <input
-                    type="search"
-                    className={styles.searchInput}
-                    placeholder="Название или адрес"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                />
-            </fieldset>
+            <ListingDealTypeFilter value={dealType} onChange={setDealType} />
+            <ListingPropertyTypeFilter value={propertyType} onChange={setPropertyType} />
+            <ListingDistrictFilter districts={districts} value={districtId} search={districtSearch} lockedDistrictId={lockedDistrictId} onChange={setDistrictId} onSearchChange={setDistrictSearch} />
+            <ListingPriceRangeFilter min={priceMin} max={priceMax} onMinChange={setPriceMin} onMaxChange={setPriceMax} />
+            <ListingAreaRangeFilter min={areaMin} max={areaMax} onMinChange={setAreaMin} onMaxChange={setAreaMax} />
+            <ListingRoomsFilter selectedRooms={selectedRooms} onToggle={toggleRoom} />
+            <ListingSearchFilter value={search} onChange={setSearch} />
 
             <button type="submit" className={styles.submit}>Показать объявления</button>
         </form>
