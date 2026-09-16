@@ -3,10 +3,10 @@ import { Suspense } from "react";
 
 import { listingApi } from "@/entities/listing/api";
 import type { PublicListingType } from "@/entities/listing/types";
-import { AgentPhone } from "@/entities/listing/ui/AgentPhone";
-import { FavoriteButton } from "@/entities/listing/ui/FavoriteButton";
+import { AgentPhone } from "@/features/agent-phone/AgentPhone";
+import { FavoriteButton } from "@/entities/favorites/FavoriteButton";
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
-import { ListingGallery } from "@/entities/listing/ui/ListingGallery";
+import { ListingGallery } from "@/widgets/listing-gallery/ListingGallery";
 import { BusyViewingTimes } from "@/entities/listing/ui/BusyViewingTimes";
 import { BusyViewingTimesSkeleton } from "@/entities/listing/ui/BusyViewingTimesSkeleton";
 import { ViewingRequestForm } from "@/features/viewing-request/ViewingRequestForm";
@@ -19,7 +19,7 @@ type Props = {
     listing: PublicListingType;
 };
 
-const propertyTypeLabels = {
+const PROPERTY_TYPE_LABELS = {
     flat: "Квартира",
     house: "Дом",
     room: "Комната",
@@ -51,7 +51,6 @@ export async function ListingPage({ listing }: Props) {
                 <span>→</span>
                 <Link href="/listings">Каталог</Link>
                 <span>→</span>
-                {/* TODO: добавить ссылку, когда будут районы */}
                 <span>{listing.district.title}</span>
                 <span>→</span>
                 <span>Объявление</span>
@@ -86,7 +85,7 @@ export async function ListingPage({ listing }: Props) {
                     </div>
                     <div>
                         <dt>Тип недвижимости</dt>
-                        <dd>{propertyTypeLabels[listing.propertyType]}</dd>
+                        <dd>{PROPERTY_TYPE_LABELS[listing.propertyType]}</dd>
                     </div>
                     <div>
                         <dt>Площадь</dt>

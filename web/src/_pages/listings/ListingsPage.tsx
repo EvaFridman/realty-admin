@@ -4,37 +4,26 @@ import { districtApi } from "@/entities/district/api";
 import { listingApi } from "@/entities/listing/api";
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { Pagination } from "@/shared/ui";
+import { getArrayParam, getStringParam } from "@/shared/lib/params";
 import { ListingFilterPanel } from "@/features/listing-filter/catalog/ListingsFilter";
 import { ListingSort } from "@/features/listing-filter/catalog/ListingSort";
-import { ListingViewSwitcher } from "@/entities/listing/ui/ListingViewSwitcher";
+import { ListingViewSwitcher } from "@/features/listing-view/ListingViewSwitcher";
 import { CatalogFreshness } from "@/entities/listing/ui/CatalogFreshness";
+import type { PublicDistrictType } from "@/entities/district/types";
 import styles from "./ListingsPage.module.css";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
 type Props = {
     searchParams: SearchParams;
-    lockedDistrictId?: number;
-    lockedDistrict?: {
-        title: string;
-        city: string;
-    };
+    lockedDistrict?: PublicDistrictType;
 };
 
-function getStringParam(value: string | string[] | undefined): string | undefined {
-    return Array.isArray(value) ? value[0] : value;
-}
-
-function getArrayParam(value: string | string[] | undefined): string[] {
-    if (Array.isArray(value)) return value;
-    return value ? [value] : [];
-}
-
-export async function ListingsPage({ searchParams, lockedDistrictId, lockedDistrict }: Props) {
+export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
     const page = Number(getStringParam(searchParams.page)) || 1;
     const view = getStringParam(searchParams.view) === "list" ? "list" : "grid";
     const rooms = getArrayParam(searchParams.rooms);
-    const districtId = lockedDistrictId ?? getStringParam(searchParams.districtId);
+    const districtId = lockedDistrict?.id ?? getStringParam(searchParams.districtId);
 
     const query = {
         page,
@@ -77,7 +66,7 @@ export async function ListingsPage({ searchParams, lockedDistrictId, lockedDistr
             </header>
 
             <div className={styles.content}>
-                <ListingFilterPanel districts={districts} lockedDistrictId={lockedDistrictId} />
+                <ListingFilterPanel districts={districts} lockedDistrictId={lockedDistrict?.id} />
 
                 <div className={styles.results}>
                     <div className={styles.resultsHeader}>

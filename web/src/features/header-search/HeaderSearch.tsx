@@ -3,7 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
-import styles from "./Header.module.css";
+import styles from "@/widgets/header/Header.module.css";
 
 export function HeaderSearch() {
     const pathname = usePathname();

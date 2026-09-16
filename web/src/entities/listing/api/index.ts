@@ -14,7 +14,7 @@ export const listingApi = {
         "use cache";
         cacheLife("hours");
         cacheTag("listings");
-    
+
         return apiFetch<PublicListingType[]>("/public/listings", { query, skipAuth: true });
     },
 
@@ -28,6 +28,14 @@ export const listingApi = {
     },
 
     getListingById(id: string | number) {
+        return apiFetch<PublicListingType>(`/public/listings/${String(id)}`, { skipAuth: true });
+    },
+
+    async getCachedListingById(id: string | number) {
+        "use cache";
+        cacheLife("hours");
+        cacheTag("listings");
+
         return apiFetch<PublicListingType>(`/public/listings/${String(id)}`, { skipAuth: true });
     },
 

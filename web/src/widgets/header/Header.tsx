@@ -4,7 +4,7 @@ import Link from "next/link";
 import styles from "./Header.module.css";
 import { SectionSwitcher } from "../index";
 import { ThemeSwitcher, Logo } from "@/shared/ui";
-import { HeaderSearch } from "./HeaderSearch";
+import { HeaderSearch } from "../../features/header-search/HeaderSearch";
 import { RecentlyViewed } from "./RecentlyViewed";
 
 export function Header() {

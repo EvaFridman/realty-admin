@@ -22,14 +22,5 @@ export default async function DistrictPage({ params, searchParams }: Props) {
         notFound();
     }
 
-    return (
-        <ListingsPage
-            searchParams={paramsFromUrl}
-            lockedDistrictId={district.id}
-            lockedDistrict={{
-                title: district.title,
-                city: district.city,
-            }}
-        />
-    );
+    return <ListingsPage searchParams={paramsFromUrl} lockedDistrict={district} />;
 }
