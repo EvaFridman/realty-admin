@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import styles from "./Footer.module.css";
 
-import { SectionSwitcher } from "../index";
+import { SectionSwitcher } from "@/features/navigation/SectionSwitcher";
 import { ThemeSwitcher } from "@/features/theme/ThemeSwitcher";
 
 export function Footer() {

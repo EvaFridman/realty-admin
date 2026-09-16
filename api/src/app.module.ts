@@ -16,13 +16,13 @@ import { PrismaService } from './prisma/prisma.service.js';
 import { ListingsModule } from './listings/listings.module.js';
 import { FavoritesModule } from './favorites/favorites.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
+import { PublicModule } from './public/public.module.js';
 import { MailService } from './mail/mail.service.js';
 import { PdfService } from './pdf/pdf.service.js';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard, ThrottlerException } from "@nestjs/throttler";
 import { FilesModule } from './files/files.module.js';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { PublicModule } from './public/public.module.js';
 import path from 'path';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -39,27 +39,26 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     }
   ): Promise<boolean> {
     const { context, limit, ttl, throttler, blockDuration } = options;
-    
+
     if (context.getType() === 'ws') return true;
 
     const req = context.switchToHttp().getRequest();
     const url = req.url || '';
 
     if (url.includes('/socket.io')) return true;
-    
+
     const buildSecret = process.env.NEXT_BUILD_SECRET;
     const buildRequest = req.headers["x-build-request"];
-    
+
     if (req.method === "GET" && buildSecret && buildRequest === buildSecret) return true;
-    
-    if (throttler.name === 'login' && !url.includes('/auth/login')) return true;
-    if (throttler.name === 'register' && !url.includes('/auth/register')) return true;
+
+    if (throttler.name === 'login' || throttler.name === 'register') return true;
     if (throttler.name === 'viewing' && !url.includes('/viewings')) return true;
     if (throttler.name === 'upload' && !url.includes('/photos') && !url.includes('/avatar')) return true;
 
     const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const key = `throttler:${throttler.name}:${ip}`;
-    
+
     const { totalHits } = await this.storageService.increment(
       key,
       ttl,
@@ -68,9 +67,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
       throttler.name
     );
 
-    if (totalHits > limit) {
-      throw new ThrottlerException();
-    }
+    if (totalHits > limit) throw new ThrottlerException();
 
     return true;
   }

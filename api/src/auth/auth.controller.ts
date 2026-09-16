@@ -8,15 +8,13 @@ import { RegisterDto } from './dto/register.dto.js';
 import { Public } from './decorators/public.decorator.js';
 import { Throttle } from "@nestjs/throttler";
 import { LoginThrottlerGuard } from './guards/login-throttler.guard.js';
+import { RegisterThrottlerGuard } from './guards/register-throttler.guard.js';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Аутентификация')
 @Controller('auth')
 export class AuthController {
-    constructor(
-        private readonly authService: AuthService, 
-        private readonly configService: ConfigService
-    ) {}
+    constructor(private readonly authService: AuthService, private readonly configService: ConfigService) {}
 
     @ApiOperation({ summary: 'Аутентификация пользователя' })
     @ApiResponse({ status: 200, description: 'Успешный вход' })
@@ -31,7 +29,7 @@ export class AuthController {
         const { accessToken, refreshToken, user } = await this.authService.login(loginDto.email, loginDto.password);
 
         const isProduction = (this.configService.get<string>('NODE_ENV') ?? process.env.NODE_ENV) === 'production';
-        const refreshTtl = this.configService.get<StringValue>('REFRESH_TTL')  ?? '30d';
+        const refreshTtl = this.configService.get<StringValue>('REFRESH_TTL') ?? '30d';
 
         response.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -40,8 +38,8 @@ export class AuthController {
             path: '/auth',
             maxAge: ms(refreshTtl) as number,
         });
-      
-        return { accessToken, user }; 
+        
+        return { accessToken, user };
     }
 
     @ApiOperation({ summary: 'Обновление сессии' })
@@ -52,9 +50,9 @@ export class AuthController {
     async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
         const token = request.cookies?.['refreshToken'];
         const { accessToken, refreshToken, user } = await this.authService.refresh(token);
-        
+
         const isProduction = (this.configService.get<string>('NODE_ENV') ?? process.env.NODE_ENV) === 'production';
-        const refreshTtl = this.configService.get<StringValue>('REFRESH_TTL')  ?? '30d';
+        const refreshTtl = this.configService.get<StringValue>('REFRESH_TTL') ?? '30d';
 
         response.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -63,7 +61,7 @@ export class AuthController {
             path: '/auth',
             maxAge: ms(refreshTtl) as number,
         });
-    
+
         return { accessToken, user };
     }
 
@@ -86,12 +84,12 @@ export class AuthController {
         return request.user;
     }
 
-    @ApiOperation({ summary: 'Регистрация нового агента' })
+    @ApiOperation({ summary: 'Регистрация нового пользователя' })
     @ApiResponse({ status: 201, description: 'Новый аккаунт успешно зарегистрирован' })
     @ApiResponse({ status: 400, description: 'Некорректные параметры регистрации' })
     @ApiResponse({ status: 409, description: 'Конфликт (пользователь с таким email уже существует в системе)' })
     @ApiResponse({ status: 429, description: 'Превышен лимит регистраций (максимум 5 запросов в час)' })
-    @UseGuards(LoginThrottlerGuard)
+    @UseGuards(RegisterThrottlerGuard)
     @Throttle({ register: { ttl: 60 * 60_000, limit: 5 } })
     @Post('register')
     @Public()

@@ -2,8 +2,8 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
-import { getSession } from "@/shared/session";
-import { sessions } from "@/shared/session/store";
+import { getSession } from "@/features/session";
+import { sessions } from "@/features/session/store";
 import { ApiError } from "./errors";
 
 type QueryValueType = string | number | boolean | string[] | number[] | undefined;
@@ -73,7 +73,7 @@ async function request<T>(path: string, options: RequestOptionsType = {}, isRetr
         const response = await fetch(url, config);
 
         if (response.status === 401 && session && !isRetry) {
-            const refreshResponse = await fetch(`${baseUrl}/session/refresh`, {
+            const refreshResponse = await fetch(`${baseUrl}/auth/refresh`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
