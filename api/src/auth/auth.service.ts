@@ -63,7 +63,7 @@ export class AuthService {
       }
 
       async register(registerDto: RegisterDto) {
-        const { email, name, password } = registerDto;
+        const { email, name, password, phone } = registerDto;
         const existingUser = await this.usersService.findByEmail(email);
         if (existingUser) throw new ConflictError('User with such an email already exists');
     
@@ -74,8 +74,8 @@ export class AuthService {
           email,
           name,
           passwordHash,
-          role: UserRole.guest,
-          phone: null,
+          role: UserRole.client,
+          phone,
           avatarFileName: null
       });
     

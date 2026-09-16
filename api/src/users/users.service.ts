@@ -27,7 +27,7 @@ export class UsersService {
       data: {
         name: data.name,
         email: data.email,
-        phone: data.phone ?? null,
+        phone: data.phone,
         role: data.role,
         passwordHash: data.passwordHash ?? '',
         avatarFileName: data.avatarFileName ?? null,
@@ -39,7 +39,7 @@ export class UsersService {
     return this.formatPublicUser(user);
   }
 
-  async findAll(page?: number, limit?: number, role?: 'agent' | 'moderator' | 'guest') {
+  async findAll(page?: number, limit?: number, role?: 'agent' | 'moderator' | 'client') {
     const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
     const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
 

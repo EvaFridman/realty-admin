@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import type { Metadata } from "next";
 
 import "./globals.css";
@@ -18,8 +18,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <ThemeInit />
             </head>
             <body>
+            <Suspense fallback={null}>
                 <Header />
-                <main>{children}</main>
+            </Suspense>
+            <main>{children}</main>
                 <Footer />
             </body>
         </html>

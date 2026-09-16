@@ -22,7 +22,7 @@ model Districts {
 enum UserRole { 
   agent
   moderator
-  guest
+  client
 
   @@map("enum_Users_role")
 }
@@ -31,8 +31,8 @@ model Users {
   id             Int             @id @default(autoincrement())
   name           String          @db.VarChar(255)
   email          String          @unique @db.VarChar(255)
-  phone          String?         @unique @db.VarChar(20)
-  role           UserRole        @default(guest)
+  phone          String          @unique @db.VarChar(20)
+  role           UserRole        @default(client)
   createdAt      DateTime        @db.Timestamptz(6)
   updatedAt      DateTime        @db.Timestamptz(6)
   passwordHash   String          @default("") @db.VarChar(255)
