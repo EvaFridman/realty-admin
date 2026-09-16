@@ -10,6 +10,7 @@ import { ListingGallery } from "@/entities/listing/ui/ListingGallery";
 import { BusyViewingTimes } from "@/entities/listing/ui/BusyViewingTimes";
 import { BusyViewingTimesSkeleton } from "@/entities/listing/ui/BusyViewingTimesSkeleton";
 import { ViewingRequestForm } from "@/features/viewing-request/ViewingRequestForm";
+import { RecentlyViewedTracker } from "@/features/recently-viewed/RecentlyViewedTracker";
 import { formatArea, formatDateFull, formatPrice, formatPricePerMeter } from "@/shared/lib/format";
 
 import styles from "./ListingPage.module.css";
@@ -44,6 +45,7 @@ export async function ListingPage({ listing }: Props) {
 
     return (
         <section className={`container ${styles.page}`}>
+            <RecentlyViewedTracker listingId={listing.id} />
             <nav className={styles.breadcrumbs} aria-label="Хлебные крошки">
                 <Link href="/">Главная</Link>
                 <span>→</span>
