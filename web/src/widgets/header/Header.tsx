@@ -5,6 +5,7 @@ import styles from "./Header.module.css";
 import { SectionSwitcher } from "../index";
 import { ThemeSwitcher, Logo } from "@/shared/ui";
 import { HeaderSearch } from "./HeaderSearch";
+import { RecentlyViewed } from "./RecentlyViewed";
 
 export function Header() {
     return (
@@ -17,6 +18,9 @@ export function Header() {
                 </Suspense>
                 <Suspense fallback={null}>
                     <HeaderSearch />
+                </Suspense>
+                <Suspense fallback={null}>
+                    <RecentlyViewed />
                 </Suspense>
                 <div className={styles.actions}>
                     {/* TODO: поменять, когда появится функционал по подтягиванию пользователя из БД */}

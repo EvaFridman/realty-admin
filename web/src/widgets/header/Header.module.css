@@ -71,6 +71,11 @@
     box-shadow: var(--focus-ring);
 }
 
+.recentlyViewed {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
 @media (min-width: 768px) {
     .content {
         flex-direction: row;
