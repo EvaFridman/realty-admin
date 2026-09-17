@@ -4,8 +4,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { PublicListingsDto } from './dto/public-listings.dto.js';
 import { CreateViewingDto } from '../viewings/dto/create-viewing.dto.js';
 import { buildPublicListingsWhere } from './public.where.js';
-import { ListingStatus, UserRole, ViewingStatus } from '../generated/prisma/index.js';
-import { NotFoundError } from '../errors/app.exception.js';
+import { ListingStatus, UserRole, ViewingStatus, Prisma } from '../generated/prisma/index.js';
+import { NotFoundError, ConflictError } from '../errors/app.exception.js';
 
 @Injectable()
 export class PublicService {
@@ -106,6 +106,58 @@ export class PublicService {
         }
       });
     }
+
+    async findAllFavorites(user: { id: number }) {
+      const favorites = await this.prisma.favorites.findMany({
+        where: { userId: user.id },
+        select: { listingId: true },
+        orderBy: { addedAt: 'desc' },
+      });
+
+      return favorites.map((favorite) => favorite.listingId);
+    }
+
+    async addFavorite(listingId: number, user: { id: number }) {
+      const listing = await this.prisma.listings.findUnique({
+        where: { id: listingId },
+        select: { id: true, status: true },
+      });
+
+      if (!listing || listing.status !== ListingStatus.PUBLISHED) throw new NotFoundError('Listing not found');
+
+      try {
+        await this.prisma.favorites.create({
+          data: {
+            userId: user.id,
+            listingId,
+            addedAt: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        });
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') throw new ConflictError('Favorite already exists');
+
+        throw error;
+      }
+
+      return { isFavorite: true };
+    }
+
+    async removeFavorite(listingId: number, user: { id: number }) {
+      const favorite = await this.prisma.favorites.findUnique({
+        where: { userId_listingId: { userId: user.id, listingId } },
+      });
+
+      if (!favorite) return { isFavorite: false };
+
+      await this.prisma.favorites.delete({
+        where: { userId_listingId: { userId: user.id, listingId } },
+      });
+
+      return { isFavorite: false };
+    }
+
 
     async findAllDistricts(page?: number, limit?: number, city?: string) {
         const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);

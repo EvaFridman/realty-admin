@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, ParseIntPipe, Post, Body, Req } from '@nestjs/common';
+import { Controller, Get, Param, Query, ParseIntPipe, Post, Body, Req, Delete } from '@nestjs/common';
 import { Public } from '../auth/decorators/public.decorator.js';
 import { OptionalAuth } from '../auth/decorators/optional-auth.decorator.js';
 import { PublicService } from './public.service.js';
@@ -32,8 +32,8 @@ export class PublicController {
     }
 
     @ApiOperation({ summary: 'Информация занятом времени для просмотра по объявлению' })
-    @ApiResponse({ status: 200, description: 'Информация об занятом времени для просмотра по объявлению успешно получена' })
-    @ApiResponse({ status: 404, description: 'Информация об занятом времени для просмотра по объявлению не найдена' })
+    @ApiResponse({ status: 200, description: 'Информация о занятом времени для просмотра по объявлению успешно получена' })
+    @ApiResponse({ status: 404, description: 'Информация об объявлении не найдена' })
     @Public()
     @Get('listings/:id/busy-viewing-times')
     async findBusyViewingTimes(@Param('id', ParseIntPipe) id: number) {
@@ -61,7 +61,34 @@ export class PublicController {
         return await this.publicService.createViewing(listingId, dto, request.user as any);
     }
 
+    @ApiOperation({ summary: 'Получить ID избранных объявлений текущего пользователя' })
+    @ApiResponse({ status: 200, description: 'ID избранных объявлений успешно получены' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
+    @Get('favorites')
+    async findAllFavorites(@Req() request: Request) {
+        return await this.publicService.findAllFavorites(request.user as any);
+    }
+
+    @ApiOperation({ summary: 'Добавить объявление в избранное' })
+    @ApiResponse({ status: 201, description: 'Объявление успешно добавлено в избранное' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
+    @ApiResponse({ status: 404, description: 'Объявление не найдено' })
+    @Post('listings/:id/favorite')
+    async addFavorite(@Param('id', ParseIntPipe) listingId: number, @Req() request: Request) {
+        return await this.publicService.addFavorite(listingId, request.user as any);
+    }
+
+    @ApiOperation({ summary: 'Удалить объявление из избранного' })
+    @ApiResponse({ status: 200, description: 'Объявление успешно удалено из избранного' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
+    @ApiResponse({ status: 404, description: 'Объявление или запись в избранном не найдены' })
+    @Delete('listings/:id/favorite')
+    async removeFavorite(@Param('id', ParseIntPipe) listingId: number, @Req() request: Request) {
+        return await this.publicService.removeFavorite(listingId, request.user as any);
+    }
+
     @ApiOperation({ summary: 'Список районов с количеством опубликованных объектов' })
+    @ApiResponse({ status: 200, description: 'Список районов успешно получен' })
     @Public()
     @Get('districts')
     async findAllDistricts(@Query() query: ListDistrictsDto) {
@@ -70,6 +97,8 @@ export class PublicController {
     }
 
     @ApiOperation({ summary: 'Информация о районе по slug' })
+    @ApiResponse({ status: 200, description: 'Район успешно получен' })
+    @ApiResponse({ status: 404, description: 'Район не найден' })
     @Public()
     @Get('districts/:slug')
     async findDistrictBySlug(@Param('slug') slug: string) {

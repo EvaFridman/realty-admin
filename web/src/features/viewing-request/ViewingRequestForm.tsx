@@ -35,7 +35,7 @@ export function ViewingRequestForm({ listingId, user }: Props) {
         return (
             <div className={styles.success}>
                 <p>Заявка успешно отправлена. Мы свяжемся с вами для подтверждения просмотра.</p>
-                <Link href="/profile/viewings">Мои заявки</Link>
+                <Link href="/account?tab=viewings">Мои заявки</Link>
             </div>
         );
     }

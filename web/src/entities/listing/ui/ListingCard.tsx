@@ -11,13 +11,15 @@ import { FavoriteButton } from "../../favorites/FavoriteButton";
 type Props = {
     listing: PublicListingType;
     variant?: "tile" | "row";
+    isFavorite?: boolean;
+    onFavoriteChange?: (isFavorite: boolean) => void;
 };
 
 function getPhoto(listing: PublicListingType) {
     return listing.photos.find((photo) => photo.isCover) ?? listing.photos[0];
 }
 
-export function ListingCard({ listing, variant = "tile" }: Props) {
+export function ListingCard({ listing, variant = "tile", isFavorite = false, onFavoriteChange }: Props) {
     const photo = getPhoto(listing);
     const photoUrl = getUrl(photo?.externalUrl ?? null);
     const features = formatListingFeatures(listing.rooms, listing.floor, listing.totalFloors);
@@ -34,7 +36,7 @@ export function ListingCard({ listing, variant = "tile" }: Props) {
                     </div>
                 )}
 
-                <FavoriteButton />
+                <FavoriteButton listingId={listing.id} isFavorite={isFavorite} onChange={onFavoriteChange}/>
 
                 {listing.photos.length > 0 && (<span className={styles.photoCount}>фото {listing.photos.length} шт.</span>)}
             </div>

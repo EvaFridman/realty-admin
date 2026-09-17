@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { listingApi } from "@/entities/listing/api";
+import { getFavoriteIds } from "@/entities/favorites/api";
 import type { PublicListingType } from "@/entities/listing/types";
 import { AgentPhone } from "@/features/agent-phone/AgentPhone";
 import { FavoriteButton } from "@/entities/favorites/FavoriteButton";
@@ -19,6 +20,11 @@ type Props = {
     listing: PublicListingType;
 };
 
+type ContentProps = {
+    listing: PublicListingType;
+    similar: PublicListingType[];
+};
+
 const PROPERTY_TYPE_LABELS = {
     flat: "Квартира",
     house: "Дом",
@@ -26,26 +32,14 @@ const PROPERTY_TYPE_LABELS = {
     commercial: "Коммерческая недвижимость",
 };
 
-export async function ListingPage({ listing }: Props) {
+async function ListingPageContent({ listing, similar }: ContentProps) {
+    const favoriteIds = await getFavoriteIds();
     const isRent = listing.dealType === "rent";
-
-    const price = Number(listing.price);
-
-    const similarListings = await listingApi.getListingsWithMeta({
-        districtId: listing.district.id,
-        dealType: listing.dealType,
-        priceMin: Math.round(price * 0.67),
-        priceMax: Math.round(price * 1.33),
-        limit: 4,
-    });
-
-    const similar = similarListings.items
-        .filter((item) => item.id !== listing.id)
-        .slice(0, 3);
 
     return (
         <section className={`container ${styles.page}`}>
             <RecentlyViewedTracker listingId={listing.id} />
+
             <nav className={styles.breadcrumbs} aria-label="Хлебные крошки">
                 <Link href="/">Главная</Link>
                 <span>→</span>
@@ -70,7 +64,7 @@ export async function ListingPage({ listing }: Props) {
                     <strong className={styles.price}>{formatPrice(listing.price, isRent)}</strong>
                     <span className={styles.pricePerMeter}>{formatPricePerMeter(listing.price, listing.area)}</span>
                     <Link href="#viewing" className={styles.viewingButton}>Записаться на просмотр</Link>
-                    <FavoriteButton />
+                    <FavoriteButton listingId={listing.id} isFavorite={favoriteIds.includes(listing.id)}/>
                     <p>Свяжитесь с агентом, чтобы уточнить детали и выбрать удобное время просмотра.</p>
                 </aside>
             </div>
@@ -133,16 +127,38 @@ export async function ListingPage({ listing }: Props) {
             <section id="viewing" className={styles.section}>
                 <h2>Записаться на просмотр</h2>
                 <ViewingRequestFormContainer listingId={listing.id} />
-                </section>
+            </section>
 
             {similar.length > 0 && (
                 <section className={styles.section}>
                     <h2>Похожие объявления</h2>
                     <div className={styles.similarListings}>
-                        {similar.map((item) => (<ListingCard key={item.id} listing={item} />))}
+                        {similar.map((item) => (<ListingCard key={item.id} listing={item} isFavorite={favoriteIds.includes(item.id)}/>))}
                     </div>
                 </section>
             )}
         </section>
+    );
+}
+
+export async function ListingPage({ listing }: Props) {
+    const price = Number(listing.price);
+
+    const similarListings = await listingApi.getListingsWithMeta({
+        districtId: listing.district.id,
+        dealType: listing.dealType,
+        priceMin: Math.round(price * 0.67),
+        priceMax: Math.round(price * 1.33),
+        limit: 4,
+    });
+
+    const similar = similarListings.items
+        .filter((item) => item.id !== listing.id)
+        .slice(0, 3);
+
+    return (
+        <Suspense fallback={null}>
+            <ListingPageContent listing={listing} similar={similar}/>
+        </Suspense>
     );
 }

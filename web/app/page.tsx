@@ -1,11 +1,35 @@
+import { Suspense } from "react";
+import Link from "next/link";
+
+import styles from "./page.module.css";
+
 import { districtApi } from "@/entities/district/api";
 import { listingApi } from "@/entities/listing/api";
+import { getFavoriteIds } from "@/entities/favorites/api";
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { HomeListingFilter } from "@/features/listing-filter/home/HomeListingFilter";
 import { DistrictList } from "@/entities/district/ui/DistrictList";
 import { DealSteps } from "@/widgets/DealSteps/DealSteps";
-import styles from "./page.module.css";
-import Link from "next/link";
+
+
+type Props = {
+    listings: Awaited<ReturnType<typeof listingApi.getCachedListings>>;
+};
+
+async function HomeListings({ listings }: Props) {
+    const favoriteIds = await getFavoriteIds();
+
+    return listings.length > 0 ? (
+        <div className={styles.listings}>
+            {listings.map((listing) => (<ListingCard key={listing.id} listing={listing} isFavorite={favoriteIds.includes(listing.id)} />))}
+        </div>
+    ) : (
+        <div className={styles.empty}>
+            <h3>Объявлений пока нет</h3>
+            <p>Новые предложения появятся здесь.</p>
+        </div>
+    );
+}
 
 export default async function HomePage() {
     const [listings, districts] = await Promise.all([
@@ -31,21 +55,11 @@ export default async function HomePage() {
                 <div className={styles.sectionHeader}>
                     <h2>Новые объявления</h2>
                     <Link href="/listings">Весь каталог →</Link>
-
                 </div>
 
-                {listings.length > 0 ? (
-                    <div className={styles.listings}>
-                        {listings.map((listing) => (
-                            <ListingCard key={listing.id} listing={listing} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className={styles.empty}>
-                        <h3>Объявлений пока нет</h3>
-                        <p>Новые предложения появятся здесь.</p>
-                    </div>
-                )}
+                <Suspense fallback={null}>
+                    <HomeListings listings={listings} />
+                </Suspense>
             </section>
 
             <section className={`container ${styles.section}`}>
