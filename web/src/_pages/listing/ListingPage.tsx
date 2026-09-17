@@ -9,7 +9,7 @@ import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { ListingGallery } from "@/widgets/listing-gallery/ListingGallery";
 import { BusyViewingTimes } from "@/entities/listing/ui/BusyViewingTimes";
 import { BusyViewingTimesSkeleton } from "@/entities/listing/ui/BusyViewingTimesSkeleton";
-import { ViewingRequestForm } from "@/features/viewing-request/ViewingRequestForm";
+import { ViewingRequestFormContainer } from "@/features/viewing-request/ViewingRequestFormContainer";
 import { RecentlyViewedTracker } from "@/features/recently-viewed/RecentlyViewedTracker";
 import { formatArea, formatDateFull, formatPrice, formatPricePerMeter } from "@/shared/lib/format";
 
@@ -132,8 +132,8 @@ export async function ListingPage({ listing }: Props) {
 
             <section id="viewing" className={styles.section}>
                 <h2>Записаться на просмотр</h2>
-                <ViewingRequestForm />
-            </section>
+                <ViewingRequestFormContainer listingId={listing.id} />
+                </section>
 
             {similar.length > 0 && (
                 <section className={styles.section}>

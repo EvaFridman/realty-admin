@@ -12,11 +12,13 @@ export class JwtAuthGuard implements CanActivate {
     if (context.getType() === 'ws') return true;
 
     const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [context.getHandler(), context.getClass()]);
+    const isOptionalAuth = this.reflector.getAllAndOverride<boolean>('optionalAuth', [context.getHandler(), context.getClass()]);
     if (isPublic) return true;
 
     const request = context.switchToHttp().getRequest();
     const [scheme, token] = (request.headers.authorization ?? "").split(" ");
 
+    if (isOptionalAuth && (!scheme || scheme !== "Bearer" || !token)) return true;
     if (scheme !== "Bearer" || !token) throw new UnauthorizedError("No token");
 
     try {
@@ -25,6 +27,7 @@ export class JwtAuthGuard implements CanActivate {
       request.user = { id: payload.sub, role: payload.role };
       return true;
     } catch {
+      if (isOptionalAuth) return true;
       throw new UnauthorizedError('Invalid or expired token');
     }
   }
