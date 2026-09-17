@@ -3,18 +3,13 @@ import Link from "next/link";
 
 import styles from "./Header.module.css";
 import { SectionSwitcher } from "@/features/navigation/SectionSwitcher";
-import { Logo } from "@/shared/ui";
+import { Logo, Loader } from "@/shared/ui";
 import { ThemeSwitcher } from "@/features/theme/ThemeSwitcher";
 import { HeaderSearch } from "../../features/header-search/HeaderSearch";
 import { RecentlyViewed } from "./RecentlyViewed";
-import { getSession } from "@/shared/session";
-import { Loader } from "@/shared/ui";
-import { ProfileMenu } from "@/features/profile-menu/ProfileMenu";
+import { HeaderActions } from "./HeaderActions";
 
-export async function Header() {
-    const session = await getSession();
-    const user = session?.user ?? null;
-
+export function Header() {
     return (
         <header className={styles.header}>
             <div className={`container ${styles.content}`}>
@@ -29,17 +24,8 @@ export async function Header() {
                 <Suspense fallback={<Loader />}>
                     <RecentlyViewed />
                 </Suspense>
-                <div className={styles.actions}>
-                    {user ? (
-                        <>
-                            <ProfileMenu user={user} />
-                            <Link href="/account/favorites" className={styles.favorite} aria-label="Избранное"> ♡ </Link>
-                        </>
-                    ) : (
-                        <Link href="/login" className={styles.login}>Войти</Link>
-                    )}
-                    <ThemeSwitcher variant="header" />
-                </div>
+                <HeaderActions />
+                <ThemeSwitcher variant="header" />
             </div>
         </header>
     );

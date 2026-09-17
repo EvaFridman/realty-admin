@@ -12,8 +12,10 @@ type Props = {
 };
 
 export function FavoriteButton({ listingId, isFavorite: initialIsFavorite, onChange }: Props) {
-    const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
+    const [localIsFavorite, setLocalIsFavorite] = useState<boolean | null>(null);
     const [isPending, startTransition] = useTransition();
+
+    const isFavorite = localIsFavorite ?? initialIsFavorite;
 
     function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
         event.preventDefault();
@@ -24,7 +26,7 @@ export function FavoriteButton({ listingId, isFavorite: initialIsFavorite, onCha
             const result = await toggleFavorite(listingId, isFavorite);
 
             if (result.isFavorite !== undefined) {
-                setIsFavorite(result.isFavorite);
+                setLocalIsFavorite(result.isFavorite);
                 onChange?.(result.isFavorite);
             }
         });

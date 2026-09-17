@@ -3,7 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 import { getSession } from "../session";
-import { sessions } from "../session/store"; 
+import { sessions } from "../session/store";
 import { ApiError } from "./errors";
 
 type QueryValueType = string | number | boolean | string[] | number[] | undefined;
@@ -29,6 +29,7 @@ function getRefreshToken(response: Response): string | null {
 
 async function request<T>(path: string, options: RequestOptionsType = {}, isRetry = false): Promise<T> {
     const baseUrl = process.env.API_URL;
+    const method = options.method ?? "GET";
     let url = `${baseUrl}${path}`;
 
     if (options.query) {
@@ -50,9 +51,12 @@ async function request<T>(path: string, options: RequestOptionsType = {}, isRetr
     }
 
     const headers: Record<string, string> = {
-        "Content-Type": "application/json",
         ...options.headers,
     };
+
+    if (["POST", "PUT", "PATCH"].includes(method) && !headers["Content-Type"]) {
+        headers["Content-Type"] = "application/json";
+    }
 
     if (process.env.NEXT_BUILD_SECRET) headers["X-Build-Request"] = process.env.NEXT_BUILD_SECRET;
 
@@ -62,7 +66,7 @@ async function request<T>(path: string, options: RequestOptionsType = {}, isRetr
 
     try {
         const config: RequestInit = {
-            method: options.method ?? "GET",
+            method,
             headers,
             cache: options.cache,
             next: options.next,

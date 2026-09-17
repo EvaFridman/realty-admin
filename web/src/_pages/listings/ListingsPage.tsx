@@ -2,15 +2,14 @@ import Link from "next/link";
 
 import { districtApi } from "@/entities/district/api";
 import { listingApi } from "@/entities/listing/api";
-import { getFavoriteIds } from "@/entities/favorites/api";
-import { ListingCard } from "@/entities/listing/ui/ListingCard";
-import { Pagination } from "@/shared/ui";
 import { getArrayParam, getStringParam } from "@/shared/lib/params";
 import { ListingFilterPanel } from "@/features/listing-filter/catalog/ListingsFilter";
 import { ListingSort } from "@/features/listing-filter/catalog/ListingSort";
 import { ListingViewSwitcher } from "@/features/listing-view/ListingViewSwitcher";
 import { CatalogFreshness } from "@/entities/listing/ui/CatalogFreshness";
+import { ListingLoadMore } from "@/features/listing-load-more/ListingLoadMore";
 import type { PublicDistrictType } from "@/entities/district/types";
+
 import styles from "./ListingsPage.module.css";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -42,10 +41,9 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
         sortOrder: getStringParam(searchParams.sortOrder) ?? "desc",
     };
 
-    const [result, districts, favoriteIds] = await Promise.all([
+    const [result, districts] = await Promise.all([
         listingApi.getListingsWithMeta(query),
         districtApi.getDistricts({ page: 1, limit: 20 }),
-        getFavoriteIds(),
     ]);
 
     return (
@@ -81,18 +79,8 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
                         </div>
                     </div>
 
-                    {result.items.length > 0 ? (
-                        <div className={view === "list" ? styles.listingsList : styles.listings}>
-                            {result.items.map((listing) => (<ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"} isFavorite={favoriteIds.includes(listing.id)}/>))}
-                        </div>
-                    ) : (
-                        <div className={styles.empty}>
-                            <h2>Ничего не найдено</h2>
-                            <p>Попробуйте изменить параметры поиска или сбросить фильтры.</p>
-                        </div>
-                    )}
+                    <ListingLoadMore initialItems={result.items} initialMeta={result.meta} query={query} view={view}/>
 
-                    <Pagination currentPage={result.meta.page} totalPages={result.meta.totalPages} searchParams={searchParams} />
                     <CatalogFreshness />
                 </div>
             </div>
