@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 
