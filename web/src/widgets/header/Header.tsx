@@ -7,7 +7,8 @@ import { Logo } from "@/shared/ui";
 import { ThemeSwitcher } from "@/features/theme/ThemeSwitcher";
 import { HeaderSearch } from "../../features/header-search/HeaderSearch";
 import { RecentlyViewed } from "./RecentlyViewed";
-import { getSession } from "@/features/session";
+import { getSession } from "@/shared/session";
+import { Loader } from "@/shared/ui";
 import { ProfileMenu } from "@/features/profile-menu/ProfileMenu";
 
 export async function Header() {
@@ -19,20 +20,20 @@ export async function Header() {
             <div className={`container ${styles.content}`}>
                 <Logo />
                 <Link href="/" className={styles.headerTitle}>Витрина</Link>
-                <Suspense fallback={null}>
+                <Suspense fallback={<Loader />}>
                     <SectionSwitcher variant="header" />
                 </Suspense>
-                <Suspense fallback={null}>
+                <Suspense fallback={<Loader />}>
                     <HeaderSearch />
                 </Suspense>
-                <Suspense fallback={null}>
+                <Suspense fallback={<Loader />}>
                     <RecentlyViewed />
                 </Suspense>
                 <div className={styles.actions}>
                     {user ? (
                         <>
                             <ProfileMenu user={user} />
-                            <Link href="/account?tab=favorites" className={styles.favorite} aria-label="Избранное"> ♡ </Link>
+                            <Link href="/account/favorites" className={styles.favorite} aria-label="Избранное"> ♡ </Link>
                         </>
                     ) : (
                         <Link href="/login" className={styles.login}>Войти</Link>

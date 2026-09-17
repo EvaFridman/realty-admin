@@ -3,13 +3,19 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { UnauthorizedError, ConflictError } from '../errors/app.exception.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { UserRole } from '../generated/prisma/index.js';
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly usersService: UsersService, private readonly jwtService: JwtService, private readonly configService: ConfigService) {}
+    constructor(
+        private readonly usersService: UsersService,
+        private readonly prisma: PrismaService,
+        private readonly jwtService: JwtService,
+        private readonly configService: ConfigService,
+    ) {}
 
     async login(email: string, password: string) {
         const user = await this.usersService.findByEmail(email);
@@ -40,7 +46,6 @@ export class AuthService {
             { secret: refreshSecret, expiresIn: refreshExpires as any },
         );
 
-
         return { accessToken, refreshToken };
     }
 
@@ -48,21 +53,21 @@ export class AuthService {
         if (!token) throw new UnauthorizedError('Refresh token missing');
     
         try {
-          const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
-          const payload = await this.jwtService.verifyAsync(token, { secret: refreshSecret });
+            const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+            const payload = await this.jwtService.verifyAsync(token, { secret: refreshSecret });
           
-          const user = await this.usersService.findOne(payload.sub);
-          if (!user) throw new UnauthorizedError('User not found');
+            const user = await this.usersService.findOne(payload.sub);
+            if (!user) throw new UnauthorizedError('User not found');
     
-          const tokens = await this.issuePair(user);
+            const tokens = await this.issuePair(user);
     
-          return { ...tokens, user };
+            return { ...tokens, user };
         } catch {
-          throw new UnauthorizedError('Invalid or expired refresh token');
+            throw new UnauthorizedError('Invalid or expired refresh token');
         }
-      }
+    }
 
-      async register(registerDto: RegisterDto) {
+    async register(registerDto: RegisterDto) {
         const { email, name, password, phone } = registerDto;
         const existingUser = await this.usersService.findByEmail(email);
         if (existingUser) throw new ConflictError('User with such an email already exists');
@@ -71,16 +76,42 @@ export class AuthService {
         const passwordHash = await bcrypt.hash(password, salt);
     
         const newUser = await this.usersService.create({
-          email,
-          name,
-          passwordHash,
-          role: UserRole.client,
-          phone,
-          avatarFileName: null
-      });
+            email,
+            name,
+            passwordHash,
+            role: UserRole.client,
+            phone,
+            avatarFileName: null
+        });
     
         const tokens = await this.issuePair(newUser);
     
         return { ...tokens, user: newUser };
-      }
+    }
+
+    async changePassword(userId: number, currentPassword: string, newPassword: string) {
+        const user = await this.prisma.users.findUnique({
+            where: { id: userId },
+            select: { id: true, passwordHash: true },
+        });
+
+        if (!user) throw new UnauthorizedError('User not found');
+
+        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+
+        if (!isCurrentPasswordValid) throw new UnauthorizedError('Invalid current password');
+
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(newPassword, salt);
+
+        await this.prisma.users.update({
+            where: { id: user.id },
+            data: {
+                passwordHash,
+                updatedAt: new Date(),
+            },
+        });
+
+        return { message: 'Password changed' };
+    }
 }

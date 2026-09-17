@@ -1,4 +1,4 @@
-import { getSession } from "@/features/session";
+import { getSession } from "@/shared/session";
 
 import { ViewingRequestForm } from "./ViewingRequestForm";
 

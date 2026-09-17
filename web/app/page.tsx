@@ -10,6 +10,7 @@ import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { HomeListingFilter } from "@/features/listing-filter/home/HomeListingFilter";
 import { DistrictList } from "@/entities/district/ui/DistrictList";
 import { DealSteps } from "@/widgets/DealSteps/DealSteps";
+import { Loader } from "@/shared/ui";
 
 
 type Props = {
@@ -57,7 +58,7 @@ export default async function HomePage() {
                     <Link href="/listings">Весь каталог →</Link>
                 </div>
 
-                <Suspense fallback={null}>
+                <Suspense fallback={<Loader />}>
                     <HomeListings listings={listings} />
                 </Suspense>
             </section>

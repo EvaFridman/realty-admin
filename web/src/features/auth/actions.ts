@@ -2,9 +2,9 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { sessions } from "@/features/session/store";
-import { getSession } from "@/features/session";
-import type { AuthUser } from "@/entities/user/types";
+import { sessions } from "@/shared/session/store";
+import { getSession } from "@/shared/session";
+import type { AuthUser } from "@/shared/session/types";
 
 type LoginData = {
     email: string;

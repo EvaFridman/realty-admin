@@ -13,6 +13,7 @@ import { BusyViewingTimesSkeleton } from "@/entities/listing/ui/BusyViewingTimes
 import { ViewingRequestFormContainer } from "@/features/viewing-request/ViewingRequestFormContainer";
 import { RecentlyViewedTracker } from "@/features/recently-viewed/RecentlyViewedTracker";
 import { formatArea, formatDateFull, formatPrice, formatPricePerMeter } from "@/shared/lib/format";
+import { Loader } from "@/shared/ui";
 
 import styles from "./ListingPage.module.css";
 
@@ -157,7 +158,7 @@ export async function ListingPage({ listing }: Props) {
         .slice(0, 3);
 
     return (
-        <Suspense fallback={null}>
+        <Suspense fallback={<Loader />}>
             <ListingPageContent listing={listing} similar={similar}/>
         </Suspense>
     );

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { PublicListingsDto } from './dto/public-listings.dto.js';
 import { CreateViewingDto } from '../viewings/dto/create-viewing.dto.js';
+import { ListViewingsDto } from '../viewings/dto/list-viewings.dto.js';
 import { buildPublicListingsWhere } from './public.where.js';
 import { ListingStatus, UserRole, ViewingStatus, Prisma } from '../generated/prisma/index.js';
 import { NotFoundError, ConflictError } from '../errors/app.exception.js';
@@ -252,5 +253,71 @@ export class PublicService {
       });
   
       return viewings.map((viewing) => viewing.preferredAt);
+    }
+
+    async findMyViewings(dto: ListViewingsDto, user: { id: number }) {
+      const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
+      const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
+
+      const finalPage = (!dto.page || dto.page < 1) ? 1 : dto.page;
+      let finalLimit = (!dto.limit || dto.limit < 1) ? pageSizeDefault : dto.limit;
+      if (finalLimit > pageSizeMax) finalLimit = pageSizeMax;
+
+      const whereCondition = {
+          clientId: user.id,
+          ...(dto.status ? { status: dto.status } : {}),
+      };
+
+      const [items, total] = await Promise.all([
+          this.prisma.viewings.findMany({
+              where: whereCondition,
+              skip: (finalPage - 1) * finalLimit,
+              take: finalLimit,
+              orderBy: { createdAt: 'desc' },
+              select: {
+                  id: true,
+                  preferredAt: true,
+                  status: true,
+                  comment: true,
+                  listing: {
+                      select: {
+                          id: true,
+                          title: true,
+                          photos: {
+                              select: {
+                                  id: true,
+                                  fileName: true,
+                                  externalUrl: true,
+                                  position: true,
+                                  isCover: true,
+                              },
+                              orderBy: { position: 'asc' },
+                          },
+                          agent: {
+                              select: {
+                                  id: true,
+                                  name: true,
+                                  phone: true,
+                                  email: true,
+                              },
+                          },
+                      },
+                  },
+              },
+          }),
+          this.prisma.viewings.count({ where: whereCondition }),
+      ]);
+
+      const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
+
+      return {
+          items,
+          meta: {
+              page: finalPage,
+              limit: finalLimit,
+              total,
+              totalPages,
+          },
+      };
     }
 }
