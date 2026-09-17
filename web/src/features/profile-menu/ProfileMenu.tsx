@@ -16,7 +16,7 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
             </summary>
 
             <div className={styles.dropdown}>
-                <Link href="/profile" className={styles.item}>Профиль</Link>
+                <Link href="/account?tab=profile" className={styles.item}>Профиль</Link>
                 <form action={logout}>
                     <button type="submit" className={styles.item}>Выйти</button>
                 </form>

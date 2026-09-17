@@ -26,6 +26,11 @@ function getRefreshToken(response: Response): string | null {
     return match?.[1] ?? null;
 }
 
+function getSafeReturnUrl(returnUrl?: string): string {
+    if (!returnUrl || !returnUrl.startsWith("/") || returnUrl.startsWith("//") || returnUrl.includes("\\")) return "/";
+    return returnUrl;
+}
+
 async function createSession(response: Response): Promise<AuthUser | null> {
     const result = await response.json();
     const data = result.data ?? result;
@@ -52,7 +57,7 @@ async function createSession(response: Response): Promise<AuthUser | null> {
     return data.user;
 }
 
-export async function login(data: LoginData): Promise<{ error?: string; blocked?: boolean; retryAfter?: number }> {
+export async function login(data: LoginData, returnUrl?: string): Promise<{ error?: string; blocked?: boolean; retryAfter?: number }> {
     let response: Response;
 
     try {
@@ -75,14 +80,13 @@ export async function login(data: LoginData): Promise<{ error?: string; blocked?
         };
     }
 
-
     if (!response.ok) return { error: "Неверная почта или пароль" };
 
     const user = await createSession(response);
 
     if (!user) return { error: "Не удалось выполнить вход" };
 
-    redirect("/");
+    redirect(getSafeReturnUrl(returnUrl));
 }
 
 export async function register(data: RegisterData): Promise<{ error?: string }> {

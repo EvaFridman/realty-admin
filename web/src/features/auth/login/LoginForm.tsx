@@ -6,7 +6,11 @@ import { login } from "../actions";
 import { Button, Input } from "@/shared/ui";
 import styles from "./LoginForm.module.css";
 
-export function LoginForm() {
+type Props = {
+    returnUrl?: string;
+};
+
+export function LoginForm({ returnUrl }: Props) {
     const [error, setError] = useState("");
     const [blocked, setBlocked] = useState(false);
     const [retryAfter, setRetryAfter] = useState(0);
@@ -27,7 +31,7 @@ export function LoginForm() {
         const result = await login({
             email: String(formData.get("email") ?? ""),
             password: String(formData.get("password") ?? ""),
-        });
+        }, returnUrl);
 
         if (result.blocked) {
             setBlocked(true);
@@ -84,7 +88,7 @@ export function LoginForm() {
             {error && <p className={styles.error}>{error}</p>}
 
             <Button type="submit">Войти</Button>
-            
+
             <p className={styles.footer}>Нет аккаунта? <Link href="/register">Зарегистрироваться</Link></p>
         </form>
     );

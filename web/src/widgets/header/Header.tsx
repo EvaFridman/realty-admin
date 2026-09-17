@@ -32,7 +32,7 @@ export async function Header() {
                     {user ? (
                         <>
                             <ProfileMenu user={user} />
-                            <Link href="/favorites" className={styles.favorite} aria-label="Избранное"> ♡ </Link>
+                            <Link href="/account?tab=favorites" className={styles.favorite} aria-label="Избранное"> ♡ </Link>
                         </>
                     ) : (
                         <Link href="/login" className={styles.login}>Войти</Link>

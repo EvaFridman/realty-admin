@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { districtApi } from "@/entities/district/api";
 import { listingApi } from "@/entities/listing/api";
+import { getFavoriteIds } from "@/entities/favorites/api";
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { Pagination } from "@/shared/ui";
 import { getArrayParam, getStringParam } from "@/shared/lib/params";
@@ -41,9 +42,10 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
         sortOrder: getStringParam(searchParams.sortOrder) ?? "desc",
     };
 
-    const [result, districts] = await Promise.all([
+    const [result, districts, favoriteIds] = await Promise.all([
         listingApi.getListingsWithMeta(query),
         districtApi.getDistricts({ page: 1, limit: 20 }),
+        getFavoriteIds(),
     ]);
 
     return (
@@ -81,7 +83,7 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
 
                     {result.items.length > 0 ? (
                         <div className={view === "list" ? styles.listingsList : styles.listings}>
-                            {result.items.map((listing) => (<ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"} />))}
+                            {result.items.map((listing) => (<ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"} isFavorite={favoriteIds.includes(listing.id)}/>))}
                         </div>
                     ) : (
                         <div className={styles.empty}>
