@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { http } from "@/shared/api/http";
+
 type Props = {
     agentId: number;
 };
@@ -14,10 +16,8 @@ export function AgentPhone({ agentId }: Props) {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/public/agents/${agentId}/phone`);
-            if (!response.ok) throw new Error("Не удалось получить телефон");
-            const result = await response.json();
-            setPhone(result.data.phone);
+            const { data } = await http.get<{ phone: string | null }>(`/agents/${agentId}/phone`);
+            setPhone(data.phone);
         } finally {
             setIsLoading(false);
         }

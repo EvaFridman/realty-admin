@@ -23,9 +23,6 @@ export async function changePassword(_previousState: ChangePasswordState, formDa
     try {
         await apiFetch("/auth/password", {
             method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            },
             body: {
                 currentPassword,
                 newPassword,
