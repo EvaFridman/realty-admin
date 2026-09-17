@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { PublicListingsDto } from './dto/public-listings.dto.js';
+import { CreateViewingDto } from '../viewings/dto/create-viewing.dto.js';
 import { buildPublicListingsWhere } from './public.where.js';
 import { ListingStatus, UserRole, ViewingStatus } from '../generated/prisma/index.js';
 import { NotFoundError } from '../errors/app.exception.js';
@@ -89,6 +90,21 @@ export class PublicService {
         delete (publicListing as any).status; 
         
         return publicListing;
+    }
+
+    async createViewing(listingId: number, dto: CreateViewingDto, user?: { id: number; role: string }) {
+      const listing = await this.prisma.listings.findUnique({ where: { id: listingId } });
+      if (!listing || listing.status !== ListingStatus.PUBLISHED) throw new NotFoundError('Listing not found');
+      return await this.prisma.viewings.create({
+        data: {
+          listingId,
+          ...dto,
+          clientId: user?.role === UserRole.client ? user.id : null,
+          status: ViewingStatus.CREATED,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+      });
     }
 
     async findAllDistricts(page?: number, limit?: number, city?: string) {

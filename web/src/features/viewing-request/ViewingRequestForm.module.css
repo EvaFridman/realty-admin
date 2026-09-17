@@ -45,3 +45,44 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+.error {
+    display: block;
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+}
+
+.success {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.success p {
+    margin: 0;
+}
+
+.success a {
+    color: var(--color-text);
+    text-decoration: underline;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.userInfo p {
+    margin: 0;
+}
+
+.userInfo button {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--color-text);
+    text-decoration: underline;
+    cursor: pointer;
+}

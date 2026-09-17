@@ -44,6 +44,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
 
     const req = context.switchToHttp().getRequest();
     const url = req.url || '';
+    const path = req.path || '';
 
     if (url.includes('/socket.io')) return true;
 
@@ -54,6 +55,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
 
     if (throttler.name === 'login' || throttler.name === 'register') return true;
     if (throttler.name === 'viewing' && !url.includes('/viewings')) return true;
+    if (throttler.name === 'viewingPublic' && !/^\/public\/listings\/\d+\/viewings$/.test(path)) return true;
     if (throttler.name === 'upload' && !url.includes('/photos') && !url.includes('/avatar')) return true;
 
     const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
@@ -86,6 +88,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
         { name: "register", ttl: 60 * 60_000, limit: 5 },
         { name: "upload", ttl: 15 * 60_000, limit: 30 },
         { name: "viewing", ttl: 60 * 60_000, limit: 20 },
+        { name: "viewingPublic", ttl: 15 * 60_000, limit: 5 },
         { name: "ws", ttl: 1000, limit: 100 },
       ],
     }),
