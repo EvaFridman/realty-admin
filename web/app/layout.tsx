@@ -5,6 +5,7 @@ import "./globals.css";
 
 import { Header, Footer } from "@/widgets";
 import { ThemeInit } from "@/features/theme/ThemeInit";
+import { Loader } from "@/shared/ui";
 
 export const metadata: Metadata = {
     title: "Витрина недвижимости",
@@ -18,7 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <ThemeInit />
             </head>
             <body>
-            <Suspense fallback={null}>
+            <Suspense fallback={<Loader />}>
                 <Header />
             </Suspense>
             <main>{children}</main>

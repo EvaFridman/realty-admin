@@ -5,8 +5,9 @@ import { PublicService } from './public.service.js';
 import { PublicListingsDto } from './dto/public-listings.dto.js';
 import { ListDistrictsDto } from '../districts/dto/list-districts.dto.js';
 import { CreateViewingDto } from '../viewings/dto/create-viewing.dto.js';
+import { ListViewingsDto } from '../viewings/dto/list-viewings.dto.js';
 import type { Request } from 'express';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Витрина')
@@ -59,6 +60,15 @@ export class PublicController {
     @Post('listings/:id/viewings')
     async createViewing(@Param('id', ParseIntPipe) listingId: number, @Body() dto: CreateViewingDto, @Req() request: Request) {
         return await this.publicService.createViewing(listingId, dto, request.user as any);
+    }
+
+    @ApiBearerAuth('bearer')
+    @ApiOperation({ summary: 'Получить заявки на просмотр текущего пользователя' })
+    @ApiResponse({ status: 200, description: 'Заявки текущего пользователя успешно получены' })
+    @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
+    @Get('viewings/my')
+    async findMyViewings(@Query() query: ListViewingsDto, @Req() request: Request) {
+        return await this.publicService.findMyViewings(query, request.user as any);
     }
 
     @ApiOperation({ summary: 'Получить ID избранных объявлений текущего пользователя' })

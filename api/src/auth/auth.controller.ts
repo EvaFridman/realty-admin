@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Body, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Req, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import ms, { StringValue } from 'ms';
 import { RegisterDto } from './dto/register.dto.js';
+import { ChangePasswordDto } from './dto/change-password.dto.js';
 import { Public } from './decorators/public.decorator.js';
 import { Throttle } from "@nestjs/throttler";
 import { LoginThrottlerGuard } from './guards/login-throttler.guard.js';
@@ -82,6 +83,20 @@ export class AuthController {
     @Get('me')
     async me(@Req() request: Request) {
         return request.user;
+    }
+
+    @ApiBearerAuth('bearer')
+    @ApiOperation({ summary: 'Смена пароля текущего пользователя' })
+    @ApiResponse({ status: 200, description: 'Пароль успешно изменен' })
+    @ApiResponse({ status: 400, description: 'Некорректные данные нового пароля' })
+    @ApiResponse({ status: 401, description: 'Текущий пароль неверный или пользователь не авторизован' })
+    @Patch('password')
+    async changePassword(@Body() dto: ChangePasswordDto, @Req() request: Request) {
+        return await this.authService.changePassword(
+            (request.user as any).id,
+            dto.currentPassword,
+            dto.newPassword,
+        );
     }
 
     @ApiOperation({ summary: 'Регистрация нового пользователя' })

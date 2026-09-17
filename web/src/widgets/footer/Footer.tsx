@@ -4,6 +4,7 @@ import styles from "./Footer.module.css";
 
 import { SectionSwitcher } from "@/features/navigation/SectionSwitcher";
 import { ThemeSwitcher } from "@/features/theme/ThemeSwitcher";
+import { Loader } from "@/shared/ui";
 
 export function Footer() {
     return (
@@ -13,7 +14,7 @@ export function Footer() {
                     <h2>Витрина</h2>
                     <p>Объявления о продаже и аренде жилья</p>
                 </div>
-                <Suspense fallback={null}>
+                <Suspense fallback={<Loader />}>
                     <SectionSwitcher variant="header" />
                 </Suspense>
                 <ThemeSwitcher variant="footer" />

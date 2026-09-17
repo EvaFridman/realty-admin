@@ -2,8 +2,8 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
-import { getSession } from "@/features/session";
-import { sessions } from "@/features/session/store";
+import { getSession } from "../session";
+import { sessions } from "../session/store"; 
 import { ApiError } from "./errors";
 
 type QueryValueType = string | number | boolean | string[] | number[] | undefined;

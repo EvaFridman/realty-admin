@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { getSession } from "@/features/session";
+import { getSession } from "@/shared/session";
 import { apiFetch } from "@/shared/api/api-fetch";
 import { ApiError } from "@/shared/api/errors";
 

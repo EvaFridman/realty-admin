@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { LoginForm } from "@/features/auth/login/LoginForm";
+import { Loader } from "@/shared/ui";
 
 import styles from "./page.module.css";
 
@@ -24,7 +25,7 @@ async function LoginPageContent({ searchParams }: Props) {
 
 export default function LoginPage(props: Props) {
     return (
-        <Suspense fallback={null}>
+        <Suspense fallback={<Loader />}>
             <LoginPageContent {...props}/>
         </Suspense>
     );

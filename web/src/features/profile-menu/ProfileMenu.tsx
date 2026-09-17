@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { AuthUser } from "@/entities/user/types";
+import type { AuthUser } from "@/shared/session/types";
 import { logout } from "@/features/auth/actions";
 import styles from "./ProfileMenu.module.css";
 
@@ -16,7 +16,7 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
             </summary>
 
             <div className={styles.dropdown}>
-                <Link href="/account?tab=profile" className={styles.item}>Профиль</Link>
+                <Link href="/account/profile" className={styles.item}>Профиль</Link>
                 <form action={logout}>
                     <button type="submit" className={styles.item}>Выйти</button>
                 </form>

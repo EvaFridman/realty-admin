@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useActionState } from "react";
 
-import type { AuthUser } from "@/entities/user/types";
+import type { AuthUser } from "@/shared/session/types";
 import { Button, Input } from "@/shared/ui";
 import { createViewingRequest } from "./actions";
 
@@ -35,7 +35,7 @@ export function ViewingRequestForm({ listingId, user }: Props) {
         return (
             <div className={styles.success}>
                 <p>Заявка успешно отправлена. Мы свяжемся с вами для подтверждения просмотра.</p>
-                <Link href="/account?tab=viewings">Мои заявки</Link>
+                <Link href="/account/viewings">Мои заявки</Link>
             </div>
         );
     }

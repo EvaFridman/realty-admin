@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { AuthUser } from "@/entities/user/types";
+import type { AuthUser } from "./types";
 
 export type Session = {
     accessToken: string;
