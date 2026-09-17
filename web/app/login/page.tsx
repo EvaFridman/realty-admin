@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { LoginForm } from "@/features/auth/login/LoginForm";
 import { Loader } from "@/shared/ui";
 
 import styles from "./page.module.css";
+
+export const metadata: Metadata = { title: "Вход" };
 
 type Props = {
     searchParams: Promise<{ returnUrl?: string }>;
