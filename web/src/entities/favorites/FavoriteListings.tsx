@@ -20,16 +20,16 @@ export function FavoriteListings({ listings: initialListings }: Props) {
 
     if (listings.length === 0) {
         return (
-            <div className={styles.empty}>
+            <section className={styles.empty}>
                 <h3>В избранном пока ничего нет</h3>
                 <p>Добавляйте объявления в избранное, чтобы вернуться к ним позже.</p>
-            </div>
+            </section>
         );
     }
 
     return (
-        <div className={styles.listings}>
+        <section className={styles.listings}>
             {listings.map((listing) => (<ListingCard key={listing.id} listing={listing} isFavorite onFavoriteChange={(isFavorite) => handleFavoriteChange(listing.id, isFavorite)} />))}
-        </div>
+        </section>
     );
 }

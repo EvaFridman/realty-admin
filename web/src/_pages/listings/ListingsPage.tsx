@@ -65,7 +65,7 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
                 <p>Квартиры, дома и комнаты от собственников и агентств.</p>
             </header>
 
-            <div className={styles.content}>
+            <section className={styles.content}>
                 <ListingFilterPanel districts={districts} lockedDistrictId={lockedDistrict?.id} />
 
                 <div className={styles.results}>
@@ -83,7 +83,7 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
 
                     <CatalogFreshness />
                 </div>
-            </div>
+            </section>
         </section>
     );
 }

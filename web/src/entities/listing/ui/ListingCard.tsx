@@ -43,7 +43,7 @@ export function ListingCard({ listing, variant = "tile", isFavorite = false, onF
                 {listing.photos.length > 0 && (<span className={styles.photoCount}>фото {listing.photos.length} шт.</span>)}
             </div>
 
-            <div className={styles.info}>
+            <section className={styles.info}>
                 <strong className={styles.price}>
                     {formatPrice(listing.price, listing.dealType === "rent")}
                 </strong>
@@ -60,7 +60,7 @@ export function ListingCard({ listing, variant = "tile", isFavorite = false, onF
                         {formatDateShort(listing.publishedAt)}
                     </time>
                 </div>
-            </div>
+            </section>
         </Link>
     );
 }

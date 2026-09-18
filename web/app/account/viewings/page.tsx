@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
@@ -7,8 +6,6 @@ import { getSession } from "@/shared/session";
 import { Loader } from "@/shared/ui";
 
 import { ViewingsList } from "@/_pages/viewings/ViewingsList";
-
-export const metadata: Metadata = { title: "Заявки на просмотр" };
 
 async function AccountViewingsContent() {
     const session = await getSession();

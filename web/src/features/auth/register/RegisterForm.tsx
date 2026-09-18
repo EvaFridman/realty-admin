@@ -32,7 +32,7 @@ export function RegisterForm() {
 
     return (
         <form action={handleSubmit} className={styles.form}>
-            <div className={styles.fields}>
+            <fieldset className={styles.fields}>
                 <label className={styles.field}>
                     <span className={styles.label}>Имя</span>
                     <Input name="name" type="text" placeholder="Введите имя" required />
@@ -57,7 +57,7 @@ export function RegisterForm() {
                     <span className={styles.label}>Повторите пароль</span>
                     <Input name="passwordRepeat" type="password" placeholder="Повторите пароль" required />
                 </label>
-            </div>
+            </fieldset>
 
             <label className={styles.consent}>
                 <input name="consent" type="checkbox" required />

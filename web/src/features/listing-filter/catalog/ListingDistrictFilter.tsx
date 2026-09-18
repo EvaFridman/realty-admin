@@ -38,7 +38,7 @@ export function ListingDistrictFilter({
                 onChange={(event) => onSearchChange(event.target.value)}
             />
 
-            <div className={styles.districts}>
+            <section className={styles.districts}>
                 {filteredDistricts.map((district) => (
                     <label key={district.id} className={styles.district}>
                         <input
@@ -53,7 +53,7 @@ export function ListingDistrictFilter({
                         <span className={styles.districtCount}>{district.publishedListingsCount}</span>
                     </label>
                 ))}
-            </div>
+            </section>
         </fieldset>
     );
 }

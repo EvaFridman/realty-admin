@@ -71,9 +71,9 @@ export function ListingLoadMore({ initialItems, initialMeta, query, view }: Prop
     return (
         <>
             {items.length > 0 ? (
-                <div className={view === "list" ? styles.listingsList : styles.listings}>
+                <section className={view === "list" ? styles.listingsList : styles.listings}>
                     {items.map((listing) => (<ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"} isFavorite={favoriteIds.includes(listing.id)}/>))}
-                </div>
+                </section>
             ) : (
                 <div className={styles.empty}>
                     <h2>Ничего не найдено</h2>

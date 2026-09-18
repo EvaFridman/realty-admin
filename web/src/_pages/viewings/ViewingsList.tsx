@@ -76,7 +76,7 @@ export function ViewingsList({ viewings }: Props) {
                         </button>
 
                         {isOpen && (
-                            <div className={styles.details}>
+                            <section className={styles.details}>
                                 <div>
                                     <span className={styles.detailTitle}>Комментарий</span>
                                     <p>{viewing.comment || "Без комментария"}</p>
@@ -89,7 +89,7 @@ export function ViewingsList({ viewings }: Props) {
                                         {viewing.listing.agent.phone && ` · ${viewing.listing.agent.phone}`}
                                     </p>
                                 </div>
-                            </div>
+                            </section>
                         )}
                     </article>
                 );

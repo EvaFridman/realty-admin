@@ -12,11 +12,11 @@ export async function FavoritesList() {
 
     if (favoriteIds.length === 0) {
         return (
-            <div className={styles.empty}>
+            <section className={styles.empty}>
                 <h3>В избранном пусто</h3>
                 <p>Нажмите сердечко на карточке объявления — оно появится здесь и сохранится между устройствами.</p>
                 <Link href="/listings" className={styles.catalogLink}>Перейти в каталог</Link>
-            </div>
+            </section>
         );
     }
 

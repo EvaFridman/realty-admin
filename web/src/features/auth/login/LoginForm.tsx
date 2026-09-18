@@ -47,7 +47,7 @@ export function LoginForm({ returnUrl }: Props) {
         const seconds = retryAfter % 60;
 
         return (
-            <div className={styles.blocked}>
+            <section className={styles.blocked}>
                 <h2 className={styles.blockedTitle}>Вход приостановлен</h2>
 
                 <div className={styles.warning}>
@@ -67,13 +67,13 @@ export function LoginForm({ returnUrl }: Props) {
                 <Link href="/register" className={styles.blockedLink}>
                     Создать аккаунт
                 </Link>
-            </div>
+            </section>
         );
     }
 
     return (
         <form action={handleSubmit} className={styles.form}>
-            <div className={styles.fields}>
+            <fieldset className={styles.fields}>
                 <label className={styles.field}>
                     <span className={styles.label}>Почта</span>
                     <Input name="email" type="email" placeholder="Введите почту" required />
@@ -83,7 +83,7 @@ export function LoginForm({ returnUrl }: Props) {
                     <span className={styles.label}>Пароль</span>
                     <Input name="password" type="password" placeholder="Введите пароль" required />
                 </label>
-            </div>
+            </fieldset>
 
             {error && <p className={styles.error}>{error}</p>}
 

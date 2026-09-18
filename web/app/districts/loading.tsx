@@ -3,18 +3,18 @@ import styles from "./loading.module.css";
 
 export default function Loading() {
     return (
-        <section className={`container ${styles.page}`}>
-            <div className={styles.breadcrumbs}>
+        <main className={`container ${styles.page}`}>
+            <section className={styles.breadcrumbs}>
                 <Skeleton width="70px" height="14px" />
                 <Skeleton width="70px" height="14px" />
-            </div>
+            </section>
 
-            <div className={styles.header}>
+            <section className={styles.header}>
                 <Skeleton width="360px" height="38px" />
                 <Skeleton width="520px" height="20px" />
-            </div>
+            </section>
 
-            <div className={styles.content}>
+            <section className={styles.content}>
                 <aside className={styles.filters}>
                     <Skeleton width="100%" height="620px" />
                 </aside>
@@ -25,9 +25,9 @@ export default function Loading() {
                         <Skeleton width="190px" height="40px" />
                     </div>
 
-                    <div className={styles.listings}>
+                    <section className={styles.listings}>
                         {Array.from({ length: 6 }).map((_, index) => (
-                            <div key={index} className={styles.card}>
+                            <article key={index} className={styles.card}>
                                 <Skeleton width="100%" height="190px" />
 
                                 <div className={styles.cardContent}>
@@ -36,11 +36,11 @@ export default function Loading() {
                                     <Skeleton width="65%" height="16px" />
                                     <Skeleton width="90%" height="14px" />
                                 </div>
-                            </div>
+                            </article>
                         ))}
-                    </div>
+                    </section>
                 </div>
-            </div>
-        </section>
+            </section>
+        </main>
     );
 }
