@@ -9,6 +9,7 @@ import { ListingViewSwitcher } from "@/features/listing-view/ListingViewSwitcher
 import { CatalogFreshness } from "@/entities/listing/ui/CatalogFreshness";
 import { ListingLoadMore } from "@/features/listing-load-more/ListingLoadMore";
 import type { PublicDistrictType } from "@/entities/district/types";
+import { getDistrictJsonLd } from "@/entities/district/lib/district-json-ld";
 
 import styles from "./ListingsPage.module.css";
 
@@ -46,44 +47,56 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
         districtApi.getDistricts({ page: 1, limit: 20 }),
     ]);
 
+    const districtJsonLd = lockedDistrict ? getDistrictJsonLd(lockedDistrict, result.items) : null;
+
     return (
-        <section className={`container ${styles.page}`}>
-            <nav className={styles.breadcrumbs} aria-label="Хлебные крошки">
-                <Link href="/">Главная</Link>
-                <span>→</span>
-                <Link href="/listings">Каталог</Link>
-                {lockedDistrict && (
-                    <>
-                        <span>→</span>
-                        <span>{lockedDistrict.title}</span>
-                    </>
-                )}
-            </nav>
+        <>
+            <section className={`container ${styles.page}`}>
+                <nav className={styles.breadcrumbs} aria-label="Хлебные крошки">
+                    <Link href="/">Главная</Link>
+                    <span>→</span>
+                    <Link href="/listings">Каталог</Link>
+                    {lockedDistrict && (
+                        <>
+                            <span>→</span>
+                            <span>{lockedDistrict.title}</span>
+                        </>
+                    )}
+                </nav>
 
-            <header className={styles.header}>
-                <h1>{lockedDistrict ? `${lockedDistrict.title}, ${lockedDistrict.city}` : "Продажа и аренда жилья"}</h1>
-                <p>Квартиры, дома и комнаты от собственников и агентств.</p>
-            </header>
+                <header className={styles.header}>
+                    <h1>{lockedDistrict ? `${lockedDistrict.title}, ${lockedDistrict.city}` : "Продажа и аренда жилья"}</h1>
+                    <p>Квартиры, дома и комнаты от собственников и агентств.</p>
+                </header>
 
-            <section className={styles.content}>
-                <ListingFilterPanel districts={districts} lockedDistrictId={lockedDistrict?.id} />
+                <section className={styles.content}>
+                    <ListingFilterPanel districts={districts} lockedDistrictId={lockedDistrict?.id} />
 
-                <div className={styles.results}>
-                    <div className={styles.resultsHeader}>
-                        <div className={styles.count}>
-                            Найдено: <strong>{result.meta.total}</strong>
+                    <div className={styles.results}>
+                        <div className={styles.resultsHeader}>
+                            <div className={styles.count}>
+                                Найдено: <strong>{result.meta.total}</strong>
+                            </div>
+                            <div className={styles.controls}>
+                                <ListingSort />
+                                <ListingViewSwitcher view={view} />
+                            </div>
                         </div>
-                        <div className={styles.controls}>
-                            <ListingSort />
-                            <ListingViewSwitcher view={view} />
-                        </div>
+
+                        <ListingLoadMore initialItems={result.items} initialMeta={result.meta} query={query} view={view} />
+
+                        <CatalogFreshness />
                     </div>
-
-                    <ListingLoadMore initialItems={result.items} initialMeta={result.meta} query={query} view={view}/>
-
-                    <CatalogFreshness />
-                </div>
+                </section>
             </section>
-        </section>
+
+            {districtJsonLd && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(districtJsonLd).replace(/</g, "\\u003c") }}
+                />
+            )}
+
+        </>
     );
 }
