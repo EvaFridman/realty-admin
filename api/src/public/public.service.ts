@@ -77,7 +77,7 @@ export class PublicService {
                 address: true,
                 publishedAt: true,
                 status: true,
-                district: { select: { id: true, title: true } },
+                district: { select: { id: true, title: true, city: true } },
                 photos: {
                   select: { id: true, fileName: true, externalUrl: true, position: true, isCover: true },
                   orderBy: { position: 'asc' },

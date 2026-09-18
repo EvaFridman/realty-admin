@@ -25,7 +25,7 @@ export type PublicListingType = {
     propertyType: PublicListingPropertyType;
     address: string;
     publishedAt: string;
-    district: { id: number; title: string };
+    district: { id: number; title: string; city: string };
     photos: PublicPhotoType[];
 };
 
