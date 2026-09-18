@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
@@ -7,18 +6,6 @@ import { Loader } from "@/shared/ui";
 import { ChangePasswordForm } from "@/features/profile/ChangePasswordForm";
 
 import styles from "./page.module.css";
-
-export const metadata: Metadata = {
-    title: {
-    template: "Профиль — Витрина недвижимости",
-    default: "Профиль — Витрина недвижимости",
-    },
-    openGraph: {
-    type: "profile",
-    locale: "ru_RU",
-    siteName: "Профиль — Витрина недвижимости",
-    },
-    };
 
 async function AccountProfileContent() {
     const session = await getSession();

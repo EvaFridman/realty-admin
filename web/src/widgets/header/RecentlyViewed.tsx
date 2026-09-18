@@ -41,9 +41,9 @@ export function RecentlyViewed(): ReactNode {
     if (!ids.length) return null;
 
     return (
-        <div className={styles.recentlyViewed}>
+        <section className={styles.recentlyViewed}>
             <span>Вы смотрели: </span>
             {ids.map((id, index) => (<span key={id}> {index > 0 && ", "}#{id}</span>))}
-        </div>
+        </section>
     );
 }

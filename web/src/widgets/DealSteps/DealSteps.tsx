@@ -8,7 +8,7 @@ const steps = [
 
 export function DealSteps() {
     return (
-        <div className={styles.list}>
+        <section className={styles.list}>
             {steps.map((step) => (
                 <article key={step.number} className={styles.item}>
                     <span className={styles.number}>{step.number}</span>
@@ -16,6 +16,6 @@ export function DealSteps() {
                     <p>{step.description}</p>
                 </article>
             ))}
-        </div>
+        </section>
     );
 }

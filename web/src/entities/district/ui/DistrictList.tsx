@@ -10,13 +10,13 @@ type Props = {
 
 export function DistrictList({ districts }: Props) {
     return (
-        <div className={styles.list}>
+        <section className={styles.list}>
             {districts.map((district) => (
                 <Link key={district.id} href={`/districts/${district.slug}`} className={styles.item}>
                     <h3>{district.title}</h3>
                     <span>{formatListingsCount(district.publishedListingsCount)}</span>
                 </Link>
             ))}
-        </div>
+        </section>
     );
 }

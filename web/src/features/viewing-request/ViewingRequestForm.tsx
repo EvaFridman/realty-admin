@@ -52,7 +52,7 @@ export function ViewingRequestForm({ listingId, user }: Props) {
                     </button>
                 </div>
             ) : (
-                <div className={styles.fields}>
+                <fieldset className={styles.fields}>
                     <label>
                         Имя
                         <Input
@@ -85,10 +85,10 @@ export function ViewingRequestForm({ listingId, user }: Props) {
                         />
                         {state.fieldErrors?.email && <span className={styles.error}>{state.fieldErrors.email[0]}</span>}
                     </label>
-                </div>
+                </fieldset>
             )}
 
-            <div className={styles.fields}>
+            <fieldset className={styles.fields}>
                 <label>
                     Дата
                     <Input name="date" type="date" />
@@ -110,7 +110,7 @@ export function ViewingRequestForm({ listingId, user }: Props) {
                     />
                     {state.fieldErrors?.comment && <span className={styles.error}>{state.fieldErrors.comment[0]}</span>}
                 </label>
-            </div>
+            </fieldset>
 
             <input
                 type="hidden"

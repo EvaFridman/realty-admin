@@ -12,7 +12,7 @@ export function ListingPriceRangeFilter({ min, max, onMinChange, onMaxChange }: 
         <fieldset className={styles.fieldset}>
             <legend>Цена, ₽</legend>
 
-            <div className={styles.range}>
+            <fieldset className={styles.range}>
                 <input
                     type="number"
                     min="0"
@@ -27,7 +27,7 @@ export function ListingPriceRangeFilter({ min, max, onMinChange, onMaxChange }: 
                     value={max}
                     onChange={(event) => onMaxChange(event.target.value)}
                 />
-            </div>
+            </fieldset>
         </fieldset>
     );
 }

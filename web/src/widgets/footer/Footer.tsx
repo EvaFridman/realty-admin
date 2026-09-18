@@ -9,7 +9,7 @@ import { Loader } from "@/shared/ui";
 export function Footer() {
     return (
         <footer className={styles.footer}>
-            <div className={`container ${styles.content}`}>
+            <section className={`container ${styles.content}`}>
                 <div className={styles.mainInfo}>
                     <h2>Витрина</h2>
                     <p>Объявления о продаже и аренде жилья</p>
@@ -18,7 +18,7 @@ export function Footer() {
                     <SectionSwitcher variant="header" />
                 </Suspense>
                 <ThemeSwitcher variant="footer" />
-            </div>
+            </section>
         </footer>
     );
 }
