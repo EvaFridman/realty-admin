@@ -7,7 +7,7 @@ import type { PublicListingType } from "@/entities/listing/types";
 import { AgentPhone } from "@/features/agent-phone/AgentPhone";
 import { FavoriteButton } from "@/entities/favorites/FavoriteButton";
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
-import { ListingGallery } from "@/widgets/listing-gallery/ListingGallery";
+import { ListingGalleryDynamic } from "@/widgets/listing-gallery/ListingGalleryDynamic";
 import { BusyViewingTimes } from "@/entities/listing/ui/BusyViewingTimes";
 import { getListingJsonLd } from "@/entities/listing/lib/listing-json-ld";
 import { BusyViewingTimesSkeleton } from "@/entities/listing/ui/BusyViewingTimesSkeleton";
@@ -62,7 +62,7 @@ async function ListingPageContent({ listing, similar }: ContentProps) {
 
                 <div className={styles.main}>
                     <div className={styles.gallery}>
-                        <ListingGallery photos={listing.photos} />
+                        <ListingGalleryDynamic photos={listing.photos} />
                     </div>
 
                     <aside className={styles.summary}>

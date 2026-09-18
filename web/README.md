@@ -35,6 +35,28 @@
 Размер взят по `firstLoadUncompressedJsBytes` из `.next/diagnostics/route-bundle-stats.json`.
 
 
+### Загрузка после завершения недели
+
+| Маршрут             | Способ сборки     | Размер загрузки (без сжатия) |
+| ------------------- | ----------------- | ---------------------------: |
+| `/`                 | Partial Prerender |                     476.2 KB |
+| `/_not-found`       | Partial Prerender |                     457.4 KB |
+| `/about`            | Partial Prerender |                     457.4 KB |
+| `/districts`        | Partial Prerender |                     458.3 KB |
+| `/districts/[slug]` | Partial Prerender |                     486.7 KB |
+| `/help`             | Partial Prerender |                     457.4 KB |
+| `/listings`         | Partial Prerender |                     592.3 KB |
+| `/listings/[id]`    | Partial Prerender |                     588.2 KB |
+| `/ui-kit`           | Partial Prerender |                     469.8 KB |
+
+Размер взят по `firstLoadUncompressedJsBytes` из `.next/diagnostics/route-bundle-stats.json`.
+
+Размер JavaScript после релиза 7 увеличился по сравнению с замером во вторник, поскольку после него в приложение была добавлена новая функциональность.
+
+Код галереи вынесен в динамический импорт и не загружается при первой загрузке страницы объявления.
+
+
+
 
 ## Контроль динамических маршрутов
 
