@@ -6,6 +6,7 @@ import "./globals.css";
 import { Header, Footer } from "@/widgets";
 import { ThemeInit } from "@/features/theme/ThemeInit";
 import { Loader } from "@/shared/ui";
+import { inter } from "./fonts";
 
 export const metadata: Metadata = {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001"),
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <head>
                 <ThemeInit />
             </head>
-            <body>
+            <body className={inter.variable}>
                 <Suspense fallback={<Loader />}>
                     <Header />
                 </Suspense>
