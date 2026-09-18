@@ -33,7 +33,7 @@ return (
     <div className={styles.gallery}>
         <div className={styles.mainImage}>
             {currentPhoto.externalUrl ? (
-                <Image src={currentPhoto.externalUrl} alt={`Фото ${currentPhoto.position}`} fill priority />
+                <Image src={currentPhoto.externalUrl} alt={`Фото ${currentPhoto.position}`} fill sizes="(max-width: 767px) 100vw, (max-width: 1199px) 70vw, 800px" fetchPriority="high" />
             ) : (
                 <div className={styles.placeholder}>Нет фото</div>
             )}
@@ -58,7 +58,7 @@ return (
                         onClick={() => setCurrentIndex(index)}
                         aria-label={`Показать фото ${photo.position}`}
                     >
-                        {photo.externalUrl ? (<Image src={photo.externalUrl} alt="" fill />) : (<span>Нет фото</span>)}
+                        {photo.externalUrl ? (<Image src={photo.externalUrl} alt="" fill sizes="80px" />) : (<span>Нет фото</span>)}
                     </button>
                 ))}
             </div>
