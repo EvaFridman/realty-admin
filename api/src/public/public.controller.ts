@@ -114,4 +114,12 @@ export class PublicController {
     async findDistrictBySlug(@Param('slug') slug: string) {
         return await this.publicService.findDistrictBySlug(slug);
     }
+
+    @ApiOperation({ summary: 'Список опубликованных объявлений для sitemap' })
+    @ApiResponse({ status: 200, description: 'Данные для sitemap успешно получены' })
+    @Public()
+    @Get('sitemap/listings')
+    async findSitemapListings() {
+        return await this.publicService.findSitemapListings();
+    }
 }

@@ -320,4 +320,8 @@ export class PublicService {
           },
       };
     }
+
+    async findSitemapListings() {
+      return await this.prisma.listings.findMany({ where: { status: ListingStatus.PUBLISHED }, select: { id: true, updatedAt: true } });
+    }
 }
