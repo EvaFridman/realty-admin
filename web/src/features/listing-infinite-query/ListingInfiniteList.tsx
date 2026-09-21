@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import styles from "./ListingInfiniteList.module.css";
 
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { useInfiniteListings } from "@/entities/listing/api/use-listings";
 import type { PublicListingType, PublicListingsMetaType } from "@/entities/listing/types";
-import { http } from "@/shared/api/http";
 import { Skeleton } from "@/shared/ui";
 
 type QueryValueType = string | number | string[] | undefined;
@@ -17,21 +16,15 @@ type Props = {
     initialMeta: PublicListingsMetaType;
     query: Record<string, QueryValueType>;
     view: "grid" | "list";
+    isAuthenticated: boolean;
 };
 
-export function ListingInfiniteList({ initialItems, initialMeta, query, view }: Props) {
-    const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
+export function ListingInfiniteList({ initialItems, initialMeta, query, view, isAuthenticated }: Props) {
     const observerRef = useRef<HTMLDivElement | null>(null);
 
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteListings({ query, initialItems, initialMeta });
 
     const allItems = data?.pages.flatMap((page) => page.items) ?? [];
-
-    useEffect(() => {
-        http.get<number[]>("/favorites/ids")
-            .then(({ data }) => setFavoriteIds(data))
-            .catch(() => setFavoriteIds([]));
-    }, []);
 
     useEffect(() => {
         if (!hasNextPage || isFetchingNextPage) return;
@@ -50,7 +43,7 @@ export function ListingInfiniteList({ initialItems, initialMeta, query, view }: 
         <>
             {allItems.length > 0 ? (
                 <section className={view === "list" ? styles.listingsList : styles.listings}>
-                    {allItems.map((listing) => (<ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"} isFavorite={favoriteIds.includes(listing.id)} />))}
+                    {allItems.map((listing) => (<ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"} isAuthenticated={isAuthenticated} />))}
 
                     {isFetchingNextPage &&
                         Array.from({ length: 3 }).map((_, index) => (

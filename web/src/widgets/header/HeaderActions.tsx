@@ -30,6 +30,8 @@ export function HeaderActions() {
 
     if (isLoading) return <Loader size={48}/>;
 
+    const isAuthenticated = user !== null;
+
     return (
         <div className={styles.actions}>
             {user ? (
@@ -37,7 +39,7 @@ export function HeaderActions() {
                     <ProfileMenu user={user} onLogout={() => setUser(null)} />
                     <Link href="/account/favorites" className={styles.favorite} aria-label="Избранное">
                         ♡
-                        <FavoriteCount />
+                        <FavoriteCount isAuthenticated={isAuthenticated} />
                     </Link>
                 </>
             ) : (

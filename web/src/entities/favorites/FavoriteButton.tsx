@@ -1,35 +1,43 @@
 "use client";
 
-import { useState, useTransition } from "react";
-
-import styles from "../listing/ui/ListingCard.module.css";
-import { toggleFavorite } from "@/features/favorites/actions";
+import { useSyncExternalStore } from "react";
+import { useFavoriteIds } from "@/entities/favorites/api/use-favorites";
+import { useToggleFavorite } from "@/features/favorites/use-toggle-favorite";
+import { useRouter } from "next/navigation";
+import styles from "./FavoriteButton.module.css";
 
 type Props = {
     listingId: number;
-    isFavorite: boolean;
-    onChange?: (isFavorite: boolean) => void;
+    isAuthenticated: boolean;
 };
 
-export function FavoriteButton({ listingId, isFavorite: initialIsFavorite, onChange }: Props) {
-    const [localIsFavorite, setLocalIsFavorite] = useState<boolean | null>(null);
-    const [isPending, startTransition] = useTransition();
+const subscribe = () => () => {}; 
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
-    const isFavorite = localIsFavorite ?? initialIsFavorite;
+export function FavoriteButton({ listingId, isAuthenticated }: Props) {
+    const router = useRouter();
+    const isClient = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+    
+    const { data: favoriteIds = [] } = useFavoriteIds(isAuthenticated);
+    const { mutate } = useToggleFavorite();
+
+    const isFavorite = isClient ? favoriteIds.includes(listingId) : false;
 
     function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
         event.preventDefault();
 
-        if (isPending) return;
+        if (!isAuthenticated) {
+            router.push(`/login?returnUrl=/listings/${listingId}`);
+            return;
+        }
 
-        startTransition(async () => {
-            const result = await toggleFavorite(listingId, isFavorite);
+        if (typeof window !== "undefined" && !window.navigator.onLine) {
+            alert("Не удалось изменить избранное. Сетевая ошибка. Проверьте подключение.");
+            return;
+        }
 
-            if (result.isFavorite !== undefined) {
-                setLocalIsFavorite(result.isFavorite);
-                onChange?.(result.isFavorite);
-            }
-        });
+        mutate({ listingId, currentStatus: isFavorite });
     }
 
     return (
@@ -38,7 +46,6 @@ export function FavoriteButton({ listingId, isFavorite: initialIsFavorite, onCha
             className={styles.favorite}
             aria-label={isFavorite ? "Удалить из избранного" : "Добавить в избранное"}
             aria-pressed={isFavorite}
-            disabled={isPending}
             onClick={handleClick}
         >
             {isFavorite ? "♥" : "♡"}

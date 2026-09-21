@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { cache } from "react";
-import { notFound } from "next/navigation";
 
 import { listingApi } from "@/entities/listing/api";
 import { ApiError } from "@/shared/api/errors";
 import { ListingPage } from "@/_pages/listing/ListingPage";
-import type { PublicListingType } from "@/entities/listing/types";
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -28,8 +26,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         title: `${listing.title}, ${listing.area} м²`,
         description: `${listing.district.title}, ${listing.price} ₽`,
         alternates: { canonical: `/listings/${id}` },
-        // Индексацию для роботов по опубликованным объявлениям не делаю,
-        // потому что сервер нам вообще отдаёт только опубликованные и не отдает статус
         ...(cover?.externalUrl && { openGraph: { images: [{ url: cover.externalUrl, width: 1200, height: 630 }] } }),
     };
 }
@@ -39,16 +35,8 @@ export async function generateStaticParams() {
     return listings.map((listing) => ({ id: String(listing.id) }));
 }
 
-export default async function Page({ params }: Props) {
-    const { id } = await params;
-    let listing: PublicListingType;
-
-    try {
-        listing = await getListing(id);
-    } catch (error) {
-        if (error instanceof ApiError && error.status === 404) notFound();
-        throw error;
-    }
-
-    return <ListingPage listing={listing} />;
+export default function Page({ params }: Props) {
+    return (
+        <ListingPage paramsPromise={params} />
+    );
 }

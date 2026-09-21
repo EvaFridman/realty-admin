@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { notFound } from "next/navigation";
 
 import { listingApi } from "@/entities/listing/api";
-import { getFavoriteIds } from "@/entities/favorites/api";
+import { getSession } from "@/shared/session";
+import { ApiError } from "@/shared/api/errors";
 import type { PublicListingType } from "@/entities/listing/types";
 import { AgentPhone } from "@/features/agent-phone/AgentPhone";
-import { FavoriteButton } from "@/entities/favorites/FavoriteButton";
+import { FavoriteButton } from "@/entities/favorites/FavoriteButton"; 
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { ListingGalleryDynamic } from "@/widgets/listing-gallery/ListingGalleryDynamic";
 import { BusyViewingTimes } from "@/entities/listing/ui/BusyViewingTimes";
@@ -19,12 +21,11 @@ import { Loader } from "@/shared/ui";
 import styles from "./ListingPage.module.css";
 
 type Props = {
-    listing: PublicListingType;
+    paramsPromise: Promise<{ id: string }>;
 };
 
 type ContentProps = {
-    listing: PublicListingType;
-    similar: PublicListingType[];
+    paramsPromise: Promise<{ id: string }>;
 };
 
 const PROPERTY_TYPE_LABELS = {
@@ -34,10 +35,37 @@ const PROPERTY_TYPE_LABELS = {
     commercial: "Коммерческая недвижимость",
 };
 
-async function ListingPageContent({ listing, similar }: ContentProps) {
-    const favoriteIds = await getFavoriteIds();
-    const isRent = listing.dealType === "rent";
+async function ListingPageContent({ paramsPromise }: ContentProps) {
+    const { id } = await paramsPromise;
+    let listing: PublicListingType;
 
+    try {
+        listing = await listingApi.getCachedListingById(id);
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 404) notFound();
+        throw error;
+    }
+
+    const price = Number(listing.price);
+    
+    const [session, similarListings] = await Promise.all([
+        getSession(),
+        listingApi.getListingsWithMeta({
+            districtId: listing.district.id,
+            dealType: listing.dealType,
+            priceMin: Math.round(price * 0.67),
+            priceMax: Math.round(price * 1.33),
+            limit: 4,
+        })
+    ]);
+
+    const isAuthenticated = session !== null;
+
+    const similar = similarListings.items
+        .filter((item) => item.id !== listing.id)
+        .slice(0, 3);
+
+    const isRent = listing.dealType === "rent";
     const jsonLd = getListingJsonLd(listing);
 
     return (
@@ -69,7 +97,7 @@ async function ListingPageContent({ listing, similar }: ContentProps) {
                         <strong className={styles.price}>{formatPrice(listing.price, isRent)}</strong>
                         <span className={styles.pricePerMeter}>{formatPricePerMeter(listing.price, listing.area)}</span>
                         <Link href="#viewing" className={styles.viewingButton}>Записаться на просмотр</Link>
-                        <FavoriteButton listingId={listing.id} isFavorite={favoriteIds.includes(listing.id)} />
+                        <FavoriteButton listingId={listing.id} isAuthenticated={isAuthenticated} />
                         <p>Свяжитесь с агентом, чтобы уточнить детали и выбрать удобное время просмотра.</p>
                     </aside>
                 </div>
@@ -96,7 +124,7 @@ async function ListingPageContent({ listing, similar }: ContentProps) {
                         </div>
                         <div>
                             <dt>Этаж</dt>
-                            <dd>{listing.floor != null ? `${listing.floor}${listing.totalFloors != null ? ` из ${listing.totalFloors}` : ""}` : "—"}</dd>
+                            <dd>{listing.floor != null ? `${listing.floor}${listing.totalFloors != null ? ` из \${listing.totalFloors}` : ""}` : "—"}</dd>
                         </div>
                         <div>
                             <dt>Опубликовано</dt>
@@ -138,7 +166,7 @@ async function ListingPageContent({ listing, similar }: ContentProps) {
                     <section className={styles.section}>
                         <h2>Похожие объявления</h2>
                         <div className={styles.similarListings}>
-                            {similar.map((item) => (<ListingCard key={item.id} listing={item} isFavorite={favoriteIds.includes(item.id)} />))}
+                            {similar.map((item) => (<ListingCard key={item.id} listing={item} isAuthenticated={isAuthenticated} />))}
                         </div>
                     </section>
                 )}
@@ -152,24 +180,10 @@ async function ListingPageContent({ listing, similar }: ContentProps) {
     );
 }
 
-export async function ListingPage({ listing }: Props) {
-    const price = Number(listing.price);
-
-    const similarListings = await listingApi.getListingsWithMeta({
-        districtId: listing.district.id,
-        dealType: listing.dealType,
-        priceMin: Math.round(price * 0.67),
-        priceMax: Math.round(price * 1.33),
-        limit: 4,
-    });
-
-    const similar = similarListings.items
-        .filter((item) => item.id !== listing.id)
-        .slice(0, 3);
-
+export function ListingPage({ paramsPromise }: Props) {
     return (
         <Suspense fallback={<Loader />}>
-            <ListingPageContent listing={listing} similar={similar} />
+            <ListingPageContent paramsPromise={paramsPromise} />
         </Suspense>
     );
 }

@@ -5,24 +5,24 @@ import styles from "./page.module.css";
 
 import { districtApi } from "@/entities/district/api";
 import { listingApi } from "@/entities/listing/api";
-import { getFavoriteIds } from "@/entities/favorites/api";
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { HomeListingFilter } from "@/features/listing-filter/home/HomeListingFilter";
 import { DistrictList } from "@/entities/district/ui/DistrictList";
 import { DealSteps } from "@/widgets/DealSteps/DealSteps";
 import { Loader } from "@/shared/ui";
-
+import { getSession } from "@/shared/session";
 
 type Props = {
     listings: Awaited<ReturnType<typeof listingApi.getCachedListings>>;
 };
 
 async function HomeListings({ listings }: Props) {
-    const favoriteIds = await getFavoriteIds();
+    const session = await getSession();
+    const isAuthenticated = session !== null;
 
     return listings.length > 0 ? (
         <div className={styles.listings}>
-            {listings.map((listing) => (<ListingCard key={listing.id} listing={listing} isFavorite={favoriteIds.includes(listing.id)} />))}
+            {listings.map((listing) => (<ListingCard key={listing.id} listing={listing} isAuthenticated={isAuthenticated} />))}
         </div>
     ) : (
         <div className={styles.empty}>
