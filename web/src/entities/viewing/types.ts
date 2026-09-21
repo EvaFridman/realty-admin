@@ -19,3 +19,9 @@ export type PublicViewingType = {
         };
     };
 };
+
+export type GetMyViewingsParams = {
+    page?: number;
+    limit?: number;
+    status?: ViewingStatus;
+};

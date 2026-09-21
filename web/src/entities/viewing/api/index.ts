@@ -1,12 +1,6 @@
 import { apiFetch } from "@/shared/api/api-fetch";
 
-import type { PublicViewingType, ViewingStatus } from "../types";
-
-type GetMyViewingsParams = {
-    page?: number;
-    limit?: number;
-    status?: ViewingStatus;
-};
+import type { PublicViewingType, GetMyViewingsParams } from "../types";
 
 export async function getMyViewings(params: GetMyViewingsParams = {}) {
     const searchParams = new URLSearchParams();

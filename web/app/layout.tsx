@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 
+import { QueryProvider } from "@/_app/providers/query-provider"; 
 import { Header, Footer } from "@/widgets";
 import { ThemeInit } from "@/features/theme/ThemeInit";
 import { Loader } from "@/shared/ui";
@@ -32,7 +33,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <Suspense fallback={<Loader />}>
                     <Header />
                 </Suspense>
-                <main>{children}</main>
+                <QueryProvider>
+                    <main>{children}</main>
+                </QueryProvider>
                 <Footer />
             </body>
         </html>
