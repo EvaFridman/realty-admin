@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
+import { useFavoriteIds } from "@/entities/favorites/api/use-favorites";
 import type { PublicListingType, PublicListingsMetaType } from "@/entities/listing/types";
 import { Button } from "@/shared/ui";
 import { http } from "@/shared/api/http";
@@ -16,6 +17,7 @@ type Props = {
     initialMeta: PublicListingsMetaType;
     query: Record<string, QueryValueType>;
     view: "grid" | "list";
+    isAuthenticated: boolean;
 };
 
 function buildQuery(query: Record<string, QueryValueType>, page: number) {
@@ -35,17 +37,12 @@ function buildQuery(query: Record<string, QueryValueType>, page: number) {
     return searchParams.toString();
 }
 
-export function ListingLoadMore({ initialItems, initialMeta, query, view }: Props) {
+export function ListingLoadMore({ initialItems, initialMeta, query, view, isAuthenticated }: Props) {
     const [items, setItems] = useState(initialItems);
     const [meta, setMeta] = useState(initialMeta);
-    const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        http.get<number[]>("/favorites/ids")
-            .then(({ data }) => setFavoriteIds(data))
-            .catch(() => setFavoriteIds([]));
-    }, []);
+    useFavoriteIds(isAuthenticated);
 
     const hasMore = meta.page < meta.totalPages;
 
@@ -72,7 +69,8 @@ export function ListingLoadMore({ initialItems, initialMeta, query, view }: Prop
         <>
             {items.length > 0 ? (
                 <section className={view === "list" ? styles.listingsList : styles.listings}>
-                    {items.map((listing) => (<ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"} isFavorite={favoriteIds.includes(listing.id)}/>))}
+                    {items.map((listing) => (
+                        <ListingCard key={listing.id} listing={listing} variant={view === "list" ? "row" : "tile"} isAuthenticated={isAuthenticated} />))}
                 </section>
             ) : (
                 <div className={styles.empty}>

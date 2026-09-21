@@ -8,20 +8,19 @@ import styles from "./ListingCard.module.css";
 import type { PublicListingType } from "../types";
 import { formatArea, formatDateShort, formatListingFeatures, formatPrice } from "@/shared/lib/format";
 import { getUrl } from "@/shared/utils/safeUrl";
-import { FavoriteButton } from "../../favorites/FavoriteButton";
+import { FavoriteButton } from "@/entities/favorites/FavoriteButton"; 
 
 type Props = {
     listing: PublicListingType;
     variant?: "tile" | "row";
-    isFavorite?: boolean;
-    onFavoriteChange?: (isFavorite: boolean) => void;
+    isAuthenticated: boolean;
 };
 
 function getPhoto(listing: PublicListingType) {
     return listing.photos.find((photo) => photo.isCover) ?? listing.photos[0];
 }
 
-export function ListingCard({ listing, variant = "tile", isFavorite = false, onFavoriteChange }: Props) {
+export function ListingCard({ listing, variant = "tile", isAuthenticated }: Props) {
     const photo = getPhoto(listing);
     const photoUrl = getUrl(photo?.externalUrl ?? null);
     const features = formatListingFeatures(listing.rooms, listing.floor, listing.totalFloors);
@@ -38,7 +37,7 @@ export function ListingCard({ listing, variant = "tile", isFavorite = false, onF
                     </div>
                 )}
 
-                <FavoriteButton listingId={listing.id} isFavorite={isFavorite} onChange={onFavoriteChange}/>
+                <FavoriteButton listingId={listing.id} isAuthenticated={isAuthenticated} />
 
                 {listing.photos.length > 0 && (<span className={styles.photoCount}>фото {listing.photos.length} шт.</span>)}
             </div>

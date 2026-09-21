@@ -1,19 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import { http } from "@/shared/api/http";
-
+import { useFavoriteIds } from "@/entities/favorites/api/use-favorites";
 import styles from "./FavoriteCount.module.css";
 
-export function FavoriteCount() {
-    const [count, setCount] = useState<number | null>(null);
+type Props = {
+    isAuthenticated: boolean;
+};
 
-    useEffect(() => {
-        http.get<{ count: number }>("/favorites").then(({ data }) => setCount(data.count)).catch(() => setCount(0));
-    }, []);
-
-    if (count === null) return null;
+export function FavoriteCount({ isAuthenticated }: Props) {
+    const { data: favoriteIds = [] } = useFavoriteIds(isAuthenticated);
+    const count = favoriteIds.length;
+    if (count === 0) return null;
 
     return <span className={styles.count}>{count}</span>;
 }

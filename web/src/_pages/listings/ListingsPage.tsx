@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { districtApi } from "@/entities/district/api";
 import { listingApi } from "@/entities/listing/api";
+import { getSession } from "@/shared/session";
 import { getArrayParam, getStringParam } from "@/shared/lib/params";
 import { ListingFilterPanel } from "@/features/listing-filter/catalog/ListingsFilter";
 import { ListingSort } from "@/features/listing-filter/catalog/ListingSort";
@@ -21,6 +22,9 @@ type Props = {
 };
 
 export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
+    const session = await getSession();
+    const isAuthenticated = session !== null;
+
     const page = Number(getStringParam(searchParams.page)) || 1;
     const view = getStringParam(searchParams.view) === "list" ? "list" : "grid";
     const rooms = getArrayParam(searchParams.rooms);
@@ -83,7 +87,7 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
                             </div>
                         </div>
 
-                        <ListingInfiniteList initialItems={result.items} initialMeta={result.meta} query={query} view={view} />
+                        <ListingInfiniteList initialItems={result.items} initialMeta={result.meta} query={query} view={view} isAuthenticated={isAuthenticated} />
 
                         <CatalogFreshness />
                     </div>

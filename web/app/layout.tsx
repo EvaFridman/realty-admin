@@ -30,13 +30,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <ThemeInit />
             </head>
             <body className={inter.variable}>
-                <Suspense fallback={<Loader />}>
-                    <Header />
-                </Suspense>
                 <QueryProvider>
+                    <Suspense fallback={<Loader />}>
+                        <Header />
+                    </Suspense>
                     <main>{children}</main>
+                    <Footer />
                 </QueryProvider>
-                <Footer />
             </body>
         </html>
     );
