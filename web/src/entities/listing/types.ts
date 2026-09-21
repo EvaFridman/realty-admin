@@ -45,3 +45,5 @@ export type ListingsApiResponseType = {
     data: PublicListingType[];
     meta: PublicListingsMetaType;
 };
+
+export type ListingQueryType = Record<string, string | number | boolean | string[] | number[] | undefined>;

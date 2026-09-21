@@ -1,9 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import { apiFetch, apiFetchWithMeta } from "@/shared/api/api-fetch";
-import type { PublicListingType, ListingsApiResponseType } from "../types";
-
-type ListingQueryType = Record<string, string | number | boolean | string[] | number[] | undefined>;
+import type { PublicListingType, ListingsApiResponseType, ListingQueryType } from "../types";
 
 export const listingApi = {
     getListings(query?: ListingQueryType) {
