@@ -7,7 +7,7 @@ import { ListingFilterPanel } from "@/features/listing-filter/catalog/ListingsFi
 import { ListingSort } from "@/features/listing-filter/catalog/ListingSort";
 import { ListingViewSwitcher } from "@/features/listing-view/ListingViewSwitcher";
 import { CatalogFreshness } from "@/entities/listing/ui/CatalogFreshness";
-import { ListingLoadMore } from "@/features/listing-load-more/ListingLoadMore";
+import { ListingInfiniteList } from "@/features/listing-infinite-query/ListingInfiniteList";
 import type { PublicDistrictType } from "@/entities/district/types";
 import { getDistrictJsonLd } from "@/entities/district/lib/district-json-ld";
 
@@ -83,7 +83,7 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
                             </div>
                         </div>
 
-                        <ListingLoadMore initialItems={result.items} initialMeta={result.meta} query={query} view={view} />
+                        <ListingInfiniteList initialItems={result.items} initialMeta={result.meta} query={query} view={view} />
 
                         <CatalogFreshness />
                     </div>
