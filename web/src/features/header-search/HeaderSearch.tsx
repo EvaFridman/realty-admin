@@ -14,7 +14,7 @@ export function HeaderSearch() {
     const searchInput = useAppStore((state) => state.searchQuery);
     const setSearchInput = useAppStore((state) => state.setSearchQuery);
 
-    const debouncedSearch = useDebouncedValue(searchInput, 350);
+    const debouncedSearch = useDebouncedValue(searchInput, 400);
 
     useEffect(() => {
         const urlSearch = searchParams.get("search") ?? "";
@@ -37,7 +37,7 @@ export function HeaderSearch() {
 
         params.set("page", "1");
 
-        router.replace(`/listings?${params.toString()}`);
+        router.replace(`/listings?${params.toString()}`, { scroll: false });
     }, [debouncedSearch, pathname, router, searchParams]);
 
     return (
