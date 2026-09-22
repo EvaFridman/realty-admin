@@ -86,7 +86,7 @@ async function request<T>(path: string, options: RequestOptionsType = {}, isRetr
             });
 
             if (!refreshResponse.ok) {
-                sessions.destroy(session.id);
+                await sessions.destroy(session.id);
                 redirect("/login");
             }
 
@@ -95,11 +95,11 @@ async function request<T>(path: string, options: RequestOptionsType = {}, isRetr
             const refreshToken = getRefreshToken(refreshResponse);
 
             if (!refreshToken) {
-                sessions.destroy(session.id);
+                await sessions.destroy(session.id);
                 redirect("/login");
             }
 
-            sessions.update(session.id, {
+            await sessions.update(session.id, {
                 accessToken: refreshData.accessToken,
                 refreshToken,
                 user: refreshData.user,
