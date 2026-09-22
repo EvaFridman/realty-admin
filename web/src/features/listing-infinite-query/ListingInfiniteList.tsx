@@ -6,7 +6,7 @@ import styles from "./ListingInfiniteList.module.css";
 
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { useInfiniteListings } from "@/entities/listing/api/use-listings";
-import { useAppStore } from "@/_app/providers/app-store-provider";
+import { useAppStore } from "@/shared/providers/app-store-provider";
 import type { PublicListingType, PublicListingsMetaType } from "@/entities/listing/types";
 import { Skeleton } from "@/shared/ui";
 

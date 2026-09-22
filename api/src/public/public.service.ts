@@ -7,56 +7,92 @@ import { ListViewingsDto } from '../viewings/dto/list-viewings.dto.js';
 import { buildPublicListingsWhere } from './public.where.js';
 import { ListingStatus, UserRole, ViewingStatus, Prisma } from '../generated/prisma/index.js';
 import { NotFoundError, ConflictError } from '../errors/app.exception.js';
+import { CacheService } from '../redis/cache.service.js';
+import { generateCatalogCacheKey } from '../redis/catalog-key.helper.js';
+import { generateDistrictsCacheKey } from '../redis/districts-key.helper.js';
 
 @Injectable()
 export class PublicService {
-    constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService) {}
+    constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService, private readonly cacheService: CacheService) {}
 
     async findAllListings(dto: PublicListingsDto) {
-        const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
-        const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
-
-        const finalPage = (!dto.page || dto.page < 1) ? 1 : dto.page;
-        let finalLimit = (!dto.limit || dto.limit < 1) ? pageSizeDefault : dto.limit;
-        if (finalLimit > pageSizeMax) finalLimit = pageSizeMax;
-
-        const whereCondition = buildPublicListingsWhere(dto);
-
-        const sortField = dto.sortBy ?? 'publishedAt';
-        const sortOrder = dto.sortOrder ?? 'desc';
-        const orderByCondition = { [sortField]: sortOrder };
-
-        const [items, total] = await Promise.all([
-        this.prisma.listings.findMany({
-            where: whereCondition,
-            orderBy: orderByCondition,
-            skip: (finalPage - 1) * finalLimit,
-            take: finalLimit,
-            select: {
-                id: true,
-                title: true,
-                price: true,
-                area: true,
-                rooms: true,
-                floor: true,
-                totalFloors: true,
-                dealType: true,
-                propertyType: true,
-                address: true,
-                publishedAt: true,
-                district: { select: { id: true, title: true } },
-                photos: {
-                  select: { id: true, fileName: true, externalUrl: true, position: true, isCover: true },
-                  orderBy: { position: 'asc' },
-                },
-            },
-        }),
-        this.prisma.listings.count({ where: whereCondition })
-        ]);
-
-        const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
-
-        return { items, meta: { page: finalPage, limit: finalLimit, total, totalPages } };
+      const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
+      const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
+  
+      const finalPage = (!dto.page || dto.page < 1) ? 1 : dto.page;
+      let finalLimit = (!dto.limit || dto.limit < 1) ? pageSizeDefault : dto.limit;
+      if (finalLimit > pageSizeMax) finalLimit = pageSizeMax;
+  
+      const sortField = dto.sortBy ?? 'publishedAt';
+      const sortOrder = dto.sortOrder ?? 'desc';
+  
+      const cacheKey = generateCatalogCacheKey(dto, finalPage, finalLimit, sortField, sortOrder);
+  
+      const cached = await this.cacheService.get<{
+          items: unknown[];
+          meta: {
+              page: number;
+              limit: number;
+              total: number;
+              totalPages: number;
+          };
+      }>(cacheKey);
+  
+      if (cached) return cached;
+  
+      const whereCondition = buildPublicListingsWhere(dto);
+      const orderByCondition = { [sortField]: sortOrder };
+  
+      const [items, total] = await Promise.all([
+          this.prisma.listings.findMany({
+              where: whereCondition,
+              orderBy: orderByCondition,
+              skip: (finalPage - 1) * finalLimit,
+              take: finalLimit,
+              select: {
+                  id: true,
+                  title: true,
+                  price: true,
+                  area: true,
+                  rooms: true,
+                  floor: true,
+                  totalFloors: true,
+                  dealType: true,
+                  propertyType: true,
+                  address: true,
+                  publishedAt: true,
+                  district: { select: { id: true, title: true } },
+                  photos: {
+                      select: {
+                          id: true,
+                          fileName: true,
+                          externalUrl: true,
+                          position: true,
+                          isCover: true,
+                      },
+                      orderBy: { position: 'asc' },
+                  },
+              },
+          }),
+          this.prisma.listings.count({ where: whereCondition }),
+      ]);
+  
+      const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
+  
+      const result = {
+          items,
+          meta: {
+              page: finalPage,
+              limit: finalLimit,
+              total,
+              totalPages,
+          },
+      };
+  
+      await this.cacheService.set(cacheKey, result, 300);
+      await this.cacheService.addToTag('listings', cacheKey);
+  
+      return result;
     }
 
     async findOneListing(id: number) {
@@ -161,50 +197,82 @@ export class PublicService {
 
 
     async findAllDistricts(page?: number, limit?: number, city?: string) {
-        const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
-        const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
-    
-        const finalPage = (!page || page < 1) ? 1 : page;
-        let finalLimit = (!limit || limit < 1) ? pageSizeDefault : limit;
-        if (finalLimit > pageSizeMax) finalLimit = pageSizeMax;
-    
-        const finalCity = (city && city.trim() !== '') ? city.trim() : undefined;
-        const whereCondition = finalCity ? { city: finalCity } : {};
-    
-        const [items, total] = await Promise.all([
-            this.prisma.districts.findMany({
+      const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
+      const pageSizeMax = Number(this.configService.get<number>('PAGE_SIZE_MAX') ?? 100);
+  
+      const finalPage = (!page || page < 1) ? 1 : page;
+      let finalLimit = (!limit || limit < 1) ? pageSizeDefault : limit;
+      if (finalLimit > pageSizeMax) finalLimit = pageSizeMax;
+  
+      const finalCity = (city && city.trim() !== '') ? city.trim() : undefined;
+  
+      const cacheKey = generateDistrictsCacheKey(finalPage, finalLimit, finalCity);
+  
+      const cached = await this.cacheService.get<{
+          items: {
+              id: number;
+              title: string;
+              slug: string;
+              city: string;
+              publishedListingsCount: number;
+          }[];
+          meta: {
+              page: number;
+              limit: number;
+              total: number;
+              totalPages: number;
+          };
+      }>(cacheKey);
+  
+      if (cached) return cached;
+  
+      const whereCondition = finalCity ? { city: finalCity } : {};
+  
+      const [items, total] = await Promise.all([
+          this.prisma.districts.findMany({
               where: whereCondition,
               skip: (finalPage - 1) * finalLimit,
               take: finalLimit,
               select: {
-                id: true,
-                title: true,
-                slug: true,
-                city: true,
-                _count: {
-                  select: {
-                    listings: { where: { status: ListingStatus.PUBLISHED } },
+                  id: true,
+                  title: true,
+                  slug: true,
+                  city: true,
+                  _count: {
+                      select: {
+                          listings: { where: { status: ListingStatus.PUBLISHED } },
+                      },
                   },
-                },
               },
               orderBy: { title: 'asc' },
-            }),
-            this.prisma.districts.count({ where: whereCondition })
-        ]);
-    
-        const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
-
-        const formattedItems = items.map((d) => ({
-            id: d.id,
-            title: d.title,
-            slug: d.slug,
-            city: d.city,
-            publishedListingsCount: d._count.listings,
-        }));
-    
-        return { items: formattedItems, meta: { page: finalPage, limit: finalLimit, total, totalPages } };
+          }),
+          this.prisma.districts.count({ where: whereCondition }),
+      ]);
+  
+      const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
+  
+      const formattedItems = items.map((d) => ({
+          id: d.id,
+          title: d.title,
+          slug: d.slug,
+          city: d.city,
+          publishedListingsCount: d._count.listings,
+      }));
+  
+      const result = {
+          items: formattedItems,
+          meta: {
+              page: finalPage,
+              limit: finalLimit,
+              total,
+              totalPages,
+          },
+      };
+  
+      await this.cacheService.set(cacheKey, result, 86400);
+  
+      return result;
     }
-
     async findDistrictBySlug(slug: string) {
       const district = await this.prisma.districts.findUnique({
           where: { slug },

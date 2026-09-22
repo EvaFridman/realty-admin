@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAppStore } from "@/_app/providers/app-store-provider";
+import { useAppStore } from "@/shared/providers/app-store-provider";
 
 type Props = {
     listingId: number;
