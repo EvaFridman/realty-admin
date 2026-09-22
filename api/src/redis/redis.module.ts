@@ -2,6 +2,7 @@ import { Global, Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Redis } from "ioredis";
 import { CacheService } from "./cache.service.js";
+import { LoginBlockService } from "./login-block.service.js";
 
 @Global()
 @Module({
@@ -14,8 +15,8 @@ import { CacheService } from "./cache.service.js";
             db: 0,
         }),
     },
-        CacheService,
+        CacheService, LoginBlockService,
     ],
-    exports: ["REDIS", CacheService],
+    exports: ["REDIS", CacheService, LoginBlockService],
 })
 export class RedisModule {}
