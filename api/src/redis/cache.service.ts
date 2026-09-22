@@ -36,4 +36,8 @@ export class CacheService {
         const result = await this.redis.set(lockKey, "1", "PX", 3000, "NX");
         return result === "OK";
     }
+
+    async releaseLock(key: string): Promise<void> {
+        await this.redis.unlink(`lock:${key}`);
+    }
 }
