@@ -23,6 +23,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard, ThrottlerException } from "@nestjs/throttler";
 import { FilesModule } from './files/files.module.js';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { RedisModule } from './redis/redis.module.js';
 import path from 'path';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -94,6 +95,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     }),
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
+    RedisModule,
     DistrictsModule,
     UsersModule,
     HealthModule,
