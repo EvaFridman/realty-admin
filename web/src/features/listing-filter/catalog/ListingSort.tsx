@@ -30,7 +30,7 @@ export function ListingSort() {
         params.set("sortOrder", nextSortOrder);
         params.set("page", "1");
 
-        router.replace(`${pathname}?${params.toString()}`);
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     }
 
     return (
