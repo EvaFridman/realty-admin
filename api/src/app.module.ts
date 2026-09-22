@@ -1,4 +1,4 @@
-import { Module, Injectable, ExecutionContext } from '@nestjs/common';
+import { Module, Injectable, ExecutionContext, Inject } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -21,15 +21,21 @@ import { MailService } from './mail/mail.service.js';
 import { PdfService } from './pdf/pdf.service.js';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard, ThrottlerException } from "@nestjs/throttler";
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { FilesModule } from './files/files.module.js';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { RedisModule } from './redis/redis.module.js';
+import { PublicViewingRateLimitService } from './redis/public-viewing-rate-limit.service.js';
+import { Redis } from 'ioredis';
 import path from 'path';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Injectable()
 export class GlobalThrottlerGuard extends ThrottlerGuard {
+  @Inject(PublicViewingRateLimitService)
+  private readonly publicViewingRateLimitService: PublicViewingRateLimitService;
+
   protected async handleRequest(
     options: {
       context: ExecutionContext;
@@ -60,6 +66,13 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     if (throttler.name === 'upload' && !url.includes('/photos') && !url.includes('/avatar')) return true;
 
     const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+
+    if (throttler.name === 'viewingPublic') {
+      const result = await this.publicViewingRateLimitService.check(ip, limit, ttl);
+      if (!result.allowed) throw new ThrottlerException();
+      return true;
+    }
+
     const key = `throttler:${throttler.name}:${ip}`;
 
     const { totalHits } = await this.storageService.increment(
@@ -82,16 +95,21 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
       rootPath: path.resolve('./public'),
       serveRoot: '/static',
     }),
-    ThrottlerModule.forRoot({
-      throttlers: [
-        { name: "api", ttl: 15 * 60_000, limit: 500 },
-        { name: "login", ttl: 15 * 60_000, limit: 10 },
-        { name: "register", ttl: 60 * 60_000, limit: 5 },
-        { name: "upload", ttl: 15 * 60_000, limit: 30 },
-        { name: "viewing", ttl: 60 * 60_000, limit: 20 },
-        { name: "viewingPublic", ttl: 15 * 60_000, limit: 5 },
-        { name: "ws", ttl: 1000, limit: 100 },
-      ],
+    ThrottlerModule.forRootAsync({
+      imports: [RedisModule],
+      inject: ["REDIS"],
+      useFactory: (redis: Redis) => ({
+        throttlers: [
+          { name: "api", ttl: 15 * 60_000, limit: 500 },
+          { name: "login", ttl: 15 * 60_000, limit: 10 },
+          { name: "register", ttl: 60 * 60_000, limit: 5 },
+          { name: "upload", ttl: 15 * 60_000, limit: 30 },
+          { name: "viewing", ttl: 60 * 60_000, limit: 20 },
+          { name: "viewingPublic", ttl: 15 * 60_000, limit: 5 },
+          { name: "ws", ttl: 1000, limit: 100 },
+        ],
+        storage: new ThrottlerStorageRedisService(redis),
+      }),
     }),
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
@@ -110,6 +128,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
   ],
   controllers: [AppController],
   providers: [AppService,
+    PublicViewingRateLimitService,
     { provide: APP_GUARD, useClass: GlobalThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
