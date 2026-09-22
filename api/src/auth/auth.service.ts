@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { UnauthorizedError, ConflictError } from '../errors/app.exception.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { UserRole } from '../generated/prisma/index.js';
+import { LoginBlockService } from '../redis/login-block.service.js';
 
 @Injectable()
 export class AuthService {
@@ -15,12 +16,23 @@ export class AuthService {
         private readonly prisma: PrismaService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly loginBlockService: LoginBlockService,
     ) {}
 
     async login(email: string, password: string) {
+        const blockTtl = await this.loginBlockService.getBlockTtl(email);
+    
+        if (blockTtl > 0) throw new UnauthorizedError(`Too many failed login attempts. Try again in ${Math.ceil(blockTtl / 60)} minutes`);
+    
         const user = await this.usersService.findByEmail(email);
-        if (!user || !(await bcrypt.compare(password, user.passwordHash))) throw new UnauthorizedError("Invalid credentials");
-
+    
+        if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+            await this.loginBlockService.recordFailure(email);
+            throw new UnauthorizedError("Invalid credentials");
+        }
+    
+        await this.loginBlockService.clearFailures(email);
+    
         const tokens = await this.issuePair(user);
         
         const { passwordHash: _passwordHash, ...publicUser } = user;
