@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useAppStore } from "@/_app/providers/app-store-provider";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import styles from "@/widgets/header/Header.module.css";
 
@@ -10,10 +11,17 @@ export function HeaderSearch() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [searchInput, setSearchInput] = useState(
-        () => searchParams.get("search") ?? "",
-    );
+    const searchInput = useAppStore((state) => state.searchQuery);
+    const setSearchInput = useAppStore((state) => state.setSearchQuery);
+
     const debouncedSearch = useDebouncedValue(searchInput, 350);
+
+    useEffect(() => {
+        const urlSearch = searchParams.get("search") ?? "";
+        if (urlSearch && !searchInput) {
+            setSearchInput(urlSearch);
+        }
+    }, [searchParams, setSearchInput, searchInput]);
 
     useEffect(() => {
         if (pathname !== "/listings") return;

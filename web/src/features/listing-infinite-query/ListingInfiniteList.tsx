@@ -6,6 +6,7 @@ import styles from "./ListingInfiniteList.module.css";
 
 import { ListingCard } from "@/entities/listing/ui/ListingCard";
 import { useInfiniteListings } from "@/entities/listing/api/use-listings";
+import { useAppStore } from "@/_app/providers/app-store-provider";
 import type { PublicListingType, PublicListingsMetaType } from "@/entities/listing/types";
 import { Skeleton } from "@/shared/ui";
 
@@ -15,15 +16,13 @@ type Props = {
     initialItems: PublicListingType[];
     initialMeta: PublicListingsMetaType;
     query: Record<string, QueryValueType>;
-    view: "grid" | "list";
     isAuthenticated: boolean;
 };
 
-export function ListingInfiniteList({ initialItems, initialMeta, query, view, isAuthenticated }: Props) {
+export function ListingInfiniteList({ initialItems, initialMeta, query, isAuthenticated }: Props) {
     const observerRef = useRef<HTMLDivElement | null>(null);
-
+    const view = useAppStore((state) => state.catalogView);
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteListings({ query, initialItems, initialMeta });
-
     const allItems = data?.pages.flatMap((page) => page.items) ?? [];
 
     useEffect(() => {
