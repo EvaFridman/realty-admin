@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { createContext, type ReactNode, useContext, useState, useEffect } from "react";
 import { useStore } from "zustand";
 import { createInitialAppStore, type AppStore } from "./app-store";
 
@@ -9,6 +9,10 @@ export const AppStoreContext = createContext<ReturnType<typeof createInitialAppS
 export function AppStoreProvider({ children }: { children: ReactNode }) {
     // Линтер ругается useRef во время рендеринга, заменила на useState.
     const [store] = useState(() => createInitialAppStore());
+
+    useEffect(() => {
+        store.persist.rehydrate();
+    }, [store]);
 
     return (
         <AppStoreContext.Provider value={store}>
