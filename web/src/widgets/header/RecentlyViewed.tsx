@@ -1,6 +1,6 @@
 "use client";
 
-import { useAppStore } from "@/_app/providers/app-store-provider";
+import { useAppStore } from "@/shared/providers/app-store-provider";
 import styles from "./Header.module.css";
 
 export function RecentlyViewed() {

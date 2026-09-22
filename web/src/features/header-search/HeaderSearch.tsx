@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useAppStore } from "@/_app/providers/app-store-provider";
+import { useAppStore } from "@/shared/providers/app-store-provider";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import styles from "@/widgets/header/Header.module.css";
 

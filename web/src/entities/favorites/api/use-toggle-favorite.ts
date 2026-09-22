@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { favoriteKeys } from "@/entities/favorites/api/keys";
-import { toggleFavorite } from "@/features/favorites/actions";
+import { toggleFavorite } from "@/entities/favorites/api/actions";
 
 export function useToggleFavorite() {
     const queryClient = useQueryClient();

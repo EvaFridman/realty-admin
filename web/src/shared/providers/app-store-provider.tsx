@@ -7,7 +7,6 @@ import { createInitialAppStore, type AppStore } from "./app-store";
 export const AppStoreContext = createContext<ReturnType<typeof createInitialAppStore> | null>(null);
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
-    // Линтер ругается useRef во время рендеринга, заменила на useState.
     const [store] = useState(() => createInitialAppStore());
 
     useEffect(() => {

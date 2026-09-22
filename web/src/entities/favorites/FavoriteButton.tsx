@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { useFavoriteIds } from "@/entities/favorites/api/use-favorites";
-import { useToggleFavorite } from "@/features/favorites/use-toggle-favorite";
+import { useToggleFavorite } from "@/entities/favorites/api/use-toggle-favorite";
 import { useRouter } from "next/navigation";
 import styles from "./FavoriteButton.module.css";
 
