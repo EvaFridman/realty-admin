@@ -114,4 +114,8 @@ export class AuthService {
 
         return { message: 'Password changed' };
     }
+
+    async getCurrentUser(userId: number) {
+        return this.usersService.findOne(userId);
+    }
 }

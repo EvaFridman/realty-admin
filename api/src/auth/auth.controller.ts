@@ -82,7 +82,7 @@ export class AuthController {
     @ApiResponse({ status: 401, description: 'Токен отсутствует или невалиден' })
     @Get('me')
     async me(@Req() request: Request) {
-        return request.user;
+        return this.authService.getCurrentUser((request.user as any).id);
     }
 
     @ApiBearerAuth('bearer')

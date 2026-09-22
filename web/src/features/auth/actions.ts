@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { sessions } from "@/shared/session/store";
+import { destroyAllSessions, sessions } from "@/shared/session/store";
 import { getSession } from "@/shared/session";
 import type { AuthUser } from "@/shared/session/types";
 
@@ -38,7 +38,7 @@ async function createSession(response: Response): Promise<AuthUser | null> {
 
     if (!refreshToken) return null;
 
-    const sessionId = sessions.create({
+    const sessionId = await sessions.create({
         accessToken: data.accessToken,
         refreshToken,
         user: data.user,
@@ -122,7 +122,7 @@ export async function logout(): Promise<void> {
     const cookieStore = await cookies();
 
     if (session) {
-        sessions.destroy(session.id);
+        await sessions.destroy(session.id);
 
         try {
             await fetch(`${process.env.API_URL}/auth/logout`, {
@@ -134,5 +134,12 @@ export async function logout(): Promise<void> {
         } catch { }
     }
 
+    cookieStore.delete("sid");
+}
+
+export async function logoutAll(): Promise<void> {
+    const session = await getSession();
+    if (session) await destroyAllSessions(session.user.id);
+    const cookieStore = await cookies();
     cookieStore.delete("sid");
 }

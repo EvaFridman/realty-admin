@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import type { AuthUser } from "@/shared/session/types";
-import { logout } from "@/features/auth/actions";
+import { logout, logoutAll } from "@/features/auth/actions";
 
 import styles from "./ProfileMenu.module.css";
 
@@ -18,6 +18,11 @@ export function ProfileMenu({ user, onLogout }: Props) {
         onLogout();
     }
 
+    async function handleLogoutAll() {
+        await logoutAll();
+        onLogout();
+    }
+
     return (
         <details className={styles.menu}>
             <summary className={styles.trigger}>
@@ -29,6 +34,9 @@ export function ProfileMenu({ user, onLogout }: Props) {
                 <Link href="/account/profile" className={styles.item}>Профиль</Link>
                 <form action={handleLogout}>
                     <button type="submit" className={styles.item}>Выйти</button>
+                </form>
+                <form action={handleLogoutAll}>
+                    <button type="submit" className={styles.item}>Выйти на всех устройствах</button>
                 </form>
             </div>
         </details>
