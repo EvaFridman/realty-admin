@@ -28,7 +28,7 @@ export class PublicService {
   
       const cacheKey = generateCatalogCacheKey(dto, finalPage, finalLimit, sortField, sortOrder);
   
-      const cached = await this.cacheService.get<{
+      const getCached = () => this.cacheService.get<{
           items: unknown[];
           meta: {
               page: number;
@@ -38,61 +38,83 @@ export class PublicService {
           };
       }>(cacheKey);
   
+      const cached = await getCached();
       if (cached) return cached;
+      let hasLock = await this.cacheService.acquireLock(cacheKey);
   
-      const whereCondition = buildPublicListingsWhere(dto);
-      const orderByCondition = { [sortField]: sortOrder };
+      if (!hasLock) {
+          for (let attempt = 0; attempt < 30; attempt++) {
+              await new Promise((resolve) => setTimeout(resolve, 100));
   
-      const [items, total] = await Promise.all([
-          this.prisma.listings.findMany({
-              where: whereCondition,
-              orderBy: orderByCondition,
-              skip: (finalPage - 1) * finalLimit,
-              take: finalLimit,
-              select: {
-                  id: true,
-                  title: true,
-                  price: true,
-                  area: true,
-                  rooms: true,
-                  floor: true,
-                  totalFloors: true,
-                  dealType: true,
-                  propertyType: true,
-                  address: true,
-                  publishedAt: true,
-                  district: { select: { id: true, title: true } },
-                  photos: {
-                      select: {
-                          id: true,
-                          fileName: true,
-                          externalUrl: true,
-                          position: true,
-                          isCover: true,
+              const cachedAfterWait = await getCached();
+              if (cachedAfterWait) return cachedAfterWait;
+  
+              hasLock = await this.cacheService.acquireLock(cacheKey);
+              if (hasLock) break;
+          }
+      }
+  
+      if (!hasLock) throw new Error('Failed to acquire cache lock');
+  
+      try {
+          const cachedAfterLock = await getCached();
+          if (cachedAfterLock) return cachedAfterLock;
+          const whereCondition = buildPublicListingsWhere(dto);
+          const orderByCondition = { [sortField]: sortOrder };
+  
+          const [items, total] = await Promise.all([
+              this.prisma.listings.findMany({
+                  where: whereCondition,
+                  orderBy: orderByCondition,
+                  skip: (finalPage - 1) * finalLimit,
+                  take: finalLimit,
+                  select: {
+                      id: true,
+                      title: true,
+                      price: true,
+                      area: true,
+                      rooms: true,
+                      floor: true,
+                      totalFloors: true,
+                      dealType: true,
+                      propertyType: true,
+                      address: true,
+                      publishedAt: true,
+                      district: { select: { id: true, title: true } },
+                      photos: {
+                          select: {
+                              id: true,
+                              fileName: true,
+                              externalUrl: true,
+                              position: true,
+                              isCover: true,
+                          },
+                          orderBy: { position: 'asc' },
                       },
-                      orderBy: { position: 'asc' },
                   },
+              }),
+              this.prisma.listings.count({ where: whereCondition }),
+          ]);
+  
+          const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
+  
+          const result = {
+              items,
+              meta: {
+                  page: finalPage,
+                  limit: finalLimit,
+                  total,
+                  totalPages,
               },
-          }),
-          this.prisma.listings.count({ where: whereCondition }),
-      ]);
+          };
   
-      const totalPages = total > 0 ? Math.ceil(total / finalLimit) : 0;
+          await this.cacheService.set(cacheKey, result, 300);
+          await this.cacheService.addToTag('listings', cacheKey);
   
-      const result = {
-          items,
-          meta: {
-              page: finalPage,
-              limit: finalLimit,
-              total,
-              totalPages,
-          },
-      };
-  
-      await this.cacheService.set(cacheKey, result, 300);
-      await this.cacheService.addToTag('listings', cacheKey);
-  
-      return result;
+          return result;
+      } finally {
+          await this.cacheService.releaseLock(cacheKey);
+      }
     }
 
     async findOneListing(id: number) {
