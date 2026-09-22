@@ -26,7 +26,6 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
     const isAuthenticated = session !== null;
 
     const page = Number(getStringParam(searchParams.page)) || 1;
-    const view = getStringParam(searchParams.view) === "list" ? "list" : "grid";
     const rooms = getArrayParam(searchParams.rooms);
     const districtId = lockedDistrict?.id ?? getStringParam(searchParams.districtId);
 
@@ -83,11 +82,11 @@ export async function ListingsPage({ searchParams, lockedDistrict }: Props) {
                             </div>
                             <div className={styles.controls}>
                                 <ListingSort />
-                                <ListingViewSwitcher view={view} />
+                                <ListingViewSwitcher />
                             </div>
                         </div>
 
-                        <ListingInfiniteList initialItems={result.items} initialMeta={result.meta} query={query} view={view} isAuthenticated={isAuthenticated} />
+                        <ListingInfiniteList  initialItems={result.items} initialMeta={result.meta} query={query} isAuthenticated={isAuthenticated} />
 
                         <CatalogFreshness />
                     </div>

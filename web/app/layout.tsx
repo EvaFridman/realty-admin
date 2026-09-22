@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { QueryProvider } from "@/_app/providers/query-provider"; 
+import { AppStoreProvider } from "@/_app/providers/app-store-provider";
 import { Header, Footer } from "@/widgets";
 import { ThemeInit } from "@/features/theme/ThemeInit";
 import { Loader } from "@/shared/ui";
@@ -31,11 +32,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </head>
             <body className={inter.variable}>
                 <QueryProvider>
-                    <Suspense fallback={<Loader />}>
-                        <Header />
-                    </Suspense>
-                    <main>{children}</main>
-                    <Footer />
+                    <AppStoreProvider>
+                        <Suspense fallback={<Loader />}>
+                            <Header />
+                        </Suspense>
+                        <main>{children}</main>
+                        <Footer />
+                    </AppStoreProvider>
                 </QueryProvider>
             </body>
         </html>
