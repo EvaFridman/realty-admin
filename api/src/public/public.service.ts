@@ -196,7 +196,11 @@ export class PublicService {
             }
         });
         
-        this.publisherService.publish("viewing.booked", { viewingId: viewing.id }, { messageId: `viewing-booked:${viewing.id}` });
+        try {
+            this.publisherService.publish("viewing.booked", { viewingId: viewing.id }, { messageId: `viewing-booked:${viewing.id}` });
+        } catch (error) {
+            console.error(`Failed to publish viewing.booked: ${error instanceof Error ? error.message : String(error)}`);
+        }
         
         return viewing;
     }

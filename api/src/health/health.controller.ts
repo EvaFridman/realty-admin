@@ -1,4 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
+import type { Channel } from 'amqplib';
 import { UsersService } from '../users/users.service.js';
 import { DistrictsService } from '../districts/districts.service.js';
 import { CacheService } from '../redis/cache.service.js';
@@ -9,9 +10,14 @@ import { Public } from '../auth/decorators/public.decorator.js';
 @ApiTags('Здоровье')
 @Controller('health')
 export class HealthController {
-    constructor(private readonly usersService: UsersService, private readonly districtsService: DistrictsService, private readonly cacheService: CacheService) {}
+    constructor(
+        private readonly usersService: UsersService,
+        private readonly districtsService: DistrictsService,
+        private readonly cacheService: CacheService,
+        @Inject("RABBITMQ_CHANNEL") private readonly channel: Channel,
+    ) {}
 
-    @ApiOperation({ summary: 'Проверка работоспособности бэкенда, базы данных и Redis' })
+    @ApiOperation({ summary: 'Проверка работоспособности бэкенда, базы данных, Redis и RabbitMQ' })
     @ApiResponse({ status: 200, description: 'Статус бэкенда успешно получен' })
     @Public()
     @SkipThrottle()
@@ -20,6 +26,7 @@ export class HealthController {
         const districtsCount = await this.districtsService.count();
         const usersCount = await this.usersService.count();
         const redis = this.cacheService.isAvailable();
+        const broker = await this.isBrokerAvailable();
         const cache = this.cacheService.getStats();
 
         return {
@@ -27,7 +34,17 @@ export class HealthController {
             districts: districtsCount,
             users: usersCount,
             redis,
+            broker,
             cache,
         };
+    }
+
+    private async isBrokerAvailable() {
+        try {
+            await this.channel.checkQueue("mail");
+            return true;
+        } catch {
+            return false;
+        }
     }
 }
