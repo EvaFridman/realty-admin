@@ -7,10 +7,11 @@ import { UpdateStatusDto } from './dto/update-status.dto.js';
 import { canTransition, getAllowedTransitions } from '../common/viewingStatusTransitions.service.js';
 import { NotFoundError, ConflictError, ForbiddenError } from '../errors/app.exception.js';
 import { UserRole, ViewingStatus, Prisma } from '../generated/prisma/index.js';
+import { PublisherService } from "../queue/publisher.service.js";
 
 @Injectable()
 export class ViewingsService {
-    constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService) { }
+    constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService, private readonly publisherService: PublisherService) { }
 
     private handlePrismaError(error: any) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -93,6 +94,8 @@ export class ViewingsService {
 
                 return await tx.viewings.update({ where: { id }, data: updateData, include: { listing: true } });
             });
+
+            this.publisherService.publish("viewing.status-changed", { viewingId: updatedViewing.id }, { messageId: `viewing-status-changed:${updatedViewing.id}` });
 
             return {
                 ...updatedViewing,

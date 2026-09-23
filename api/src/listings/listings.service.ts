@@ -16,10 +16,17 @@ import path from 'path';
 import fs from 'fs';
 import { PassThrough } from 'stream';
 import { PdfService } from '../pdf/pdf.service.js';
+import { PublisherService } from "../queue/publisher.service.js";
 
 @Injectable()
 export class ListingsService {
-  constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService, private readonly events: EventEmitter2, private readonly pdfService: PdfService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+    private readonly events: EventEmitter2,
+    private readonly pdfService: PdfService,
+    private readonly publisherService: PublisherService
+  ) { }
 
   private handlePrismaError(error: any) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -139,9 +146,15 @@ export class ListingsService {
 
       if (updatedListing.status === ListingStatus.PUBLISHED) {
         this.events.emit(
-          ListingPublishedEvent.eventName, 
-          new ListingPublishedEvent(updatedListing.id, updatedListing.agentId, updatedListing.title)
+            ListingPublishedEvent.eventName,
+            new ListingPublishedEvent(updatedListing.id, updatedListing.agentId, updatedListing.title)
         );
+    
+        this.publisherService.publish("listing.published", {
+            listingId: updatedListing.id,
+        }, {
+            messageId: `listing-published:${updatedListing.id}`,
+        });
       }
 
       return {
