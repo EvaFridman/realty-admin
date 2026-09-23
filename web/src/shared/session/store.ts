@@ -38,7 +38,8 @@ export const sessions = {
 
         await redis.expire(key, SESSION_TTL);
         await redis.sadd(getUserSessionsKey(session.user.id), id);
-
+        await redis.expire(getUserSessionsKey(session.user.id), SESSION_TTL);
+        
         return id;
     },
 

@@ -3,15 +3,30 @@ import { Redis } from "ioredis";
 
 @Injectable()
 export class CacheService {
+    private hits = 0;
+    private misses = 0;
+
     constructor(@Inject("REDIS") private readonly redis: Redis) {}
 
     async get<T>(key: string): Promise<T | null> {
-        const cached = await this.redis.get(key);
-        if (!cached) return null;
-
         try {
-            return JSON.parse(cached) as T;
+            const cached = await this.redis.get(key);
+
+            if (!cached) {
+                this.misses++;
+                return null;
+            }
+
+            this.hits++;
+
+            try {
+                return JSON.parse(cached) as T;
+            } catch {
+                this.misses++;
+                return null;
+            }
         } catch {
+            this.misses++;
             return null;
         }
     }
@@ -39,5 +54,16 @@ export class CacheService {
 
     async releaseLock(key: string): Promise<void> {
         await this.redis.unlink(`lock:${key}`);
+    }
+
+    getStats() {
+        return {
+            hits: this.hits,
+            misses: this.misses,
+        };
+    }
+
+    isAvailable(): boolean {
+        return this.redis.status === "ready";
     }
 }
