@@ -6,7 +6,7 @@ import { MailService } from "../../mail/mail.service.js";
 @Injectable()
 export class MailConsumer implements OnModuleInit, OnModuleDestroy {
     private consumerTag?: string;
-    constructor(@Inject("RABBITMQ_CHANNEL") private readonly channel: Channel, private readonly prisma: PrismaService,  private readonly mailService: MailService) {}
+    constructor(@Inject("RABBITMQ_CHANNEL") private readonly channel: Channel, private readonly prisma: PrismaService, private readonly mailService: MailService) {}
 
     async onModuleInit() {
         await this.channel.prefetch(1);
@@ -54,10 +54,10 @@ export class MailConsumer implements OnModuleInit, OnModuleDestroy {
             const info = await this.mailService.sendNewViewingNotice(viewing.listing, viewing);
 
             if (info?.message) console.log(`\nВХОДЯЩЕЕ ПИСЬМО (WORKER)\n${info.message.toString()}\n`);
-            
+
             this.channel.ack(message);
         } catch {
-            this.channel.nack(message, false, true);
+            this.channel.nack(message, false, !message.fields.redelivered);
         }
     }
 }
