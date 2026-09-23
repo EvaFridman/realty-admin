@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import amqp from "amqplib";
 import type { Channel, ChannelModel } from "amqplib";
 import { setupTopology } from "./topology.js";
+import { PublisherService } from "./publisher.service.js";
 
 @Global()
 @Module({
@@ -23,8 +24,9 @@ import { setupTopology } from "./topology.js";
                 return channel;
             },
         },
+        PublisherService,
     ],
-    exports: ["RABBITMQ_CONNECTION", "RABBITMQ_CHANNEL"],
+    exports: ["RABBITMQ_CONNECTION", "RABBITMQ_CHANNEL", PublisherService],
 })
 export class QueueModule implements OnApplicationShutdown {
     constructor(

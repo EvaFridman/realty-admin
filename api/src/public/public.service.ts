@@ -10,10 +10,16 @@ import { NotFoundError, ConflictError } from '../errors/app.exception.js';
 import { CacheService } from '../redis/cache.service.js';
 import { generateCatalogCacheKey } from '../redis/catalog-key.helper.js';
 import { generateDistrictsCacheKey } from '../redis/districts-key.helper.js';
+import { PublisherService } from "../queue/publisher.service.js";
 
 @Injectable()
 export class PublicService {
-    constructor(private readonly prisma: PrismaService, private readonly configService: ConfigService, private readonly cacheService: CacheService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly configService: ConfigService,
+        private readonly cacheService: CacheService,
+        private readonly publisherService: PublisherService
+    ) { }
 
     async findAllListings(dto: PublicListingsDto) {
         const pageSizeDefault = Number(this.configService.get<number>('PAGE_SIZE_DEFAULT') ?? 20);
@@ -179,7 +185,7 @@ export class PublicService {
     async createViewing(listingId: number, dto: CreateViewingDto, user?: { id: number; role: string }) {
         const listing = await this.prisma.listings.findUnique({ where: { id: listingId } });
         if (!listing || listing.status !== ListingStatus.PUBLISHED) throw new NotFoundError('Listing not found');
-        return await this.prisma.viewings.create({
+        const viewing = await this.prisma.viewings.create({
             data: {
                 listingId,
                 ...dto,
@@ -189,6 +195,10 @@ export class PublicService {
                 updatedAt: new Date(),
             }
         });
+        
+        this.publisherService.publish("viewing.booked", { viewingId: viewing.id }, { messageId: `viewing-booked:${viewing.id}` });
+        
+        return viewing;
     }
 
     async findAllFavorites(user: { id: number }) {
