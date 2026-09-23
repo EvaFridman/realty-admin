@@ -46,6 +46,9 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     }
   ): Promise<boolean> {
     const { context, limit, ttl, throttler, blockDuration } = options;
+    if (throttler.name === 'ws') {
+      return true;
+    }
 
     if (context.getType() === 'ws') return true;
 
@@ -53,6 +56,8 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     const url = req.url || '';
     const path = req.path || '';
 
+    if (throttler.name === 'api' && (path === '/public/listings' || path === '/health')) return true;
+    
     if (url.includes('/socket.io')) return true;
 
     const buildSecret = process.env.NEXT_BUILD_SECRET;

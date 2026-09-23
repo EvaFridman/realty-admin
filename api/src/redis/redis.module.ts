@@ -13,6 +13,7 @@ import { LoginBlockService } from "./login-block.service.js";
             host: config.getOrThrow<string>("REDIS_HOST"),
             port: Number(config.getOrThrow("REDIS_PORT")),
             db: 0,
+            maxRetriesPerRequest: 0,
         }),
     },
         CacheService, LoginBlockService,
