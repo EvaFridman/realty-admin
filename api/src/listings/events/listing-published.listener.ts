@@ -3,13 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 
 import { ListingPublishedEvent } from './listing-published.event.js';
-import { CacheService } from '../../redis/cache.service.js';
 
 @Injectable()
 export class ListingPublishedListener {
     private readonly logger = new Logger(ListingPublishedListener.name);
 
-    constructor(private readonly configService: ConfigService, private readonly cacheService: CacheService) {}
+    constructor(private readonly configService: ConfigService) {}
 
     @OnEvent(ListingPublishedEvent.eventName)
     async handle(event: ListingPublishedEvent) {
@@ -36,8 +35,6 @@ export class ListingPublishedListener {
                 this.logger.error(`Public site revalidation failed: ${response.status} ${body}`);
                 return;
             }
-
-            await this.cacheService.invalidateByTag("listings");
 
             this.logger.log(`Public site cache revalidated after listing ${event.listingId} was published`);
         } catch (error) {
