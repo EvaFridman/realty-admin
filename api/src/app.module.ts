@@ -24,6 +24,7 @@ import { ThrottlerModule, ThrottlerGuard, ThrottlerException } from "@nestjs/thr
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { FilesModule } from './files/files.module.js';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { QueueModule } from "./queue/queue.module.js";
 import { RedisModule } from './redis/redis.module.js';
 import { PublicViewingRateLimitService } from './redis/public-viewing-rate-limit.service.js';
 import { Redis } from 'ioredis';
@@ -130,6 +131,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     RealtimeModule,
     FilesModule,
     PublicModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService,
