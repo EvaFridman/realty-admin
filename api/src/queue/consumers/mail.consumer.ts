@@ -24,11 +24,17 @@ export class MailConsumer implements OnModuleInit, OnModuleDestroy {
     }
 
     private async handleMessage(message: ConsumeMessage) {
+        const startedAt = Date.now();
+        const routingKey = message.fields.routingKey;
+        const messageId = message.properties.messageId ?? "-";
+        let result = "processed";
+
         try {
             const payload = JSON.parse(message.content.toString()) as { viewingId?: number };
             const viewingId = payload.viewingId;
 
             if (!viewingId) {
+                result = "skipped";
                 this.channel.ack(message);
                 return;
             }
@@ -47,28 +53,30 @@ export class MailConsumer implements OnModuleInit, OnModuleDestroy {
             });
 
             if (!viewing) {
+                result = "skipped";
                 this.channel.ack(message);
                 return;
             }
 
             if (viewing.notifiedAt) {
-                console.log(`Пропускаю повторную доставку viewing ${viewing.id}`);
+                result = "skipped";
                 this.channel.ack(message);
                 return;
             }
-            
-            const info = await this.mailService.sendNewViewingNotice(viewing.listing, viewing);
 
-            if (info?.message) console.log(`\nВХОДЯЩЕЕ ПИСЬМО (WORKER)\n${info.message.toString()}\n`);
+            await this.mailService.sendNewViewingNotice(viewing.listing, viewing);
 
             await this.prisma.viewings.update({
                 where: { id: viewing.id },
                 data: { notifiedAt: new Date() },
             });
-            
+
             this.channel.ack(message);
         } catch {
+            result = message.fields.redelivered ? "dead-lettered" : "retry";
             this.channel.nack(message, false, !message.fields.redelivered);
+        } finally {
+            console.log(`[MAIL] routingKey=${routingKey} messageId=${messageId} result=${result} duration=${Date.now() - startedAt}ms`);
         }
     }
 }

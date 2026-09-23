@@ -23,20 +23,23 @@ export class ActivityConsumer implements OnModuleInit, OnModuleDestroy {
     }
 
     private async handleMessage(message: ConsumeMessage) {
+        const startedAt = Date.now();
+        const routingKey = message.fields.routingKey;
+        const messageId = message.properties.messageId;
+        let entityId: number | undefined;
+        let result = "processed";
+
         try {
             const payload = JSON.parse(message.content.toString()) as {
                 listingId?: number;
                 viewingId?: number;
             };
 
-            const routingKey = message.fields.routingKey;
-            const entityId = payload.listingId ?? payload.viewingId;
-            const messageId = message.properties.messageId;
-
-            console.log(`[ACTIVITY] ${new Date().toISOString()} ${routingKey} ${entityId ?? "unknown"}`);
+            entityId = payload.listingId ?? payload.viewingId;
 
             if (routingKey === "listing.published") {
                 if (!messageId) {
+                    result = "skipped";
                     this.channel.ack(message);
                     return;
                 }
@@ -45,7 +48,7 @@ export class ActivityConsumer implements OnModuleInit, OnModuleDestroy {
                 const alreadySent = await this.cacheService.get<boolean>(sentKey);
 
                 if (alreadySent) {
-                    console.log(`[ACTIVITY] Пропускаю повторную доставку ${messageId}`);
+                    result = "skipped";
                     this.channel.ack(message);
                     return;
                 }
@@ -56,7 +59,10 @@ export class ActivityConsumer implements OnModuleInit, OnModuleDestroy {
 
             this.channel.ack(message);
         } catch {
+            result = message.fields.redelivered ? "dead-lettered" : "retry";
             this.channel.nack(message, false, !message.fields.redelivered);
+        } finally {
+            console.log(`[ACTIVITY] routingKey=${routingKey} messageId=${messageId ?? "-"} result=${result} entityId=${entityId ?? "-"} duration=${Date.now() - startedAt}ms`);
         }
     }
 }

@@ -67,7 +67,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     if (req.method === "GET" && buildSecret && buildRequest === buildSecret) return true;
 
     if (throttler.name === 'login' || throttler.name === 'register') return true;
-    if (throttler.name === 'viewing' && !url.includes('/viewings')) return true;
+    if (throttler.name === 'viewing' && (!url.includes('/viewings') || /^\/public\/listings\/\d+\/viewings$/.test(path))) return true;
     if (throttler.name === 'viewingPublic' && !/^\/public\/listings\/\d+\/viewings$/.test(path)) return true;
     if (throttler.name === 'upload' && !url.includes('/photos') && !url.includes('/avatar')) return true;
 
