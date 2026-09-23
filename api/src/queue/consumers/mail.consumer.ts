@@ -51,10 +51,21 @@ export class MailConsumer implements OnModuleInit, OnModuleDestroy {
                 return;
             }
 
+            if (viewing.notifiedAt) {
+                console.log(`Пропускаю повторную доставку viewing ${viewing.id}`);
+                this.channel.ack(message);
+                return;
+            }
+            
             const info = await this.mailService.sendNewViewingNotice(viewing.listing, viewing);
 
             if (info?.message) console.log(`\nВХОДЯЩЕЕ ПИСЬМО (WORKER)\n${info.message.toString()}\n`);
 
+            await this.prisma.viewings.update({
+                where: { id: viewing.id },
+                data: { notifiedAt: new Date() },
+            });
+            
             this.channel.ack(message);
         } catch {
             this.channel.nack(message, false, !message.fields.redelivered);
