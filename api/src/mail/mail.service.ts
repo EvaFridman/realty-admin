@@ -107,6 +107,15 @@ export class MailService {
     });
   }
 
+  async sendListingExpiredNotice(agent: any, listingId: number, title: string): Promise<any> {
+    return this.sendMailSafely({
+        to: agent.email,
+        subject: `Объявление "${title}" снято с публикации`,
+        text: `Здравствуйте, ${agent.name}! Объявление #${listingId} автоматически снято с публикации, так как прошло 60 дней с момента публикации.`,
+        html: `<h1>${escapeHtml(title)}</h1><p>Здравствуйте, ${escapeHtml(agent.name)}! Объявление #${listingId} автоматически снято с публикации, так как прошло 60 дней с момента публикации.</p>`,
+    });
+  }
+
   async sendViewingConfirmation(listing: any, viewing: any): Promise<any> {
     return this.sendMailSafely({
       to: viewing.clientEmail,

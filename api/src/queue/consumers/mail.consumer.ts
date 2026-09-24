@@ -30,9 +30,42 @@ export class MailConsumer implements OnModuleInit, OnModuleDestroy {
         let result = "processed";
 
         try {
-            const payload = JSON.parse(message.content.toString()) as { viewingId?: number };
+            const payload = JSON.parse(message.content.toString()) as {
+                viewingId?: number;
+                listingId?: number;
+                agentId?: number;
+                title?: string;
+            };
+            
+            if (routingKey === "listing.expired") {
+                const listingId = payload.listingId;
+                const agentId = payload.agentId;
+                const title = payload.title;
+            
+                if (!listingId || !agentId || !title) {
+                    result = "skipped";
+                    this.channel.ack(message);
+                    return;
+                }
+            
+                const agent = await this.prisma.users.findUnique({
+                    where: { id: agentId },
+                });
+            
+                if (!agent || !agent.email) {
+                    result = "skipped";
+                    this.channel.ack(message);
+                    return;
+                }
+            
+                await this.mailService.sendListingExpiredNotice(agent, listingId, title);
+            
+                this.channel.ack(message);
+                return;
+            }
+            
             const viewingId = payload.viewingId;
-
+            
             if (!viewingId) {
                 result = "skipped";
                 this.channel.ack(message);

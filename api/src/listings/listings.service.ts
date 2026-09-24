@@ -118,7 +118,32 @@ export class ListingsService {
     }
   }
 
-  async updateStatus(id: number, dto: UpdateStatusDto): Promise<any> {
+  async expireOldListings(): Promise<number> {
+    const cutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+
+    const listings = await this.prisma.listings.findMany({
+        where: {
+            status: ListingStatus.PUBLISHED,
+            publishedAt: { lte: cutoff },
+        },
+        select: { id: true },
+    });
+
+    let expired = 0;
+
+    for (const listing of listings) {
+      await this.updateStatus(
+          listing.id,
+          { status: ListingStatus.UNPUBLISHED },
+          { expired: true },
+      );
+      expired++;
+  }
+
+    return expired;
+  }
+
+  async updateStatus(id: number, dto: UpdateStatusDto, options?: { expired?: boolean }): Promise<any> {
     try {
       const updatedListing =  await this.prisma.$transaction(async (tx) => {
         const listing = await tx.listings.findUnique({ where: { id } });
@@ -155,6 +180,16 @@ export class ListingsService {
         }, {
             messageId: `listing-published:${updatedListing.id}`,
         });
+      }
+      
+      if (options?.expired && updatedListing.status === ListingStatus.UNPUBLISHED) {
+          this.publisherService.publish("listing.expired", {
+              listingId: updatedListing.id,
+              agentId: updatedListing.agentId,
+              title: updatedListing.title,
+          }, {
+              messageId: `listing-expired:${updatedListing.id}`,
+          });
       }
 
       return {
