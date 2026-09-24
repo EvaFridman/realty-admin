@@ -124,4 +124,15 @@ export class MailService {
       html: `<h1>${escapeHtml(listing.title)}</h1> <p>Ваш просмотр подтверждён на ${escapeHtml(viewing.preferredAt)}.</p>`,
     });
   }
+
+  async sendViewingReminder(viewing: any): Promise<any> {
+    if (!viewing.listing) throw new ExternalServiceError('Viewing listing is not loaded');
+
+    return this.sendMailSafely({
+      to: viewing.clientEmail,
+      subject: `Напоминание о просмотре: "${viewing.listing.title}"`,
+      text: `Напоминаем, что ваш просмотр объявления "${viewing.listing.title}" запланирован на ${viewing.preferredAt}.`,
+      html: `<h1>${escapeHtml(viewing.listing.title)}</h1><p>Напоминаем, что ваш просмотр запланирован на ${escapeHtml(viewing.preferredAt)}.</p>`,
+    });
+  }
 }

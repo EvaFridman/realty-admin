@@ -122,20 +122,21 @@ enum ViewingStatus {
 }
 
 model Viewings {
-  id          Int                  @id @default(autoincrement())
-  listingId   Int?
-  clientId    Int?
-  clientName  String               @db.VarChar(255)
-  clientPhone String               @db.VarChar(20)
-  clientEmail String               @db.VarChar(255)
-  preferredAt DateTime             @db.Timestamptz(6)
-  comment     String?
-  status      ViewingStatus
-  notifiedAt  DateTime?            @db.Timestamptz(6)
-  createdAt   DateTime             @db.Timestamptz(6)
-  updatedAt   DateTime             @db.Timestamptz(6)
-  listing     Listings?            @relation("viewing_listings", fields: [listingId], references: [id], onUpdate: NoAction)
-  client      Users?               @relation("viewing_clients", fields: [clientId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  id             Int                  @id @default(autoincrement())
+  listingId      Int?
+  clientId       Int?
+  clientName     String               @db.VarChar(255)
+  clientPhone    String               @db.VarChar(20)
+  clientEmail    String               @db.VarChar(255)
+  preferredAt    DateTime             @db.Timestamptz(6)
+  comment        String?
+  status         ViewingStatus
+  reminderSentAt DateTime?            @db.Timestamptz(6)
+  notifiedAt     DateTime?            @db.Timestamptz(6)
+  createdAt      DateTime             @db.Timestamptz(6)
+  updatedAt      DateTime             @db.Timestamptz(6)
+  listing        Listings?            @relation("viewing_listings", fields: [listingId], references: [id], onUpdate: NoAction)
+  client         Users?               @relation("viewing_clients", fields: [clientId], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@index([listingId], map: "viewings_listingId_idx")
   @@index([clientId], map: "viewings_clientId_idx")

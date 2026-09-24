@@ -21,6 +21,12 @@ const workflows = [
         cronSchedule: "0 1 * * *",
         message: "Expire Listings Cron Workflow started: 04:00 Europe/Moscow",
     },
+    {
+        workflowId: "viewing-reminder-cron",
+        workflowType: "viewingReminderWorkflow",
+        cronSchedule: "0 * * * *",
+        message: "Viewing Reminder Cron Workflow started: every hour",
+    },
 ];
 
 try {
