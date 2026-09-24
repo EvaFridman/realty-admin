@@ -2,6 +2,7 @@ import { Injectable, Inject, OnModuleInit, OnModuleDestroy } from "@nestjs/commo
 import type { Channel, ConsumeMessage } from "amqplib";
 import { PrismaService } from "../../prisma/prisma.service.js";
 import { MailService } from "../../mail/mail.service.js";
+import { ViewingStatus } from "../../generated/prisma/index.js";
 
 @Injectable()
 export class MailConsumer implements OnModuleInit, OnModuleDestroy {
@@ -59,6 +60,37 @@ export class MailConsumer implements OnModuleInit, OnModuleDestroy {
                 }
             
                 await this.mailService.sendListingExpiredNotice(agent, listingId, title);
+            
+                this.channel.ack(message);
+                return;
+            }
+
+            if (routingKey === "viewing.reminder") {
+                const viewingId = payload.viewingId;
+            
+                if (!viewingId) {
+                    result = "skipped";
+                    this.channel.ack(message);
+                    return;
+                }
+            
+                const viewing = await this.prisma.viewings.findUnique({
+                    where: { id: viewingId },
+                    include: { listing: true },
+                });
+            
+                if (!viewing || viewing.status !== ViewingStatus.APPROVED || viewing.reminderSentAt) {
+                    result = "skipped";
+                    this.channel.ack(message);
+                    return;
+                }
+            
+                await this.mailService.sendViewingReminder(viewing);
+            
+                await this.prisma.viewings.update({
+                    where: { id: viewing.id },
+                    data: { reminderSentAt: new Date() },
+                });
             
                 this.channel.ack(message);
                 return;

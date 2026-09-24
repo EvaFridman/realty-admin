@@ -77,6 +77,34 @@ export class ViewingsService {
         return { ...viewing, allowedTransitions: getAllowedTransitions(viewing.status) };
     }
 
+    async sendUpcomingReminders(): Promise<number> {
+        const now = new Date();
+        const from = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        const to = new Date(now.getTime() + 25 * 60 * 60 * 1000);
+    
+        const viewings = await this.prisma.viewings.findMany({
+            where: {
+                status: ViewingStatus.APPROVED,
+                preferredAt: {
+                    gte: from,
+                    lt: to,
+                },
+                reminderSentAt: null,
+            },
+            select: { id: true },
+        });
+    
+        for (const viewing of viewings) {
+            this.publisherService.publish(
+                "viewing.reminder",
+                { viewingId: viewing.id },
+                { messageId: `viewing-reminder:${viewing.id}` },
+            );
+        }
+    
+        return viewings.length;
+    }
+
     async updateStatus(id: number, dto: UpdateStatusDto, user: { id: number; role: string }) {
         try {
             const updatedViewing = await this.prisma.$transaction(async (tx) => {
