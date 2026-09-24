@@ -7,9 +7,10 @@ import { MailService } from "./mail/mail.service.js";
 import { MailConsumer } from "./queue/consumers/mail.consumer.js";
 import { ActivityConsumer } from "./queue/consumers/activity.consumer.js";
 import { RedisModule } from "./redis/redis.module.js";
+import { TasksModule } from "./tasks/tasks.module.js";
 
 @Module({
-    imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, QueueModule, RedisModule],
+    imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, QueueModule, RedisModule, TasksModule],
     providers: [PdfService, MailService, MailConsumer, ActivityConsumer],
 })
 export class WorkerModule {}
