@@ -46,9 +46,9 @@ export class CacheService {
         if (keys.length > 0) await this.redis.unlink(...keys, tagKey);
     }
 
-    async acquireLock(key: string): Promise<boolean> {
+    async acquireLock(key: string, ttlMs = 3000): Promise<boolean> {
         const lockKey = `lock:${key}`;
-        const result = await this.redis.set(lockKey, "1", "PX", 3000, "NX");
+        const result = await this.redis.set(lockKey, "1", "PX", ttlMs, "NX");
         return result === "OK";
     }
 
