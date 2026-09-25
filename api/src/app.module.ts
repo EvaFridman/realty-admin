@@ -26,6 +26,7 @@ import { FilesModule } from './files/files.module.js';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { QueueModule } from "./queue/queue.module.js";
 import { RedisModule } from './redis/redis.module.js';
+import { TasksModule } from './tasks/tasks.module.js';
 import { PublicViewingRateLimitService } from './redis/public-viewing-rate-limit.service.js';
 import { Redis } from 'ioredis';
 import path from 'path';
@@ -132,6 +133,7 @@ export class GlobalThrottlerGuard extends ThrottlerGuard {
     FilesModule,
     PublicModule,
     QueueModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService,

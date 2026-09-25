@@ -7,6 +7,7 @@ import { PrismaModule } from "../prisma/prisma.module.js";
 import { QueueModule } from "../queue/queue.module.js";
 import { RedisModule } from "../redis/redis.module.js";
 import { EventEmitterModule } from "@nestjs/event-emitter";
+import { TasksModule } from "../tasks/tasks.module.js";
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
         ListingsModule,
         QueueModule,
         ViewingsModule,
+        TasksModule,
         EventEmitterModule.forRoot()],
 })
 export class TemporalWorkerModule {}

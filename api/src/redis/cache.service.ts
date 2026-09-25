@@ -62,6 +62,21 @@ export class CacheService {
         await this.redis.unlink(`lock:${key}`);
     }
 
+    async setPersistent(key: string, value: unknown): Promise<void> {
+        const serializedValue = JSON.stringify(value);
+        await this.redis.set(key, serializedValue);
+    }
+
+    async getPersistent<T>(key: string): Promise<T | null> {
+        try {
+            const value = await this.redis.get(key);
+            if (!value) return null;
+            return JSON.parse(value) as T;
+        } catch {
+            return null;
+        }
+    }
+
     getStats() {
         return {
             hits: this.hits,
