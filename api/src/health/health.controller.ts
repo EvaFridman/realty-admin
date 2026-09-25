@@ -6,6 +6,7 @@ import { CacheService } from '../redis/cache.service.js';
 import { SkipThrottle } from "@nestjs/throttler";
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Public } from '../auth/decorators/public.decorator.js';
+import { TaskRunnerService } from "../tasks/task-runner.service.js";
 
 @ApiTags('Здоровье')
 @Controller('health')
@@ -14,6 +15,7 @@ export class HealthController {
         private readonly usersService: UsersService,
         private readonly districtsService: DistrictsService,
         private readonly cacheService: CacheService,
+        private readonly taskRunnerService: TaskRunnerService,
         @Inject("RABBITMQ_CHANNEL") private readonly channel: Channel,
     ) {}
 
@@ -28,6 +30,7 @@ export class HealthController {
         const redis = this.cacheService.isAvailable();
         const broker = await this.isBrokerAvailable();
         const cache = this.cacheService.getStats();
+        const tasks = await this.taskRunnerService.getLastSuccess();
 
         return {
             status: "ok",
@@ -36,6 +39,7 @@ export class HealthController {
             redis,
             broker,
             cache,
+            tasks,
         };
     }
 
