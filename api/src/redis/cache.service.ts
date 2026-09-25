@@ -36,6 +36,12 @@ export class CacheService {
         await this.redis.set(key, serializedValue, "EX", ttlSeconds);
     }
 
+    async setIfNotExists(key: string, value: unknown, ttlSeconds: number): Promise<boolean> {
+        const serializedValue = JSON.stringify(value);
+        const result = await this.redis.set(key, serializedValue, "EX", ttlSeconds, "NX");
+        return result === "OK";
+    }
+
     async addToTag(tag: string, key: string): Promise<void> {
         await this.redis.sadd(`tag:${tag}`, key);
     }

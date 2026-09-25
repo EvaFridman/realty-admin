@@ -145,7 +145,7 @@ export class ListingsService {
 
   async updateStatus(id: number, dto: UpdateStatusDto, options?: { expired?: boolean }): Promise<any> {
     try {
-      const updatedListing =  await this.prisma.$transaction(async (tx) => {
+      const updatedListing = await this.prisma.$transaction(async (tx) => {
         const listing = await tx.listings.findUnique({ where: { id } });
         if (!listing) throw new NotFoundError('Listing not found');
 
@@ -154,11 +154,12 @@ export class ListingsService {
           throw new ConflictError(`Transition from ${listing.status} to ${dto.status} is not allowed`, allowed as any);
         }
 
-        const updateData: Prisma.ListingsUpdateInput = { status: dto.status, updatedAt: new Date() };
+        const changedAt = new Date();
+        const updateData: Prisma.ListingsUpdateInput = { status: dto.status, updatedAt: changedAt };
 
-        if (dto.status === ListingStatus.PUBLISHED) updateData.publishedAt = new Date();
+        if (dto.status === ListingStatus.PUBLISHED) updateData.publishedAt = changedAt;
 
-        return await tx.listings.update({
+        const updatedListing = await tx.listings.update({
           where: { id },
           data: updateData,
           include: {
@@ -167,6 +168,18 @@ export class ListingsService {
             photos: { orderBy: { position: 'asc' } }
           }
         });
+
+        await tx.listingStatusHistory.create({
+          data: {
+            listingId: updatedListing.id,
+            agentId: updatedListing.agentId,
+            fromStatus: listing.status,
+            toStatus: updatedListing.status,
+            createdAt: changedAt,
+          },
+        });
+
+        return updatedListing;
       });
 
       if (updatedListing.status === ListingStatus.PUBLISHED) {
@@ -200,7 +213,7 @@ export class ListingsService {
       this.handlePrismaError(error);
     }
   }
-
+  
   async findPhotos(listingId: number) {
     const listing = await this.prisma.listings.findUnique({ where: { id: listingId } });
     if (!listing) throw new NotFoundError('Listing not found');

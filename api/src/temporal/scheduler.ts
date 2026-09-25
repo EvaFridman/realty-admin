@@ -27,6 +27,12 @@ const workflows = [
         cronSchedule: "0 * * * *",
         message: "Viewing Reminder Cron Workflow started: every hour",
     },
+    {
+        workflowId: "daily-digest-cron",
+        workflowType: "dailyDigestWorkflow",
+        cronSchedule: "0 9 * * 1-5",
+        message: "Daily Digest Cron Workflow started: weekdays at 09:00 UTC",
+    },
 ];
 
 try {
