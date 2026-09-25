@@ -1,8 +1,20 @@
 import { Injectable, Inject, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import type { Channel, ConsumeMessage } from "amqplib";
+import { handleAgentDigest } from "./handlers/agent-digest.handler.js";
+import { handleListingExpired } from "./handlers/listing-expired.handler.js";
+import { handleNewViewing } from "./handlers/new-viewing.handler.js";
+import { handleViewingReminder } from "./handlers/viewing-reminder.handler.js";
 import { PrismaService } from "../../prisma/prisma.service.js";
 import { MailService } from "../../mail/mail.service.js";
-import { ViewingStatus } from "../../generated/prisma/index.js";
+
+export type MailPayload = {
+    viewingId?: number;
+    listingId?: number;
+    agentId?: number;
+    title?: string;
+    periodFrom?: string;
+    periodTo?: string;
+};
 
 @Injectable()
 export class MailConsumer implements OnModuleInit, OnModuleDestroy {
@@ -36,199 +48,48 @@ export class MailConsumer implements OnModuleInit, OnModuleDestroy {
         let result = "processed";
 
         try {
-            const payload = JSON.parse(message.content.toString()) as {
-                viewingId?: number;
-                listingId?: number;
-                agentId?: number;
-                title?: string;
-                periodFrom?: string;
-                periodTo?: string;
-            };
+            const payload = JSON.parse(message.content.toString()) as MailPayload;
 
             if (routingKey === "listing.expired") {
-                const listingId = payload.listingId;
-                const agentId = payload.agentId;
-                const title = payload.title;
-
-                if (!listingId || !agentId || !title) {
-                    result = "skipped";
-                    this.channel.ack(message);
-                    return;
-                }
-
-                const agent = await this.prisma.users.findUnique({
-                    where: { id: agentId },
-                });
-
-                if (!agent || !agent.email) {
-                    result = "skipped";
-                    this.channel.ack(message);
-                    return;
-                }
-
-                await this.mailService.sendListingExpiredNotice(agent, listingId, title);
-
-                this.channel.ack(message);
+                result = await handleListingExpired(
+                    message,
+                    payload,
+                    this.prisma,
+                    this.mailService,
+                    this.channel,
+                );
                 return;
             }
 
             if (routingKey === "viewing.reminder") {
-                const viewingId = payload.viewingId;
-
-                if (!viewingId) {
-                    result = "skipped";
-                    this.channel.ack(message);
-                    return;
-                }
-
-                const viewing = await this.prisma.viewings.findUnique({
-                    where: { id: viewingId },
-                    include: { listing: true },
-                });
-
-                if (!viewing || viewing.status !== ViewingStatus.APPROVED || viewing.reminderSentAt) {
-                    result = "skipped";
-                    this.channel.ack(message);
-                    return;
-                }
-
-                await this.mailService.sendViewingReminder(viewing);
-
-                await this.prisma.viewings.update({
-                    where: { id: viewing.id },
-                    data: { reminderSentAt: new Date() },
-                });
-
-                this.channel.ack(message);
+                result = await handleViewingReminder(
+                    message,
+                    payload,
+                    this.prisma,
+                    this.mailService,
+                    this.channel,
+                );
                 return;
             }
 
             if (routingKey === "agent.digest") {
-                const agentId = payload.agentId;
-                const periodFrom = payload.periodFrom;
-                const periodTo = payload.periodTo;
-
-                if (!agentId || !periodFrom || !periodTo) {
-                    result = "skipped";
-                    this.channel.ack(message);
-                    return;
-                }
-
-                const from = new Date(periodFrom);
-                const to = new Date(periodTo);
-
-                const agent = await this.prisma.users.findUnique({
-                    where: { id: agentId },
-                });
-
-                if (!agent || !agent.email) {
-                    result = "skipped";
-                    this.channel.ack(message);
-                    return;
-                }
-
-                const [viewings, statusChanges] = await Promise.all([
-                    this.prisma.viewings.findMany({
-                        where: {
-                            createdAt: {
-                                gte: from,
-                                lt: to,
-                            },
-                            listing: {
-                                agentId,
-                            },
-                        },
-                        include: {
-                            listing: {
-                                select: {
-                                    id: true,
-                                    title: true,
-                                },
-                            },
-                        },
-                        orderBy: { createdAt: "asc" },
-                    }),
-                    this.prisma.listingStatusHistory.findMany({
-                        where: {
-                            agentId,
-                            createdAt: {
-                                gte: from,
-                                lt: to,
-                            },
-                        },
-                        include: {
-                            listing: {
-                                select: {
-                                    id: true,
-                                    title: true,
-                                },
-                            },
-                        },
-                        orderBy: { createdAt: "asc" },
-                    }),
-                ]);
-
-                if (viewings.length === 0 && statusChanges.length === 0) {
-                    result = "skipped";
-                    this.channel.ack(message);
-                    return;
-                }
-
-                await this.mailService.sendAgentDigest(
-                    agent,
-                    {
-                        from,
-                        to,
-                    },
-                    viewings,
-                    statusChanges,
+                result = await handleAgentDigest(
+                    message,
+                    payload,
+                    this.prisma,
+                    this.mailService,
+                    this.channel,
                 );
-
-                this.channel.ack(message);
                 return;
             }
 
-            const viewingId = payload.viewingId;
-
-            if (!viewingId) {
-                result = "skipped";
-                this.channel.ack(message);
-                return;
-            }
-
-            const viewing = await this.prisma.viewings.findUnique({
-                where: { id: viewingId },
-                include: {
-                    listing: {
-                        include: {
-                            agent: true,
-                            district: true,
-                            photos: { orderBy: { position: "asc" } },
-                        },
-                    },
-                },
-            });
-
-            if (!viewing) {
-                result = "skipped";
-                this.channel.ack(message);
-                return;
-            }
-
-            if (viewing.notifiedAt) {
-                result = "skipped";
-                this.channel.ack(message);
-                return;
-            }
-
-            await this.mailService.sendNewViewingNotice(viewing.listing, viewing);
-
-            await this.prisma.viewings.update({
-                where: { id: viewing.id },
-                data: { notifiedAt: new Date() },
-            });
-
-            this.channel.ack(message);
+            result = await handleNewViewing(
+                message,
+                payload,
+                this.prisma,
+                this.mailService,
+                this.channel,
+            );
         } catch {
             result = message.fields.redelivered ? "dead-lettered" : "retry";
             this.channel.nack(message, false, !message.fields.redelivered);
