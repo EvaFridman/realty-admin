@@ -109,10 +109,10 @@ export class MailService {
 
   async sendListingExpiredNotice(agent: any, listingId: number, title: string): Promise<any> {
     return this.sendMailSafely({
-        to: agent.email,
-        subject: `Объявление "${title}" снято с публикации`,
-        text: `Здравствуйте, ${agent.name}! Объявление #${listingId} автоматически снято с публикации, так как прошло 60 дней с момента публикации.`,
-        html: `<h1>${escapeHtml(title)}</h1><p>Здравствуйте, ${escapeHtml(agent.name)}! Объявление #${listingId} автоматически снято с публикации, так как прошло 60 дней с момента публикации.</p>`,
+      to: agent.email,
+      subject: `Объявление "${title}" снято с публикации`,
+      text: `Здравствуйте, ${agent.name}! Объявление #${listingId} автоматически снято с публикации, так как прошло 60 дней с момента публикации.`,
+      html: `<h1>${escapeHtml(title)}</h1><p>Здравствуйте, ${escapeHtml(agent.name)}! Объявление #${listingId} автоматически снято с публикации, так как прошло 60 дней с момента публикации.</p>`,
     });
   }
 
@@ -133,6 +133,35 @@ export class MailService {
       subject: `Напоминание о просмотре: "${viewing.listing.title}"`,
       text: `Напоминаем, что ваш просмотр объявления "${viewing.listing.title}" запланирован на ${viewing.preferredAt}.`,
       html: `<h1>${escapeHtml(viewing.listing.title)}</h1><p>Напоминаем, что ваш просмотр запланирован на ${escapeHtml(viewing.preferredAt)}.</p>`,
+    });
+  }
+
+  async sendAgentDigest(agent: any, period: { from: Date; to: Date }, viewings: any[], statusChanges: any[]): Promise<any> {
+    const viewingText = viewings.map((viewing) => `- Объявление #${viewing.listing.id} "${viewing.listing.title}": заявка от ${viewing.clientName} (${viewing.clientPhone}), желаемое время ${viewing.preferredAt}`);
+    const statusText = statusChanges.map((change) => `- Объявление #${change.listing.id} "${change.listing.title}": ${change.fromStatus} → ${change.toStatus}`);
+    const viewingHtml = viewings.map((viewing) => `<li>Объявление #${viewing.listing.id} "${escapeHtml(viewing.listing.title)}": заявка от ${escapeHtml(viewing.clientName)} (${escapeHtml(viewing.clientPhone)}), желаемое время ${escapeHtml(viewing.preferredAt)}</li>`).join('');
+    const statusHtml = statusChanges.map((change) => `<li>Объявление #${change.listing.id} "${escapeHtml(change.listing.title)}": ${escapeHtml(change.fromStatus)} → ${escapeHtml(change.toStatus)}</li>`).join('');
+
+    const textSections = [
+      `Здравствуйте, ${agent.name}!`,
+      `Дайджест за период ${period.from.toISOString()} — ${period.to.toISOString()}.`,
+      '',
+      viewings.length > 0 ? `Новые заявки на просмотр:\n${viewingText.join('\n')}` : '',
+      '',
+      statusChanges.length > 0 ? `Изменения статусов:\n${statusText.join('\n')}` : '',
+    ].filter(Boolean);
+
+    return this.sendMailSafely({
+      to: agent.email,
+      subject: 'Ежедневный дайджест по объявлениям',
+      text: textSections.join('\n'),
+      html: `
+        <h1>Ежедневный дайджест</h1>
+        <p>Здравствуйте, ${escapeHtml(agent.name)}!</p>
+        <p>Период: ${escapeHtml(period.from.toISOString())} — ${escapeHtml(period.to.toISOString())}</p>
+        ${viewings.length > 0 ? `<h2>Новые заявки на просмотр</h2><ul>${viewingHtml}</ul>` : ''}
+        ${statusChanges.length > 0 ? `<h2>Изменения статусов</h2><ul>${statusHtml}</ul>` : ''}
+      `,
     });
   }
 }
