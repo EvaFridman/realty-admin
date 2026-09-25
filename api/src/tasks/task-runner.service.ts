@@ -8,14 +8,12 @@ import { CacheService } from "../redis/cache.service.js";
 import { withLock } from "./with-lock.js";
 import { dailyDigestTask } from "./daily-digest.task.js";
 
-export const TASK_NAMES = [
-    "cleanup",
-    "expire-listings",
-    "viewing-reminders",
-    "daily-digest",
-] as const;
-
-export type TaskName = typeof TASK_NAMES[number];
+export enum TaskName {
+    CLEANUP = "cleanup",
+    EXPIRE_LISTINGS = "expire-listings",
+    VIEWING_REMINDERS = "viewing-reminders",
+    DAILY_DIGEST = "daily-digest",
+}
 
 @Injectable()
 export class TaskRunnerService {
@@ -32,7 +30,7 @@ export class TaskRunnerService {
 
     async runCleanup() {
         return withLock(
-            "cleanup",
+            TaskName.CLEANUP,
             this.cacheService,
             () => this.filesService.removeOrphaned(),
             this.logger,
@@ -41,7 +39,7 @@ export class TaskRunnerService {
 
     async runExpireListings() {
         return withLock(
-            "expire-listings",
+            TaskName.EXPIRE_LISTINGS,
             this.cacheService,
             () => this.listingsService.expireOldListings(),
             this.logger,
@@ -50,7 +48,7 @@ export class TaskRunnerService {
 
     async runViewingReminders() {
         return withLock(
-            "viewing-reminders",
+            TaskName.VIEWING_REMINDERS,
             this.cacheService,
             () => this.viewingsService.sendUpcomingReminders(),
             this.logger,
@@ -59,7 +57,7 @@ export class TaskRunnerService {
 
     async runDailyDigest() {
         return withLock(
-            "daily-digest",
+            TaskName.DAILY_DIGEST,
             this.cacheService,
             () => this.runDailyDigestTask(),
             this.logger,
@@ -74,15 +72,15 @@ export class TaskRunnerService {
         );
     }
 
-    async run(name: string) {
+    async run(name: TaskName) {
         switch (name) {
-            case "cleanup":
+            case TaskName.CLEANUP:
                 return this.runCleanup();
-            case "expire-listings":
+            case TaskName.EXPIRE_LISTINGS:
                 return this.runExpireListings();
-            case "viewing-reminders":
+            case TaskName.VIEWING_REMINDERS:
                 return this.runViewingReminders();
-            case "daily-digest":
+            case TaskName.DAILY_DIGEST:
                 return this.runDailyDigest();
             default:
                 return undefined;
@@ -90,9 +88,14 @@ export class TaskRunnerService {
     }
 
     async getLastSuccess() {
-        const result: Record<string, string | null> = {};
+        const result: Record<TaskName, string | null> = {
+            [TaskName.CLEANUP]: null,
+            [TaskName.EXPIRE_LISTINGS]: null,
+            [TaskName.VIEWING_REMINDERS]: null,
+            [TaskName.DAILY_DIGEST]: null,
+        };
 
-        for (const name of TASK_NAMES) {
+        for (const name of Object.values(TaskName)) {
             result[name] = await this.cacheService.getPersistent<string>(`task:last-success:${name}`);
         }
 
